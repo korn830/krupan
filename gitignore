@@ -1,0 +1,11 @@
+# ห้าม commit ไฟล์ที่มีรหัสผ่าน/คีย์ลับ
+config/dbonline.php
+config/ai_config.php
+
+# Composer dependencies (ติดตั้งใหม่ด้วย `composer install` บนเซิร์ฟเวอร์)
+/vendor/
+
+# ไฟล์ของระบบปฏิบัติการ/IDE
+.DS_Store
+Thumbs.db
+.vscode/
