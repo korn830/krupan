@@ -30,6 +30,7 @@ CREATE TABLE departments (
 );
 
 -- ตารางครุภัณฑ์
+-- หมายเหตุ: status และ borrowable_status ถูกแก้ให้ตรงกับค่าที่โค้ดจริงใช้งาน (ของเดิมในไฟล์นี้ไม่ตรงกับระบบจริง)
 CREATE TABLE assets (
     asset_id INT AUTO_INCREMENT PRIMARY KEY,
     asset_code VARCHAR(50) NOT NULL UNIQUE,
@@ -38,11 +39,14 @@ CREATE TABLE assets (
     category_id INT,
     location_id INT,
     department_id INT,
-    status ENUM('ใช้งาน', 'ชำรุด', 'ซ่อมแซม', 'เลิกใช้', 'จำหน่ายแล้ว') DEFAULT 'ใช้งาน',
+    status ENUM('ใช้งานปกติ', 'ถูกยืม', 'ชำรุด', 'ส่งซ่อม', 'จำหน่าย', 'รออนุมัติ') DEFAULT 'ใช้งานปกติ',
+    borrowable_status ENUM('สามารถยืมได้', 'ไม่สามารถยืมได้') DEFAULT 'สามารถยืมได้',
     purchase_date DATE,
     warranty_expiry DATE,
     price DECIMAL(10,2),
     image_url VARCHAR(255),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (category_id) REFERENCES categories(category_id),
     FOREIGN KEY (location_id) REFERENCES locations(location_id),
     FOREIGN KEY (department_id) REFERENCES departments(department_id)
@@ -64,11 +68,31 @@ CREATE TABLE asset_history (
 CREATE TABLE asset_action_log (
     log_id INT AUTO_INCREMENT PRIMARY KEY,
     asset_id INT NOT NULL,
-    action_type ENUM('add', 'edit') NOT NULL,
+    action_type ENUM('add', 'edit', 'borrow') NOT NULL,
     type ENUM('ย้าย', 'ซ่อม', 'จำหน่าย'),
     action_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     user_id INT NOT NULL,
     details TEXT,
+    FOREIGN KEY (asset_id) REFERENCES assets(asset_id),
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+-- ตารางคำขอยืม-คืนครุภัณฑ์
+-- หมายเหตุ: ตารางนี้ไม่มีอยู่ในไฟล์ schema.sql เดิม (ของจริงมีอยู่แล้วในฐานข้อมูล)
+-- โครงสร้างด้านล่างนี้เป็นการสร้างขึ้นใหม่จากการอ่านโค้ดที่ใช้งานจริง
+-- กรุณาตรวจสอบกับฐานข้อมูลจริงของคุณก่อนใช้ไฟล์นี้สำหรับการติดตั้งใหม่ตั้งแต่ต้น
+CREATE TABLE borrow_history (
+    borrow_id INT AUTO_INCREMENT PRIMARY KEY,
+    asset_id INT NOT NULL,
+    user_id INT NOT NULL,
+    borrower_name VARCHAR(100),
+    borrow_date DATE NOT NULL,
+    return_date DATE NOT NULL,
+    actual_return_date DATETIME NULL,
+    note TEXT,
+    attachment_path VARCHAR(255) NULL, -- เอกสารแนบของคำขอยืม (เพิ่มใหม่)
+    status ENUM('รออนุมัติ', 'อนุมัติ', 'ปฏิเสธ', 'ยืมอยู่', 'เกินวันที่กำหนด', 'คืนแล้ว') DEFAULT 'รออนุมัติ',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (asset_id) REFERENCES assets(asset_id),
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );

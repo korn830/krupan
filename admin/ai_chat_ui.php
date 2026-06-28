@@ -1,3 +1,6 @@
+<!-- ให้แน่ใจว่ามี Font Awesome เสมอ (บางหน้าเช่น Dashboard ยังไม่ได้โหลดไว้) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 <!-- ปุ่มเปิด/ปิดแชท (Bubble) -->
 <button id="ai-chat-btn" class="btn btn-primary rounded-circle shadow" style="position: fixed; bottom: 30px; right: 30px; width: 65px; height: 65px; z-index: 9999; border: none;">
     <i class="fas fa-robot fs-3"></i>

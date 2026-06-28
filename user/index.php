@@ -47,7 +47,7 @@ $admin_count = $conn->query("SELECT COUNT(*) FROM users WHERE role = 'admin'")->
 ?>
 
 <!-- Include the CSS file -->
-<link rel="stylesheet" href="css/index.css">
+<link rel="stylesheet" href="admin/css/index.css">
 
 <!-- Welcome Header -->
 <div class="welcome-header">

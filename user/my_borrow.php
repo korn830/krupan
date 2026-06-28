@@ -126,6 +126,7 @@ try {
                     <th>วันที่ยืม</th>
                     <th>กำหนดคืน</th>
                     <th>หมายเหตุ</th>
+                    <th>เอกสารแนบ</th>
                     <th>สถานะ</th>
                     <th>จัดการ</th>
                 </tr>
@@ -139,6 +140,15 @@ try {
                         <td><?= htmlspecialchars($row['borrow_date']) ?></td>
                         <td><?= htmlspecialchars($row['return_date']) ?></td>
                         <td><?= htmlspecialchars($row['note'] ?? '-') ?></td>
+                        <td>
+                            <?php if (!empty($row['attachment_path'])): ?>
+                                <a href="../uploads/borrow_docs/<?= htmlspecialchars($row['attachment_path']) ?>" target="_blank" rel="noopener" class="btn btn-outline-info btn-sm">
+                                    <i class="fas fa-file-arrow-up"></i> ดูเอกสาร
+                                </a>
+                            <?php else: ?>
+                                <span class="text-muted">-</span>
+                            <?php endif; ?>
+                        </td>
                         <td>
                             <?php
                             $statusClass = '';

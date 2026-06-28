@@ -85,13 +85,51 @@ if (isset($_GET['fetch_asset']) && isset($_GET['id'])) {
     }
     // Add more validation if needed, e.g., check for future dates, min/max borrow period
 
+    // --- ตรวจสอบไฟล์เอกสารแนบ (ถ้ามีการอัปโหลด) ---
+    // ตรวจสอบ type/size ก่อน แต่ยังไม่ move_uploaded_file ในขั้นนี้
+    // (ย้ายไฟล์จริงต่อเมื่อไม่มี error อื่นแล้ว เพื่อไม่ให้มีไฟล์ค้างอยู่บนเซิร์ฟเวอร์โดยไม่มีข้อมูลอ้างอิงในฐานข้อมูล)
+    $hasAttachment = isset($_FILES['attachment']) && $_FILES['attachment']['error'] !== UPLOAD_ERR_NO_FILE;
+    $fileExt = '';
+    if ($hasAttachment) {
+        if ($_FILES['attachment']['error'] !== UPLOAD_ERR_OK) {
+            $errors[] = "เกิดข้อผิดพลาดในการอัปโหลดไฟล์ กรุณาลองใหม่อีกครั้ง";
+        } else {
+            $fileTmpPath = $_FILES['attachment']['tmp_name'];
+            $fileName = basename($_FILES['attachment']['name']);
+            $fileExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+            $fileType = mime_content_type($fileTmpPath);
+            $allowedMimeTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
+            $allowedExtensions = ['pdf', 'jpg', 'jpeg', 'png', 'webp'];
+            $maxFileSize = 5 * 1024 * 1024; // 5MB
+
+            if (!in_array($fileExt, $allowedExtensions, true) || !in_array($fileType, $allowedMimeTypes, true)) {
+                $errors[] = "เอกสารแนบต้องเป็นไฟล์ PDF หรือรูปภาพ (jpg, png, webp) เท่านั้น";
+            } elseif ($_FILES['attachment']['size'] > $maxFileSize) {
+                $errors[] = "ไฟล์เอกสารแนบมีขนาดใหญ่เกินไป (สูงสุดไม่เกิน 5MB)";
+            }
+        }
+    }
+
     if (empty($errors)) {
         try {
             $conn->beginTransaction();
 
+            // --- ย้ายไฟล์เอกสารแนบเข้าโฟลเดอร์จริง (ทำตอนนี้เพราะมั่นใจแล้วว่าข้อมูลจะถูกบันทึก) ---
+            $attachment_filename = null;
+            if ($hasAttachment) {
+                $docUploadDir = $uploadDir . 'borrow_docs/';
+                if (!is_dir($docUploadDir)) {
+                    mkdir($docUploadDir, 0755, true);
+                }
+                $newFileName = 'borrow_' . $asset_id . '_' . $user_id . '_' . time() . '.' . $fileExt;
+                if (move_uploaded_file($fileTmpPath, $docUploadDir . $newFileName)) {
+                    $attachment_filename = $newFileName;
+                }
+            }
+
             // Insert into borrow_history
-            $stmt = $conn->prepare("INSERT INTO borrow_history (asset_id, user_id, borrower_name, borrow_date, return_date, note, status) VALUES (?, ?, ?, ?, ?, ?, 'รออนุมัติ')"); // เปลี่ยน 'pending' เป็น 'รออนุมัติ'
-            $stmt->execute([$asset_id, $user_id, $borrower_name, $borrow_date, $return_date, $notes]);
+            $stmt = $conn->prepare("INSERT INTO borrow_history (asset_id, user_id, borrower_name, borrow_date, return_date, note, attachment_path, status) VALUES (?, ?, ?, ?, ?, ?, ?, 'รออนุมัติ')"); // เปลี่ยน 'pending' เป็น 'รออนุมัติ'
+            $stmt->execute([$asset_id, $user_id, $borrower_name, $borrow_date, $return_date, $notes, $attachment_filename]);
             $borrow_id = $conn->lastInsertId(); // **เพิ่มบรรทัดนี้เพื่อดึง borrow_id**
 
             // Optionally, update asset status to 'รออนุมัติ' (pending approval) immediately
@@ -108,6 +146,7 @@ if (isset($_GET['fetch_asset']) && isset($_GET['id'])) {
                 'borrow_date' => $borrow_date,
                 'return_date' => $return_date,
                 'notes' => $notes,
+                'attachment' => $attachment_filename,
                 'status' => 'รออนุมัติ' // สถานะใน log ควรตรงกับสถานะใน borrow_history
             ], JSON_UNESCAPED_UNICODE);
 
@@ -336,7 +375,7 @@ $departments = $conn->query("SELECT * FROM departments")->fetchAll();
 </div>
 <div class="modal fade" id="borrowAssetModal" tabindex="-1" aria-labelledby="borrowAssetModalLabel" aria-hidden="true">
   <div class="modal-dialog">
-    <form id="borrowAssetForm" method="POST" class="modal-content">
+    <form id="borrowAssetForm" method="POST" enctype="multipart/form-data" class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="borrowAssetModalLabel"><i class="fas fa-hand-holding me-2"></i> ยืมครุภัณฑ์</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="ปิด"></button>
@@ -378,6 +417,11 @@ $departments = $conn->query("SELECT * FROM departments")->fetchAll();
         <div class="mb-3">
           <label class="form-label">หมายเหตุ</label>
           <textarea name="notes" class="form-control"></textarea>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">เอกสารแนบ (ถ้ามี)</label>
+          <input type="file" name="attachment" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.webp">
+          <div class="form-text">เช่น หนังสือขออนุมัติยืม หรือเอกสารอ้างอิง — รองรับ PDF, JPG, PNG (ไม่เกิน 5MB)</div>
         </div>
       </div>
       <div class="modal-footer">
