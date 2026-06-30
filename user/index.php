@@ -47,7 +47,8 @@ $admin_count = $conn->query("SELECT COUNT(*) FROM users WHERE role = 'admin'")->
 ?>
 
 <!-- Include the CSS file -->
-<link rel="stylesheet" href="admin/css/index.css">
+<link rel="stylesheet" href="css/index.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <!-- Welcome Header -->
 <div class="welcome-header">

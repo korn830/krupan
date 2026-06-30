@@ -1,0 +1,89 @@
+/* ==========================================================
+   Krupan — user/my_borrow.php  (My borrow history)
+   Inherits CSS variables from header.css
+   ========================================================== */
+
+/* Borrow-status badges (different values from asset status) */
+.borrow-status-badge {
+  display: inline-block;
+  padding: .2rem .65rem;
+  border-radius: 20px;
+  font-size: .8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.borrow-status-badge.status-pending  { background: #e9d8fd; color: #553c9a; }
+.borrow-status-badge.status-approved { background: #c6f6d5; color: #22543d; }
+.borrow-status-badge.status-rejected { background: #fed7d7; color: #822727; }
+.borrow-status-badge.status-active   { background: #bee3f8; color: #2a4365; }
+.borrow-status-badge.status-overdue  { background: #feebc8; color: #7b341e; }
+.borrow-status-badge.status-returned { background: #e2e8f0; color: #4a5568; }
+
+/* Action buttons */
+.btn-return {
+  background: var(--kp-gradient);
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  padding: .3rem .8rem;
+  font-size: .82rem;
+  font-weight: 600;
+  font-family: 'Sarabun', sans-serif;
+  cursor: pointer;
+  transition: opacity .15s;
+  white-space: nowrap;
+}
+.btn-return:hover { opacity: .88; }
+
+/* Document attachment link */
+.btn-outline-info.btn-sm {
+  border-radius: 7px;
+  font-size: .8rem;
+  font-weight: 600;
+  border-color: var(--kp-primary);
+  color: var(--kp-primary);
+  white-space: nowrap;
+}
+.btn-outline-info.btn-sm:hover {
+  background: var(--kp-primary);
+  color: #fff;
+}
+
+/* Overdue row highlight */
+tr.row-overdue td { background: #fff5f5 !important; }
+tr.row-overdue:hover td { background: #fed7d7 !important; }
+
+/* Stats summary cards at top */
+.borrow-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+.borrow-stat-card {
+  background: var(--kp-surface);
+  border-radius: var(--kp-radius);
+  box-shadow: var(--kp-shadow);
+  padding: 1rem 1.25rem;
+  text-align: center;
+  border-top: 3px solid var(--kp-primary);
+}
+.borrow-stat-card .stat-number {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--kp-primary);
+  line-height: 1;
+}
+.borrow-stat-card .stat-label {
+  font-size: .8rem;
+  color: var(--kp-muted);
+  margin-top: .25rem;
+}
+
+/* Empty state */
+.empty-state {
+  padding: 3rem 1rem;
+  color: var(--kp-muted);
+  font-size: 1rem;
+}
+.empty-state .icon { font-size: 2.5rem; display: block; margin-bottom: .6rem; opacity: .45; }
