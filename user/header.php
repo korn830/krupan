@@ -7,8 +7,8 @@ if (!isset($_SESSION["user_id"])) {
     exit;
 }
 
-// Base URL ของโปรเจกต์ (สำหรับ user)
-$base_url = '/../user/';
+// Base URL ของโปรเจกต์ (สำหรับ user) - ใช้แบบเดียวกับ admin/header.php
+$base_url = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\') . '/';
 
 // Get current page for active navigation highlighting
 $current_page = basename($_SERVER['PHP_SELF']);
@@ -34,8 +34,8 @@ if (!function_exists('isActive')) {
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="<?= $base_url ?>css/header.css">
-    <script src="<?= $base_url ?>js/script.js"></script>
 
     
     <!-- Favicon -->
@@ -76,7 +76,12 @@ if (!function_exists('isActive')) {
                     </li>
                     <li class="nav-item">
                         <a class="nav-link <?= isActive('list.php', 'assets') ?>" href="list.php" title="ดูครุภัณฑ์">
-                            ครุภัณฑ์
+                            <i class="fas fa-boxes-stacked me-1"></i> ครุภัณฑ์
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?= isActive('my_borrow.php') ?>" href="my_borrow.php" title="การยืมของฉัน">
+                            <i class="fas fa-hand-holding me-1"></i> การยืมของฉัน
                         </a>
                     </li>
                 </ul>   

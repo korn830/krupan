@@ -294,12 +294,10 @@ $departments = $conn->query("SELECT * FROM departments")->fetchAll();
                                         // และ status ต้องไม่เป็น 'ถูกยืม' หรือ 'รออนุมัติ'
                                         if ($row['borrowable_status'] === 'สามารถยืมได้' && $row['status'] !== 'ถูกยืม' && $row['status'] !== 'รออนุมัติ'):
                                         ?>
-                                            <button class="btn-borrow borrow-btn"
-                                                    data-id="<?= $row['asset_id'] ?>"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#borrowAssetModal">
+                                            <a href="borrow_request.php?id=<?= $row['asset_id'] ?>"
+                                               class="btn-borrow">
                                                 <i class="fas fa-hand-holding me-1"></i> ยืม
-                                            </button>
+                                            </a>
                                         <?php else: ?>
                                             <button class="btn btn-secondary btn-sm" disabled>
                                                 <i class="fas fa-info-circle me-1"></i>
