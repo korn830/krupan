@@ -9,3 +9,4 @@ config/ai_config.php
 .DS_Store
 Thumbs.db
 .vscode/
+config/db.php

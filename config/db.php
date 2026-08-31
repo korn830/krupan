@@ -1,8 +1,8 @@
 <?php
 $host = 'localhost';
-$db   = 'asset_system';
-$user = 'root'; // แก้ตาม MySQL user ของคุณ
-$pass = '';     // แก้ตามรหัสผ่านของคุณ
+$db   = 'krupanlnwm_asset_system';
+$user = 'krupanlnwm_asset_system'; // แก้ตาม MySQL user ของคุณ
+$pass = 'C_L5c47kAGbReXV';     // แก้ตามรหัสผ่านของคุณ
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
