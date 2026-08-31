@@ -14,14 +14,45 @@
 session_start();
 header('Content-Type: application/json; charset=utf-8');
 
-// --- ต้องเป็น admin ที่ล็อกอินอยู่เท่านั้น ---
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+// --- ต้องล็อกอินอยู่เท่านั้น (รองรับทั้ง admin และ user) ---
+if (!isset($_SESSION['user_id'])) {
     http_response_code(403);
-    echo json_encode(['reply' => '❌ กรุณาเข้าสู่ระบบในสิทธิ์ผู้ดูแลระบบก่อนใช้งานผู้ช่วย AI']);
+    echo json_encode(['reply' => '❌ กรุณาเข้าสู่ระบบก่อนใช้งานผู้ช่วย AI']);
     exit;
 }
 
+$currentRole   = $_SESSION['role'] ?? 'user';
+$currentUserId = (int)$_SESSION['user_id'];
+
 require dirname(__DIR__) . '/config/db.php';
+
+// --- GET: โหลดประวัติแชทล่าสุดของผู้ใช้ ---
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['action'] === 'history') {
+    $stmt = $conn->prepare(
+        "SELECT role, content, created_at
+         FROM ai_chat_history
+         WHERE user_id = ?
+         ORDER BY created_at DESC
+         LIMIT 20"
+    );
+    $stmt->execute([$currentUserId]);
+    $rows = array_reverse($stmt->fetchAll(PDO::FETCH_ASSOC));
+    echo json_encode(['history' => $rows]);
+    exit;
+}
+
+// --- POST action=clear: ล้างประวัติแชทของผู้ใช้ ---
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_REQUEST['action'] ?? '') === 'clear') {
+    $conn->prepare("DELETE FROM ai_chat_history WHERE user_id = ?")->execute([$currentUserId]);
+    echo json_encode(['ok' => true]);
+    exit;
+}
+
+// --- POST: ส่งข้อความใหม่ ---
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    echo json_encode(['reply' => 'Invalid request']);
+    exit;
+}
 
 $configPath = __DIR__ . '/../config/ai_config.php';
 if (!file_exists($configPath)) {
@@ -143,35 +174,105 @@ function tool_update_asset_status(PDO $conn, array $input, int $adminUserId): ar
 }
 
 /**
- * รันเครื่องมือจริง ๆ ตามชื่อ + input ที่โมเดลขอมา (ใช้ร่วมกันทั้งสอง provider)
+ * ค้นหาครุภัณฑ์ที่สามารถยืมได้เท่านั้น (สำหรับ user)
  */
-function run_tool(string $toolName, array $toolInput, PDO $conn, int $adminUserId): array
+function tool_search_assets_user(PDO $conn, array $input): array
 {
-    switch ($toolName) {
-        case 'search_assets':
-            return tool_search_assets($conn, $toolInput);
-        case 'update_asset_status':
-            return tool_update_asset_status($conn, $toolInput, $adminUserId);
-        default:
-            return ['error' => 'ไม่รู้จักเครื่องมือนี้: ' . $toolName];
+    $query = trim((string)($input['query'] ?? ''));
+    if ($query === '') {
+        return ['count' => 0, 'results' => [], 'error' => 'ไม่ได้ระบุคำค้นหา'];
+    }
+    $like = '%' . $query . '%';
+
+    $stmt = $conn->prepare(
+        "SELECT a.asset_code, a.name, a.status, a.borrowable_status,
+                c.name AS category_name, l.name AS location_name, d.name AS department_name
+         FROM assets a
+         LEFT JOIN categories c ON a.category_id = c.category_id
+         LEFT JOIN locations l ON a.location_id = l.location_id
+         LEFT JOIN departments d ON a.department_id = d.department_id
+         WHERE a.borrowable_status = 'สามารถยืมได้'
+           AND a.status = 'ใช้งานปกติ'
+           AND (a.asset_code LIKE ? OR a.name LIKE ?
+                OR c.name LIKE ? OR l.name LIKE ? OR d.name LIKE ?)
+         ORDER BY a.asset_id DESC
+         LIMIT 10"
+    );
+    $stmt->execute([$like, $like, $like, $like, $like]);
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    return ['count' => count($rows), 'results' => $rows];
+}
+
+/**
+ * ดูประวัติการยืมของผู้ใช้ตัวเอง (สำหรับ user เท่านั้น — ไม่เห็นข้อมูลของคนอื่น)
+ */
+function tool_check_my_borrows(PDO $conn, array $input, int $userId): array
+{
+    $statusFilter = trim((string)($input['status'] ?? ''));
+
+    $sql = "SELECT bh.borrow_id, a.asset_code, a.name AS asset_name,
+                   bh.borrow_date, bh.return_date, bh.status, bh.note
+            FROM borrow_history bh
+            JOIN assets a ON bh.asset_id = a.asset_id
+            WHERE bh.user_id = ?";
+    $params = [$userId];
+
+    if ($statusFilter !== '') {
+        $sql .= " AND bh.status = ?";
+        $params[] = $statusFilter;
+    }
+
+    $sql .= " ORDER BY bh.borrow_id DESC LIMIT 10";
+
+    $stmt = $conn->prepare($sql);
+    $stmt->execute($params);
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    return ['count' => count($rows), 'results' => $rows];
+}
+
+/**
+ * รันเครื่องมือจริงๆ ตาม role (admin เข้าถึงได้ทุกอย่าง, user เข้าถึงได้เฉพาะที่อนุญาต)
+ */
+function run_tool(string $toolName, array $toolInput, PDO $conn, int $userId, string $role): array
+{
+    if ($role === 'admin') {
+        switch ($toolName) {
+            case 'search_assets':
+                return tool_search_assets($conn, $toolInput);
+            case 'update_asset_status':
+                return tool_update_asset_status($conn, $toolInput, $userId);
+            default:
+                return ['error' => 'ไม่รู้จักเครื่องมือนี้: ' . $toolName];
+        }
+    } else {
+        // user — จำกัดเฉพาะ tool ที่ปลอดภัย
+        switch ($toolName) {
+            case 'search_assets':
+                return tool_search_assets_user($conn, $toolInput);
+            case 'check_my_borrows':
+                return tool_check_my_borrows($conn, $toolInput, $userId);
+            default:
+                return ['error' => 'คุณไม่มีสิทธิ์ใช้เครื่องมือนี้'];
+        }
     }
 }
 
 // =====================================================================
-//  นิยาม Tool (รูปแบบ OpenAI/Ollama เป็นต้นแบบหลัก)
+//  Tool definitions — แยกตาม role
 // =====================================================================
 
-$toolsOpenAI = [
+$toolsAdmin = [
     [
         'type' => 'function',
         'function' => [
             'name' => 'search_assets',
-            'description' => 'ค้นหาครุภัณฑ์จากชื่อ, เลขรหัสครุภัณฑ์, หมวดหมู่, สถานที่, แผนก หรือสถานะ ' .
-                'ใช้เมื่อผู้ใช้ถามหาข้อมูลครุภัณฑ์ หรือเมื่อยังไม่รู้ asset_code ที่แน่ชัดก่อนจะอัปเดตสถานะ',
+            'description' => 'ค้นหาครุภัณฑ์จากชื่อ, เลขรหัส, หมวดหมู่, สถานที่, แผนก หรือสถานะ',
             'parameters' => [
                 'type' => 'object',
                 'properties' => [
-                    'query' => ['type' => 'string', 'description' => 'คำค้นหา เช่น ชื่อครุภัณฑ์, เลขรหัส, หมวดหมู่ หรือสถานที่'],
+                    'query' => ['type' => 'string', 'description' => 'คำค้นหา'],
                 ],
                 'required' => ['query'],
             ],
@@ -181,19 +282,18 @@ $toolsOpenAI = [
         'type' => 'function',
         'function' => [
             'name' => 'update_asset_status',
-            'description' => 'อัปเดตสถานะของครุภัณฑ์ 1 ชิ้น ต้องรู้ asset_code ที่ถูกต้องแน่นอนก่อนเรียกใช้ ' .
-                '(ถ้ายังไม่รู้ asset_code ที่แน่ชัด ให้เรียก search_assets ก่อนเสมอ) ' .
-                'สถานะ "ถูกยืม" และ "รออนุมัติ" ไม่สามารถตั้งผ่านเครื่องมือนี้ได้ เพราะต้องผ่านขั้นตอนยืม-คืนของระบบ',
+            'description' => 'อัปเดตสถานะของครุภัณฑ์ 1 ชิ้น ต้องรู้ asset_code ที่ถูกต้องก่อน ' .
+                'ถ้ายังไม่รู้ให้เรียก search_assets ก่อนเสมอ ' .
+                'ห้ามตั้งสถานะ "ถูกยืม" หรือ "รออนุมัติ" ผ่านเครื่องมือนี้',
             'parameters' => [
                 'type' => 'object',
                 'properties' => [
-                    'asset_code' => ['type' => 'string', 'description' => 'เลขรหัสครุภัณฑ์ที่ต้องการแก้ไข เช่น 097-001-0001'],
+                    'asset_code' => ['type' => 'string', 'description' => 'เลขรหัสครุภัณฑ์'],
                     'new_status' => [
                         'type' => 'string',
                         'enum' => ['ใช้งานปกติ', 'ชำรุด', 'ส่งซ่อม', 'จำหน่าย'],
-                        'description' => 'สถานะใหม่ที่ต้องการตั้ง',
                     ],
-                    'note' => ['type' => 'string', 'description' => 'หมายเหตุเพิ่มเติม เช่น เหตุผลที่แจ้งซ่อม (ถ้ามี)'],
+                    'note' => ['type' => 'string', 'description' => 'หมายเหตุ (ถ้ามี)'],
                 ],
                 'required' => ['asset_code', 'new_status'],
             ],
@@ -201,33 +301,108 @@ $toolsOpenAI = [
     ],
 ];
 
-$systemPrompt = <<<EOT
+$toolsUser = [
+    [
+        'type' => 'function',
+        'function' => [
+            'name' => 'search_assets',
+            'description' => 'ค้นหาครุภัณฑ์ที่สามารถยืมได้จากชื่อ, หมวดหมู่ หรือสถานที่',
+            'parameters' => [
+                'type' => 'object',
+                'properties' => [
+                    'query' => ['type' => 'string', 'description' => 'คำค้นหา เช่น คอมพิวเตอร์ ห้อง 5406'],
+                ],
+                'required' => ['query'],
+            ],
+        ],
+    ],
+    [
+        'type' => 'function',
+        'function' => [
+            'name' => 'check_my_borrows',
+            'description' => 'ดูรายการยืมของตัวเอง สามารถกรองด้วยสถานะได้',
+            'parameters' => [
+                'type' => 'object',
+                'properties' => [
+                    'status' => [
+                        'type' => 'string',
+                        'description' => 'กรองด้วยสถานะ เช่น รออนุมัติ, อนุมัติ, คืนแล้ว (ถ้าไม่ระบุ = ดูทั้งหมด)',
+                    ],
+                ],
+                'required' => [],
+            ],
+        ],
+    ],
+];
+
+// เลือก tools และ system prompt ตาม role
+if ($currentRole === 'admin') {
+    $toolsOpenAI = $toolsAdmin;
+    $systemPrompt = <<<EOT
 คุณคือ "Krupan AI" ผู้ช่วยจัดการครุภัณฑ์ของวิทยาลัย ตอบเป็นภาษาไทยเท่านั้น พูดสุภาพ กระชับ เป็นกันเอง
 
 หน้าที่ของคุณมี 2 อย่าง:
 1. ช่วยค้นหาข้อมูลครุภัณฑ์ (เรียก search_assets)
 2. ช่วยอัปเดตสถานะครุภัณฑ์ตามคำสั่งของผู้ดูแลระบบ (เรียก update_asset_status)
 
-กฎสำคัญที่ต้องทำตามเสมอ:
-- ถ้าผู้ใช้สั่งอัปเดตสถานะแต่ระบุมาแค่ชื่อ (ไม่ใช่เลขรหัสครุภัณฑ์) ให้เรียก search_assets ก่อนเสมอ เพื่อหา asset_code ที่ถูกต้อง
-- ถ้า search_assets เจอมากกว่า 1 รายการที่ตรงกับคำขอ ห้ามเดาว่าหมายถึงชิ้นไหน ให้แสดงตัวเลือกทั้งหมด (เลขรหัส + ชื่อ) แล้วถามผู้ใช้ว่าหมายถึงชิ้นไหน
-- ถ้าค้นหาแล้วไม่พบเลย ให้แจ้งผู้ใช้ตรงๆ อย่าสร้างข้อมูลขึ้นมาเอง
-- เมื่อ update_asset_status สำเร็จ (success = true) ให้ตอบขึ้นต้นด้วย "✅" เสมอ และสรุปว่าเปลี่ยนจากสถานะอะไรเป็นอะไร
-- เมื่อเกิดข้อผิดพลาดหรือ success = false ห้ามใส่ "✅" ในคำตอบ ให้อธิบายสาเหตุสั้นๆ อย่างสุภาพ
-- ห้ามเปิดเผยรายละเอียดทางเทคนิคให้ผู้ใช้เห็น เช่น ชื่อตารางในฐานข้อมูล, SQL, หรือโครงสร้าง JSON
+กฎสำคัญ:
+- ถ้าผู้ใช้สั่งอัปเดตแต่ระบุแค่ชื่อ ให้เรียก search_assets ก่อนเสมอ
+- ถ้าเจอมากกว่า 1 รายการ ห้ามเดา ให้แสดงตัวเลือกแล้วถาม
+- เมื่อ update สำเร็จ ขึ้นต้นด้วย "✅" เสมอ
+- ห้ามเปิดเผยรายละเอียดทางเทคนิค
 EOT;
+} else {
+    $toolsOpenAI = $toolsUser;
+    $systemPrompt = <<<EOT
+คุณคือ "Krupan AI" ผู้ช่วยสำหรับนักเรียน/บุคลากรของวิทยาลัย ตอบเป็นภาษาไทยเท่านั้น พูดสุภาพ กระชับ เป็นกันเอง
 
-$adminUserId = (int)$_SESSION['user_id'];
-$maxTurns = 4; // กันลูปไม่จบในกรณีที่โมเดลเรียก tool ต่อเนื่องผิดปกติ
+หน้าที่ของคุณมี 2 อย่าง:
+1. ช่วยค้นหาครุภัณฑ์ที่ต้องการยืม (เรียก search_assets) — จะแสดงเฉพาะรายการที่ยืมได้เท่านั้น
+2. ช่วยตรวจสอบสถานะการยืมของตัวเอง (เรียก check_my_borrows)
+
+กฎสำคัญ:
+- คุณไม่สามารถแก้ไขข้อมูลใดๆ ได้ — ถ้าผู้ใช้ขอแจ้งซ่อมหรือเปลี่ยนสถานะ ให้แจ้งว่าต้องติดต่อผู้ดูแลระบบ
+- ถ้าค้นหาครุภัณฑ์แล้วไม่พบ ให้แนะนำให้ลองคำค้นอื่น หรือติดต่อผู้ดูแลระบบ
+- ถ้าผู้ใช้ถามว่ายืมได้ไหม ให้ดูจาก borrowable_status และ status ของครุภัณฑ์
+- ห้ามเปิดเผยรายละเอียดทางเทคนิค
+EOT;
+}
+
+$maxTurns = 4;
+
+// --- โหลดประวัติการสนทนาล่าสุด (10 exchanges = 20 messages) ---
+$historyStmt = $conn->prepare(
+    "SELECT role, content FROM ai_chat_history
+     WHERE user_id = ?
+     ORDER BY created_at DESC LIMIT 20"
+);
+$historyStmt->execute([$currentUserId]);
+$historyRows = array_reverse($historyStmt->fetchAll(PDO::FETCH_ASSOC));
 
 try {
     $finalReply = ($provider === 'anthropic')
-        ? run_chat_anthropic($aiConfig, $systemPrompt, $toolsOpenAI, $userMessage, $conn, $adminUserId, $maxTurns)
-        : run_chat_ollama($aiConfig, $systemPrompt, $toolsOpenAI, $userMessage, $conn, $adminUserId, $maxTurns);
+        ? run_chat_anthropic($aiConfig, $systemPrompt, $toolsOpenAI, $userMessage, $historyRows, $conn, $currentUserId, $currentRole, $maxTurns)
+        : run_chat_ollama($aiConfig, $systemPrompt, $toolsOpenAI, $userMessage, $historyRows, $conn, $currentUserId, $currentRole, $maxTurns);
 
     if ($finalReply === '') {
         $finalReply = 'ขออภัยครับ ผมไม่สามารถดำเนินการให้เสร็จสิ้นได้ในขณะนี้ ลองพิมพ์คำสั่งใหม่อีกครั้งนะครับ';
     }
+
+    // --- บันทึกข้อความผู้ใช้และคำตอบ AI ลงฐานข้อมูล ---
+    $saveStmt = $conn->prepare(
+        "INSERT INTO ai_chat_history (user_id, role, content) VALUES (?, ?, ?)"
+    );
+    $saveStmt->execute([$currentUserId, 'user',      $userMessage]);
+    $saveStmt->execute([$currentUserId, 'assistant', $finalReply]);
+
+    // เก็บแค่ 40 ข้อความล่าสุดต่อคน (20 exchanges) ลบของเก่าทิ้ง
+    $conn->prepare(
+        "DELETE FROM ai_chat_history WHERE user_id = ? AND id NOT IN (
+            SELECT id FROM (
+                SELECT id FROM ai_chat_history WHERE user_id = ? ORDER BY created_at DESC LIMIT 40
+            ) AS keep
+        )"
+    )->execute([$currentUserId, $currentUserId]);
 
     echo json_encode(['reply' => $finalReply]);
 } catch (Exception $e) {
@@ -275,15 +450,17 @@ function call_ollama_api(string $host, string $model, array $messages, array $to
     return $decoded;
 }
 
-function run_chat_ollama(array $aiConfig, string $systemPrompt, array $toolsOpenAI, string $userMessage, PDO $conn, int $adminUserId, int $maxTurns): string
+function run_chat_ollama(array $aiConfig, string $systemPrompt, array $toolsOpenAI, string $userMessage, array $history, PDO $conn, int $userId, string $role, int $maxTurns): string
 {
     $host  = $aiConfig['ollama_host'] ?? 'http://localhost:11434';
     $model = $aiConfig['ollama_model'] ?? 'qwen3.5:9b';
 
-    $messages = [
-        ['role' => 'system', 'content' => $systemPrompt],
-        ['role' => 'user', 'content' => $userMessage],
-    ];
+    // สร้าง messages โดยใส่ประวัติก่อน แล้วต่อด้วยข้อความใหม่
+    $messages = [['role' => 'system', 'content' => $systemPrompt]];
+    foreach ($history as $h) {
+        $messages[] = ['role' => $h['role'], 'content' => $h['content']];
+    }
+    $messages[] = ['role' => 'user', 'content' => $userMessage];
 
     for ($turn = 0; $turn < $maxTurns; $turn++) {
         $result = call_ollama_api($host, $model, $messages, $toolsOpenAI);
@@ -299,10 +476,9 @@ function run_chat_ollama(array $aiConfig, string $systemPrompt, array $toolsOpen
         foreach ($toolCalls as $call) {
             $toolName = $call['function']['name'] ?? '';
             $rawArgs  = $call['function']['arguments'] ?? [];
-            // Ollama มักส่ง arguments มาเป็น array ที่ถูก parse แล้ว แต่กันไว้เผื่อบางรุ่นส่งมาเป็น JSON string
             $toolInput = is_string($rawArgs) ? (json_decode($rawArgs, true) ?? []) : $rawArgs;
 
-            $output = run_tool($toolName, $toolInput, $conn, $adminUserId);
+            $output = run_tool($toolName, $toolInput, $conn, $userId, $role);
 
             $messages[] = [
                 'role' => 'tool',
@@ -360,7 +536,7 @@ function call_claude_api(string $apiKey, string $model, string $system, array $t
     return $decoded;
 }
 
-function run_chat_anthropic(array $aiConfig, string $systemPrompt, array $toolsOpenAI, string $userMessage, PDO $conn, int $adminUserId, int $maxTurns): string
+function run_chat_anthropic(array $aiConfig, string $systemPrompt, array $toolsOpenAI, string $userMessage, array $history, PDO $conn, int $userId, string $role, int $maxTurns): string
 {
     $apiKey = $aiConfig['anthropic_api_key'] ?? '';
     $model  = $aiConfig['anthropic_model'] ?? 'claude-haiku-4-5-20251001';
@@ -369,7 +545,6 @@ function run_chat_anthropic(array $aiConfig, string $systemPrompt, array $toolsO
         return '❌ ยังไม่ได้ตั้งค่า Anthropic API Key กรุณาตั้งค่าในไฟล์ config/ai_config.php';
     }
 
-    // แปลงนิยาม tool จากรูปแบบ OpenAI/Ollama -> รูปแบบของ Anthropic
     $toolsAnthropic = array_map(static function (array $t): array {
         return [
             'name' => $t['function']['name'],
@@ -378,9 +553,12 @@ function run_chat_anthropic(array $aiConfig, string $systemPrompt, array $toolsO
         ];
     }, $toolsOpenAI);
 
-    $messages = [
-        ['role' => 'user', 'content' => $userMessage],
-    ];
+    // ใส่ประวัติก่อน แล้วต่อด้วยข้อความใหม่
+    $messages = [];
+    foreach ($history as $h) {
+        $messages[] = ['role' => $h['role'], 'content' => $h['content']];
+    }
+    $messages[] = ['role' => 'user', 'content' => $userMessage];
 
     $finalReply = '';
 
@@ -411,7 +589,7 @@ function run_chat_anthropic(array $aiConfig, string $systemPrompt, array $toolsO
             $toolInput = $block['input'] ?? [];
             $toolUseId = $block['id'];
 
-            $output = run_tool($toolName, $toolInput, $conn, $adminUserId);
+            $output = run_tool($toolName, $toolInput, $conn, $userId, $role);
 
             $toolResultBlocks[] = [
                 'type' => 'tool_result',
