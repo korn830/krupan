@@ -397,12 +397,11 @@ try {
 
     // เก็บแค่ 40 ข้อความล่าสุดต่อคน (20 exchanges) ลบของเก่าทิ้ง
     $conn->prepare(
-        "DELETE FROM ai_chat_history WHERE user_id = ? AND id NOT IN (
-            SELECT id FROM (
-                SELECT id FROM ai_chat_history WHERE user_id = ? ORDER BY created_at DESC LIMIT 40
-            ) AS keep
-        )"
-    )->execute([$currentUserId, $currentUserId]);
+    "DELETE FROM ai_chat_history WHERE user_id = ? AND history_id NOT IN (
+        SELECT history_id FROM (
+            SELECT history_id FROM ai_chat_history WHERE user_id = ? ORDER BY created_at DESC LIMIT 40
+        ) AS keep_rows
+    )"  )->execute([$currentUserId, $currentUserId]);
 
     echo json_encode(['reply' => $finalReply]);
 } catch (Exception $e) {
