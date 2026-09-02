@@ -9,6 +9,7 @@ require '../vendor/autoload.php';
 
 use chillerlan\QRCode\QRCode;
 use chillerlan\QRCode\QROptions;
+use chillerlan\QRCode\Output\QROutputInterface;
 
 if (isset($_GET['id'])) {
     $id = (int)$_GET['id'];
@@ -26,9 +27,9 @@ if (isset($_GET['id'])) {
             // ตั้งค่าการสร้าง QR Code เป็น SVG (ไม่ต้องพึ่งพา PHP GD Extension)
             $options = new QROptions([
                 'version'      => 5,
-                'outputType'   => QRCode::OUTPUT_MARKUP_SVG, 
+                'outputType'   => QROutputInterface::MARKUP_SVG,
                 'eccLevel'     => QRCode::ECC_L,
-                'scale'        => 5,
+                'moduleSize'   => 5,
                 'addQuietzone' => true,
             ]);
 
