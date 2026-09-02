@@ -43,8 +43,8 @@ $sheet = $spreadsheet->getActiveSheet();
 $sheet->setTitle('Template_นำเข้าครุภัณฑ์');
 
 // --- สร้างแถวคำแนะนำ (แถวที่ 1) ---
-$sheet->mergeCells('A1:I1');
-$sheet->setCellValue('A1', 'คำแนะนำ: ห้ามแก้ไขหัวตารางในแถวที่ 2. สำหรับคอลัมน์ หมวดหมู่, สถานที่, แผนก และ สถานะ สามารถคลิกที่ช่องแล้ว "เลือกจาก Dropdown" ได้เลย. (วันที่ใช้รูปแบบ YYYY-MM-DD)');
+$sheet->mergeCells('A1:J1');
+$sheet->setCellValue('A1', 'คำแนะนำ: ห้ามแก้ไขหัวตารางในแถวที่ 2. สำหรับคอลัมน์ หมวดหมู่, สถานที่, แผนก และ สถานะ สามารถคลิกที่ช่องแล้ว "เลือกจาก Dropdown" ได้เลย. (วันที่ใช้รูปแบบ YYYY-MM-DD) คอลัมน์ J: ใส่ URL รูปภาพตรงๆ (ต้องเป็นลิงก์รูปภาพโดยตรง เช่น https://.../.jpg)');
 
 // ตกแต่งแถวคำแนะนำ
 $sheet->getStyle('A1')->applyFromArray([
@@ -64,7 +64,8 @@ $headers = [
     'F' => 'department_id (แผนก)',
     'G' => 'status (สถานะ)',
     'H' => 'purchase_date (วันที่ซื้อ)',
-    'I' => 'price (ราคา)'
+    'I' => 'price (ราคา)',
+    'J' => 'image_url (URL รูปภาพ)'
 ];
 
 foreach ($headers as $col => $headerName) {
@@ -77,10 +78,10 @@ $headerStyle = [
     'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FF4F81BD']],
     'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
 ];
-$sheet->getStyle('A2:I2')->applyFromArray($headerStyle);
+$sheet->getStyle('A2:J2')->applyFromArray($headerStyle);
 
 // ปรับความกว้างคอลัมน์อัตโนมัติ
-foreach (range('A', 'I') as $col) {
+foreach (range('A', 'J') as $col) {
     $sheet->getColumnDimension($col)->setAutoSize(true);
 }
 $sheet->freezePane('A3');

@@ -36,7 +36,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['excel_file'])) {
         $conn->beginTransaction();
 
         $checkStmt = $conn->prepare("SELECT COUNT(*) FROM assets WHERE asset_code = ?");
-        $insertStmt = $conn->prepare("INSERT INTO assets (asset_code, name, description, category_id, location_id, department_id, status, purchase_date, price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $insertStmt = $conn->prepare("INSERT INTO assets (asset_code, name, description, category_id, location_id, department_id, status, purchase_date, price, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         $logStmt = $conn->prepare("INSERT INTO asset_action_log (asset_id, action_type, user_id, details) VALUES (?, 'add', ?, ?)");
 
         // ฟังก์ชันช่วยดึงเฉพาะตัวเลข ID จากข้อความรูปแบบ "ID - Name"
@@ -44,6 +44,41 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['excel_file'])) {
             if (empty($val)) return null;
             $parts = explode(' - ', $val);
             return isset($parts[0]) && is_numeric(trim($parts[0])) ? (int)trim($parts[0]) : null;
+        };
+
+        // ฟังก์ชันดาวน์โหลดและบันทึกรูปภาพจาก URL
+        $downloadImage = function($url) {
+            if (empty($url) || !filter_var($url, FILTER_VALIDATE_URL)) return null;
+
+            $ch = curl_init($url);
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_TIMEOUT => 15,
+                CURLOPT_USERAGENT => 'Mozilla/5.0',
+                CURLOPT_SSL_VERIFYPEER => false,
+            ]);
+            $imageData = curl_exec($ch);
+            $httpCode  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            if ($imageData === false || $httpCode !== 200) return null;
+
+            // ตรวจสอบว่าเป็นรูปภาพจริง
+            $finfo = new finfo(FILEINFO_MIME_TYPE);
+            $mime  = $finfo->buffer($imageData);
+            $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+            $extMap = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp', 'image/gif' => 'gif'];
+
+            if (!in_array($mime, $allowedMimes, true)) return null;
+
+            $ext      = $extMap[$mime];
+            $filename = 'import_' . uniqid() . '.' . $ext;
+            $savePath = dirname(__DIR__) . '/uploads/' . $filename;
+
+            if (file_put_contents($savePath, $imageData) === false) return null;
+
+            return $filename;
         };
 
         // ใช้ foreach ป้องกันปัญหาแถวใน Excel ถูกข้ามหรือนับจำนวนผิด
@@ -82,6 +117,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['excel_file'])) {
             $purchase_date = !empty($row['H']) ? date('Y-m-d', strtotime(str_replace('/', '-', $row['H']))) : null;
             $price = !empty($row['I']) ? (float)$row['I'] : null;
 
+            // ดาวน์โหลดรูปภาพจาก URL ในคอลัมน์ J (ถ้ามี)
+            $image_url = null;
+            if (!empty(trim($row['J'] ?? ''))) {
+                $image_url = $downloadImage(trim($row['J']));
+            }
+
             // เช็คข้อมูลซ้ำ
             $checkStmt->execute([$asset_code]);
             if ($checkStmt->fetchColumn() > 0) {
@@ -90,7 +131,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['excel_file'])) {
             }
 
             // บันทึกข้อมูล
-            $insertStmt->execute([$asset_code, $name, $description, $category_id, $location_id, $department_id, $status, $purchase_date, $price]);
+            $insertStmt->execute([$asset_code, $name, $description, $category_id, $location_id, $department_id, $status, $purchase_date, $price, $image_url]);
             $newAssetId = $conn->lastInsertId();
 
             // บันทึก Log แบบละเอียด
