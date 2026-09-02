@@ -25,14 +25,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION["user_id"] = $user["user_id"];
             $_SESSION["role"] = $user["role"];
             $_SESSION["name"] = $user["name"];
-            // Regenerate session ID after successful login to prevent session fixation
-            session_regenerate_id(true); 
+
+            // เก็บ redirect ที่ส่งมากับฟอร์มไว้ก่อนเปลี่ยนหน้า
+            $redirect = $_POST['redirect'] ?? '';
+
+            // Regenerate session ID after successful login
+            session_regenerate_id(true);
 
             if ($user["role"] === 'admin') {
                 header("Location: admin/index.php");
             } else {
-                header("Location: user/index.php");
+                // ถ้ามาจาก QR ให้กลับไปหน้าขอยืมของ asset นั้น
+                if (
+                    !empty($redirect)
+                    && strpos($redirect, 'user/') === 0
+                    && strpos($redirect, '://') === false
+                    && strpos($redirect, '//') === false
+                ) {
+                    header("Location: " . $redirect);
+                } else {
+                    header("Location: user/index.php");
+                }
             }
+
             exit;
         } else {
             $error = "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง";
@@ -75,6 +90,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     
                     <form method="POST" autocomplete="on" novalidate>
                         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+
+                        <?php
+                        // รับ URL ปลายทางจาก QR และส่งต่อไปพร้อมกับ POST
+                        $redirect = $_GET['redirect'] ?? '';
+
+                        // อนุญาตเฉพาะ URL ภายในโฟลเดอร์ user
+                        if (
+                            strpos($redirect, 'user/') !== 0
+                            || strpos($redirect, '://') !== false
+                            || strpos($redirect, '//') !== false
+                        ) {
+                            $redirect = '';
+                        }
+                        ?>
+
+                        <input
+                            type="hidden"
+                            name="redirect"
+                            value="<?= htmlspecialchars($redirect, ENT_QUOTES, 'UTF-8') ?>"
+                        >
 
                         <div class="form-group">
                             <label for="username" class="form-label">ชื่อผู้ใช้</label>

@@ -1,7 +1,15 @@
 <?php
 session_start();
+
 if (!isset($_SESSION["user_id"])) {
-    header("Location: ../index.php");
+    // จำหน้าที่ผู้ใช้ต้องการกลับไปหลัง Login
+    $redirect = 'user/borrow_request.php';
+
+    if (!empty($_GET['id'])) {
+        $redirect .= '?id=' . (int)$_GET['id'];
+    }
+
+    header('Location: ../index.php?redirect=' . urlencode($redirect));
     exit;
 }
 require_once dirname(__DIR__) . '/config/db.php';
