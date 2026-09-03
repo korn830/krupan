@@ -1,16 +1,4 @@
 <?php
-/**
- * ajax_ai.php
- * Backend ของ "Krupan AI" - ผู้ช่วยแชทสำหรับค้นหาและอัปเดตสถานะครุภัณฑ์
- *
- * รองรับ 2 รูปแบบ (เลือกได้ใน config/ai_config.php):
- *  - provider = 'ollama'    -> เรียกโมเดลที่รันอยู่บนเครื่องคุณเองผ่าน Ollama (ฟรี, ส่วนตัว)
- *  - provider = 'anthropic' -> เรียก Claude ผ่าน Anthropic API (ต้องมี API Key)
- *
- * ทั้งสองแบบใช้ tool-use เหมือนกัน: โมเดลเลือกเองว่าจะ "ค้นหาครุภัณฑ์" หรือ "อัปเดตสถานะครุภัณฑ์"
- * ส่วนการดึง/แก้ไขข้อมูลจริงในฐานข้อมูลทำโดยฟังก์ชัน PHP ด้านล่าง ไม่ใช่ตัวโมเดล
- */
-
 session_start();
 header('Content-Type: application/json; charset=utf-8');
 
