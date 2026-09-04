@@ -169,16 +169,11 @@ if (isset($_GET['fetch_asset']) && isset($_GET['id'])) {
     // ถ้ามี error ก็จะถูกแสดงผลบนหน้าหลังจาก POST (ไม่ Redirect)
 }
 
-// Pagination setup
-$perPage = 20;
-$page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-$offset = ($page - 1) * $perPage;
-
 // Get total count
 $totalAssets = $conn->query("SELECT COUNT(*) FROM assets")->fetchColumn();
-$totalPages = ceil($totalAssets / $perPage);
 
-// Fetch paginated assets (รวม borrowable_status มาด้วย)
+// ดึงครุภัณฑ์ทั้งหมด (ให้ DataTables เป็นคนแบ่งหน้า/ค้นหาฝั่ง client เหมือนหน้า admin)
+// หมายเหตุ: ห้ามใส่ LIMIT ตรงนี้ ไม่งั้นช่องค้นหาจะค้นเจอเฉพาะแถวในหน้าปัจจุบัน
 $sql = "SELECT a.*,
                 c.name AS category_name,
                 l.name AS location_name,
@@ -187,8 +182,7 @@ $sql = "SELECT a.*,
         LEFT JOIN categories c ON a.category_id = c.category_id
         LEFT JOIN locations l ON a.location_id = l.location_id
         LEFT JOIN departments d ON a.department_id = d.department_id
-        ORDER BY a.asset_id DESC
-        LIMIT $perPage OFFSET $offset";
+        ORDER BY a.asset_id DESC";
 $stmt = $conn->query($sql);
 $assets = $stmt->fetchAll();
 
@@ -204,7 +198,19 @@ $departments = $conn->query("SELECT * FROM departments")->fetchAll();
     <title>จัดการครุภัณฑ์ - ระบบจัดการครุภัณฑ์</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
     <link href="css/assets-list.css" rel="stylesheet">
+    <style>
+        .dataTables_wrapper .pagination .page-item.active .page-link {
+            background-color: #667eea;
+            border-color: #667eea;
+        }
+        .dataTables_filter input {
+            border-radius: 8px;
+            padding: 5px 10px;
+            border: 1px solid #ced4da;
+        }
+    </style>
 </head>
 <body>
 <?php include(__DIR__ . '/header.php'); ?>
@@ -242,8 +248,8 @@ $departments = $conn->query("SELECT * FROM departments")->fetchAll();
             </h5>
         </div>
         <?php if (count($assets) > 0): ?>
-            <div class="table-responsive">
-                <table class="table table-hover">
+            <div class="table-responsive p-3">
+                <table id="assetsTable" class="table table-hover align-middle">
                     <thead>
                         <tr>
                             <th>เลขครุภัณฑ์</th>
@@ -324,23 +330,6 @@ $departments = $conn->query("SELECT * FROM departments")->fetchAll();
                     </tbody>
                 </table>
             </div>
-            <?php if ($totalPages > 1): ?>
-            <nav aria-label="Page navigation" class="mt-3">
-                <ul class="pagination justify-content-center">
-                    <li class="page-item<?= $page <= 1 ? ' disabled' : '' ?>">
-                        <a class="page-link" href="?page=<?= $page-1 ?>" tabindex="-1">ก่อนหน้า</a>
-                    </li>
-                    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                        <li class="page-item<?= $i == $page ? ' active' : '' ?>">
-                            <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
-                        </li>
-                    <?php endfor; ?>
-                    <li class="page-item<?= $page >= $totalPages ? ' disabled' : '' ?>">
-                        <a class="page-link" href="?page=<?= $page+1 ?>">ถัดไป</a>
-                    </li>
-                </ul>
-            </nav>
-            <?php endif; ?>
         <?php else: ?>
             <div class="empty-state">
                 <i class="fas fa-box-open icon"></i>
@@ -435,7 +424,41 @@ $departments = $conn->query("SELECT * FROM departments")->fetchAll();
     </form>
   </div>
 </div>
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script>
+// ค้นหา / เรียงลำดับ / แบ่งหน้า ให้เหมือนหน้า admin
+$(document).ready(function () {
+    // ตารางจะไม่ถูก render เลยถ้าไม่มีครุภัณฑ์ — ต้องเช็คก่อน
+    if ($('#assetsTable').length === 0) return;
+
+    $('#assetsTable').DataTable({
+        "language": {
+            "sProcessing": "กำลังดำเนินการ...",
+            "sLengthMenu": "แสดง_MENU_ แถว",
+            "sZeroRecords": "ไม่พบข้อมูล",
+            "sInfo": "แสดง _START_ ถึง _END_ จาก _TOTAL_ แถว",
+            "sInfoEmpty": "แสดง 0 ถึง 0 จาก 0 แถว",
+            "sInfoFiltered": "(กรองข้อมูล _MAX_ ทุกแถว)",
+            "sSearch": "🔍 ค้นหา:",
+            "oPaginate": {
+                "sFirst": "เริ่มต้น",
+                "sPrevious": "ก่อนหน้า",
+                "sNext": "ถัดไป",
+                "sLast": "สุดท้าย"
+            }
+        },
+        // คอลัมน์รูปภาพกับปุ่มจัดการเรียงลำดับไม่ได้ (เรียงแล้วไม่มีความหมาย)
+        "columnDefs": [
+            { "orderable": false, "targets": [7, 8] }
+        ],
+        "order": [[0, 'desc']],
+        "pageLength": 10
+    });
+});
+</script>
 <script>
 // Define mapping from PHP to window.departmentLocationMap
 <?php
