@@ -41,6 +41,43 @@ if (!empty($_SESSION['borrow_error'])) {
     $formError = $_SESSION['borrow_error'];
     unset($_SESSION['borrow_error']);
 }
+
+// รับค่าที่ผู้ใช้กรอกไว้เดิม (กรณีส่งฟอร์มแล้วไม่ผ่านการตรวจสอบ) เพื่อไม่ให้ต้องกรอกใหม่ทั้งหมด
+$oldInput = $_SESSION['borrow_old'] ?? [];
+unset($_SESSION['borrow_old']);
+
+// --- ขอบเขตวันที่: คำนวณที่เดียว ใช้ร่วมกันทั้ง HTML และ JS ---
+// ต้องตรงกับกฎใน process_borrow.php
+const MAX_ADVANCE_DAYS = 14;   // จองล่วงหน้าได้สูงสุดกี่วันนับจากวันนี้
+const MAX_BORROW_DAYS  = 14;   // ยืมได้นานสูงสุดกี่วันนับจาก "วันที่ยืม"
+
+// ตรวจว่าเป็นวันที่รูปแบบ Y-m-d จริง ๆ (กันค่าขยะจาก session/POST)
+function validDate($value): ?string {
+    $value = trim((string)$value);
+    $d = DateTimeImmutable::createFromFormat('!Y-m-d', $value);
+    return ($d && $d->format('Y-m-d') === $value) ? $value : null;
+}
+
+$today         = date('Y-m-d');
+$maxBorrowDate = date('Y-m-d', strtotime('+' . MAX_ADVANCE_DAYS . ' days'));
+
+// วันที่ยืมที่จะแสดงในฟอร์ม (ใช้ค่าเดิมของผู้ใช้ถ้ายังอยู่ในช่วงที่อนุญาต)
+$borrowValue = validDate($oldInput['borrow_date'] ?? '') ?? $today;
+if ($borrowValue < $today || $borrowValue > $maxBorrowDate) {
+    $borrowValue = $today;
+}
+
+// สำคัญ: ขอบเขตของ "กำหนดคืน" ต้องอ้างอิงจาก "วันที่ยืม" ไม่ใช่ "วันนี้"
+$minReturnDate = date('Y-m-d', strtotime($borrowValue . ' +1 day'));
+$maxReturnDate = date('Y-m-d', strtotime($borrowValue . ' +' . MAX_BORROW_DAYS . ' days'));
+
+$returnValue = validDate($oldInput['return_date'] ?? '') ?? '';
+if ($returnValue !== '' && ($returnValue < $minReturnDate || $returnValue > $maxReturnDate)) {
+    $returnValue = '';
+}
+
+$borrowerValue = (string)($oldInput['borrower_name'] ?? ($_SESSION['name'] ?? ''));
+$noteValue     = (string)($oldInput['note'] ?? '');
 ?>
 <!DOCTYPE html>
 <html lang="th">
@@ -199,7 +236,7 @@ if (!empty($_SESSION['borrow_error'])) {
                         <label for="borrower_name" class="form-label">ชื่อผู้ยืม</label>
                         <input type="text" id="borrower_name" name="borrower_name"
                                class="form-control"
-                               value="<?= htmlspecialchars($_SESSION['name'] ?? '') ?>"
+                               value="<?= htmlspecialchars($borrowerValue) ?>"
                                required>
                     </div>
 
@@ -208,25 +245,26 @@ if (!empty($_SESSION['borrow_error'])) {
                             <label for="borrow_date" class="form-label">วันที่ยืม</label>
                             <input type="date" id="borrow_date" name="borrow_date"
                                    class="form-control"
-                                   value="<?= date('Y-m-d') ?>"
-                                   min="<?= date('Y-m-d') ?>"
-                                   max="<?= date('Y-m-d', strtotime('+14 days')) ?>" required>
-                            <div class="form-text">ยืมได้ล่วงหน้าสูงสุด 14 วัน</div>
+                                   value="<?= htmlspecialchars($borrowValue) ?>"
+                                   min="<?= htmlspecialchars($today) ?>"
+                                   max="<?= htmlspecialchars($maxBorrowDate) ?>" required>
+                            <div class="form-text">ยืมได้ล่วงหน้าสูงสุด <?= MAX_ADVANCE_DAYS ?> วัน</div>
                         </div>
                         <div class="col-sm-6">
                             <label for="return_date" class="form-label">กำหนดคืน</label>
                             <input type="date" id="return_date" name="return_date"
                                    class="form-control"
-                                   min="<?= date('Y-m-d', strtotime('+1 day')) ?>"
-                                   max="<?= date('Y-m-d', strtotime('+14 days')) ?>" required>
-                            <div class="form-text">คืนภายใน 14 วันนับจากวันที่ยืม</div>
+                                   value="<?= htmlspecialchars($returnValue) ?>"
+                                   min="<?= htmlspecialchars($minReturnDate) ?>"
+                                   max="<?= htmlspecialchars($maxReturnDate) ?>" required>
+                            <div class="form-text">คืนภายใน <?= MAX_BORROW_DAYS ?> วันนับจากวันที่ยืม</div>
                         </div>
                     </div>
 
                     <div class="mb-3">
                         <label for="note" class="form-label">เหตุผล / หมายเหตุ</label>
                         <textarea id="note" name="note" class="form-control" rows="3"
-                                  placeholder="ระบุวัตถุประสงค์การยืม..."></textarea>
+                                  placeholder="ระบุวัตถุประสงค์การยืม..."><?= htmlspecialchars($noteValue) ?></textarea>
                     </div>
 
                     <div class="mb-4">
@@ -260,31 +298,56 @@ if (!empty($_SESSION['borrow_error'])) {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // ตรวจสอบว่า return_date ต้องหลังจาก borrow_date และไม่เกิน 14 วัน
-        document.getElementById('borrow_date').addEventListener('change', function () {
-            var bd = this.value;
-            var rd = document.getElementById('return_date');
+        // ตรวจสอบว่า return_date ต้องหลังจาก borrow_date และไม่เกิน MAX_BORROW_DAYS วัน
+        (function () {
+            var borrowInput = document.getElementById('borrow_date');
+            var returnInput = document.getElementById('return_date');
 
-            // min = วันถัดไปจาก borrow_date (หรือพรุ่งนี้ถ้า borrow_date คือวันนี้)
-            var minReturn = new Date(bd);
-            minReturn.setDate(minReturn.getDate() + 1);
+            // ครุภัณฑ์ที่ยืมไม่ได้จะไม่มีฟอร์ม — ออกก่อนเพื่อไม่ให้สคริปต์พัง
+            if (!borrowInput || !returnInput) return;
 
-            // max = borrow_date + 14 วัน
-            var maxReturn = new Date(bd);
-            maxReturn.setDate(maxReturn.getDate() + 14);
+            var TODAY           = <?= json_encode($today) ?>;
+            var MAX_BORROW_DATE = <?= json_encode($maxBorrowDate) ?>;
+            var MAX_DAYS        = <?= (int)MAX_BORROW_DAYS ?>;
 
-            var fmt = d => d.toISOString().split('T')[0];
-            rd.min = fmt(minReturn);
-            rd.max = fmt(maxReturn);
-
-            // รีเซ็ต return_date ถ้าออกนอกขอบเขตใหม่
-            if (rd.value && (rd.value <= bd || rd.value > fmt(maxReturn))) {
-                rd.value = '';
+            // บวกวันแบบ UTC ล้วน ๆ เพื่อไม่ให้ timezone/DST ของเครื่องผู้ใช้ทำให้วันเพี้ยนไป 1 วัน
+            function addDays(ymd, days) {
+                var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(ymd || '');
+                if (!m) return null;
+                var d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+                if (isNaN(d.getTime())) return null;
+                d.setUTCDate(d.getUTCDate() + days);
+                return d.toISOString().slice(0, 10);
             }
 
-            // อัปเดต max ของ borrow_date ด้วย (ล็อกไว้ที่ 14 วันจากวันนี้)
-            this.max = '<?= date('Y-m-d', strtotime('+14 days')) ?>';
-        });
+            function syncReturnRange() {
+                var bd = borrowInput.value;
+
+                // วันที่ยืมยังว่างหรือไม่ถูกต้อง — ปล่อยให้ฝั่งเซิร์ฟเวอร์เป็นคนตรวจ
+                if (!addDays(bd, 0) || bd < TODAY || bd > MAX_BORROW_DATE) {
+                    returnInput.removeAttribute('min');
+                    returnInput.removeAttribute('max');
+                    return;
+                }
+
+                var minReturn = addDays(bd, 1);
+                var maxReturn = addDays(bd, MAX_DAYS);
+                returnInput.min = minReturn;
+                returnInput.max = maxReturn;
+
+                // ล้างกำหนดคืนเดิมถ้าหลุดออกนอกช่วงใหม่
+                if (returnInput.value &&
+                    (returnInput.value < minReturn || returnInput.value > maxReturn)) {
+                    returnInput.value = '';
+                }
+            }
+
+            borrowInput.addEventListener('change', syncReturnRange);
+            borrowInput.addEventListener('input', syncReturnRange);
+
+            // สำคัญ: ต้องซิงก์ตอนโหลดหน้าด้วย ไม่ใช่เฉพาะตอนผู้ใช้เปลี่ยนค่า
+            syncReturnRange();
+        })();
     </script>
 </body>
 </html>

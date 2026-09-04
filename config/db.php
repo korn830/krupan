@@ -1,4 +1,9 @@
 <?php
+// กำหนด timezone ให้ตรงกับผู้ใช้งานจริง มิฉะนั้น PHP จะใช้ UTC
+// ทำให้ date('Y-m-d') ("วันนี้" ของเซิร์ฟเวอร์) ไม่ตรงกับวันที่บนเครื่องผู้ใช้
+// และช่วงวันที่ min/max ของฟอร์มยืมจะเพี้ยนไป 1 วัน
+date_default_timezone_set('Asia/Bangkok');
+
 $host = 'localhost';
 $db   = 'krupanlnwm_asset_system';
 $user = 'krupanlnwm_asset_system'; // แก้ตาม MySQL user ของคุณ

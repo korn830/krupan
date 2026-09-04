@@ -18,17 +18,33 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
 
 require_once dirname(__DIR__) . '/config/db.php';
 
+// ต้องตรงกับกฎใน borrow_request.php
+const MAX_ADVANCE_DAYS = 14;   // จองล่วงหน้าได้สูงสุดกี่วันนับจากวันนี้
+const MAX_BORROW_DAYS  = 14;   // ยืมได้นานสูงสุดกี่วันนับจาก "วันที่ยืม"
+
 $asset_id = (int)($_POST['asset_id'] ?? 0);
 $user_id = (int)$_SESSION['user_id'];
-$borrow_date = $_POST['borrow_date'] ?? date('Y-m-d');
-$return_date = $_POST['return_date'] ?? '';
 $note = trim($_POST['note'] ?? '');
 
-// --- ฟังก์ชัน redirect กลับพร้อม error ---
+// --- ฟังก์ชัน redirect กลับพร้อม error (เก็บค่าที่กรอกไว้เดิมด้วย) ---
 function fail(string $msg, int $assetId): void {
     $_SESSION['borrow_error'] = $msg;
+    $_SESSION['borrow_old'] = [
+        'borrower_name' => (string)($_POST['borrower_name'] ?? ''),
+        'borrow_date'   => (string)($_POST['borrow_date'] ?? ''),
+        'return_date'   => (string)($_POST['return_date'] ?? ''),
+        'note'          => (string)($_POST['note'] ?? ''),
+    ];
     header("Location: borrow_request.php?id=" . $assetId);
     exit;
+}
+
+// ตรวจว่าเป็นวันที่รูปแบบ Y-m-d จริง ๆ ก่อนนำไปเปรียบเทียบ/คำนวณ
+// (ถ้าไม่ตรวจ ค่าขยะจะหลุดผ่านการเทียบสตริง แล้วทำให้ strtotime() คำนวณผิด)
+function validDate($value): ?string {
+    $value = trim((string)$value);
+    $d = DateTimeImmutable::createFromFormat('!Y-m-d', $value);
+    return ($d && $d->format('Y-m-d') === $value) ? $value : null;
 }
 
 // --- Validation พื้นฐาน ---
@@ -37,22 +53,31 @@ if ($asset_id <= 0) {
     exit;
 }
 
+$borrow_date = validDate($_POST['borrow_date'] ?? '');
+$return_date = validDate($_POST['return_date'] ?? '');
+
+if ($borrow_date === null) {
+    fail("กรุณาระบุวันที่ยืมให้ถูกต้อง", $asset_id);
+}
+if ($return_date === null) {
+    fail("กรุณาระบุกำหนดคืนให้ถูกต้อง", $asset_id);
+}
+
 $today          = date('Y-m-d');
-$maxBorrowDate  = date('Y-m-d', strtotime('+14 days'));
-$maxReturnDays  = 14;
+$maxBorrowDate  = date('Y-m-d', strtotime('+' . MAX_ADVANCE_DAYS . ' days'));
 
 if ($borrow_date < $today) {
     fail("วันที่ยืมต้องไม่ใช่วันที่ผ่านมาแล้ว", $asset_id);
 }
 if ($borrow_date > $maxBorrowDate) {
-    fail("ไม่สามารถจองล่วงหน้าเกิน 14 วัน (สูงสุดถึง {$maxBorrowDate})", $asset_id);
+    fail("ไม่สามารถจองล่วงหน้าเกิน " . MAX_ADVANCE_DAYS . " วัน (สูงสุดถึง {$maxBorrowDate})", $asset_id);
 }
-if ($return_date === '' || $return_date <= $borrow_date) {
+if ($return_date <= $borrow_date) {
     fail("กำหนดคืนต้องเป็นวันหลังจากวันที่ยืม", $asset_id);
 }
-$maxReturnDate = date('Y-m-d', strtotime($borrow_date . " +{$maxReturnDays} days"));
+$maxReturnDate = date('Y-m-d', strtotime($borrow_date . ' +' . MAX_BORROW_DAYS . ' days'));
 if ($return_date > $maxReturnDate) {
-    fail("กำหนดคืนต้องไม่เกิน {$maxReturnDays} วันนับจากวันที่ยืม (สูงสุดถึง {$maxReturnDate})", $asset_id);
+    fail("กำหนดคืนต้องไม่เกิน " . MAX_BORROW_DAYS . " วันนับจากวันที่ยืม (สูงสุดถึง {$maxReturnDate})", $asset_id);
 }
 
 // --- ตรวจสอบว่า asset ยังพร้อมให้ยืมอยู่ ---
