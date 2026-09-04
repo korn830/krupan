@@ -209,13 +209,17 @@ if (!empty($_SESSION['borrow_error'])) {
                             <input type="date" id="borrow_date" name="borrow_date"
                                    class="form-control"
                                    value="<?= date('Y-m-d') ?>"
-                                   min="<?= date('Y-m-d') ?>" required>
+                                   min="<?= date('Y-m-d') ?>"
+                                   max="<?= date('Y-m-d', strtotime('+14 days')) ?>" required>
+                            <div class="form-text">ยืมได้ล่วงหน้าสูงสุด 14 วัน</div>
                         </div>
                         <div class="col-sm-6">
                             <label for="return_date" class="form-label">กำหนดคืน</label>
                             <input type="date" id="return_date" name="return_date"
                                    class="form-control"
-                                   min="<?= date('Y-m-d', strtotime('+1 day')) ?>" required>
+                                   min="<?= date('Y-m-d', strtotime('+1 day')) ?>"
+                                   max="<?= date('Y-m-d', strtotime('+14 days')) ?>" required>
+                            <div class="form-text">คืนภายใน 14 วันนับจากวันที่ยืม</div>
                         </div>
                     </div>
 
@@ -256,12 +260,30 @@ if (!empty($_SESSION['borrow_error'])) {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // ตรวจสอบว่า return_date ต้องหลังจาก borrow_date
+        // ตรวจสอบว่า return_date ต้องหลังจาก borrow_date และไม่เกิน 14 วัน
         document.getElementById('borrow_date').addEventListener('change', function () {
             var bd = this.value;
             var rd = document.getElementById('return_date');
-            rd.min = bd > '<?= date('Y-m-d') ?>' ? bd : '<?= date('Y-m-d', strtotime('+1 day')) ?>';
-            if (rd.value && rd.value <= bd) rd.value = '';
+
+            // min = วันถัดไปจาก borrow_date (หรือพรุ่งนี้ถ้า borrow_date คือวันนี้)
+            var minReturn = new Date(bd);
+            minReturn.setDate(minReturn.getDate() + 1);
+
+            // max = borrow_date + 14 วัน
+            var maxReturn = new Date(bd);
+            maxReturn.setDate(maxReturn.getDate() + 14);
+
+            var fmt = d => d.toISOString().split('T')[0];
+            rd.min = fmt(minReturn);
+            rd.max = fmt(maxReturn);
+
+            // รีเซ็ต return_date ถ้าออกนอกขอบเขตใหม่
+            if (rd.value && (rd.value <= bd || rd.value > fmt(maxReturn))) {
+                rd.value = '';
+            }
+
+            // อัปเดต max ของ borrow_date ด้วย (ล็อกไว้ที่ 14 วันจากวันนี้)
+            this.max = '<?= date('Y-m-d', strtotime('+14 days')) ?>';
         });
     </script>
 </body>

@@ -37,8 +37,22 @@ if ($asset_id <= 0) {
     exit;
 }
 
+$today          = date('Y-m-d');
+$maxBorrowDate  = date('Y-m-d', strtotime('+14 days'));
+$maxReturnDays  = 14;
+
+if ($borrow_date < $today) {
+    fail("วันที่ยืมต้องไม่ใช่วันที่ผ่านมาแล้ว", $asset_id);
+}
+if ($borrow_date > $maxBorrowDate) {
+    fail("ไม่สามารถจองล่วงหน้าเกิน 14 วัน (สูงสุดถึง {$maxBorrowDate})", $asset_id);
+}
 if ($return_date === '' || $return_date <= $borrow_date) {
     fail("กำหนดคืนต้องเป็นวันหลังจากวันที่ยืม", $asset_id);
+}
+$maxReturnDate = date('Y-m-d', strtotime($borrow_date . " +{$maxReturnDays} days"));
+if ($return_date > $maxReturnDate) {
+    fail("กำหนดคืนต้องไม่เกิน {$maxReturnDays} วันนับจากวันที่ยืม (สูงสุดถึง {$maxReturnDate})", $asset_id);
 }
 
 // --- ตรวจสอบว่า asset ยังพร้อมให้ยืมอยู่ ---
