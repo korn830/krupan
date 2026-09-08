@@ -66,7 +66,8 @@ $stmtAvail = $conn->query(
 $available = $stmtAvail->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-<link rel="stylesheet" href="css/index.css">
+<?php require_once __DIR__ . '/../assets/kp_assets.php'; ?>
+<link rel="stylesheet" href="<?= kp_asset('assets/css/shared/index.css', '../') ?>">
 
 <div class="kp-page-head">
     <div>

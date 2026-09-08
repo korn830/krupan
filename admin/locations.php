@@ -58,7 +58,8 @@ $locations = $conn->query("SELECT l.*, d.name AS department_name FROM locations 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/locations.css">
+    <?php require_once __DIR__ . '/../assets/kp_assets.php'; ?>
+<link rel="stylesheet" href="<?= kp_asset('admin/css/locations.css', '../') ?>">
 </head>
 <body>
 <?php include 'header.php'; ?>
