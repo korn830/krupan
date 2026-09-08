@@ -1,0 +1,384 @@
+/* ==========================================================================
+   kp.css — ชั้นหน้าตาหลักของระบบ (Thai academic)
+   โหลดจาก header.php จึงมีผลกับทุกหน้าพร้อมกัน
+   ทุกค่าสีมาจาก tokens.css ไม่มีการเขียนรหัสสีตรง ๆ ในไฟล์นี้
+   ========================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&family=Noto+Serif+Thai:wght@400;500&display=swap');
+@import url('tokens.css');
+
+/* --- พื้นฐาน --- */
+body {
+    background: var(--kp-bg) !important;
+    color: var(--kp-text);
+    font-family: var(--kp-sans);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+}
+.num, .kp-num { font-variant-numeric: tabular-nums; }
+a { color: var(--kp-link); text-decoration: none; }
+a:hover { color: var(--kp-link); text-decoration: underline; }
+:focus-visible { outline: 2px solid var(--kp-accent); outline-offset: 2px; }
+
+/* --- แถบนำทาง: พื้นขาว เส้นบาง ไม่มีเกรเดียนต์ --- */
+.navbar {
+    background: var(--kp-surface) !important;
+    border-bottom: 1px solid var(--kp-border) !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    padding: 0 !important;
+}
+.navbar.scrolled { box-shadow: none !important; padding: 0 !important; }
+.navbar .container-fluid { max-width: 1180px; padding: 0 28px; }
+.navbar-brand {
+    font-family: var(--kp-serif) !important;
+    font-weight: 500 !important;
+    font-size: 16px !important;
+    color: var(--kp-primary) !important;
+    background: none !important;
+    border: none !important;
+    backdrop-filter: none !important;
+    border-radius: 0 !important;
+    padding: 18px 0 !important;
+}
+.navbar-brand::before { content: none !important; }
+.navbar-nav .nav-link {
+    color: var(--kp-body) !important;
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    background: none !important;
+    border-radius: 0 !important;
+    padding: 20px 17px !important;
+    box-shadow: none !important;
+}
+.navbar-nav .nav-link:hover { color: var(--kp-text) !important; background: none !important; }
+.navbar-nav .nav-link.active {
+    color: var(--kp-primary) !important;
+    font-weight: 500 !important;
+    box-shadow: inset 0 -2px 0 var(--kp-accent) !important;
+}
+
+/* --- หัวหน้า: ไม่มีการ์ดเกรเดียนต์ --- */
+.page-header {
+    background: none !important;
+    color: var(--kp-text) !important;
+    padding: 0 0 4px !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    margin-bottom: 26px !important;
+    border-bottom: none !important;
+}
+.page-header::before { content: none !important; }
+.page-header h4, .page-header h1, .page-header h2 {
+    font-family: var(--kp-serif);
+    font-size: 25px;
+    font-weight: 500;
+    color: var(--kp-text);
+    margin: 0;
+    /* สไตล์เดิมตั้ง display:flex ไว้ ทำให้เส้นทองด้านล่างกลายเป็นสมาชิกของ flex
+       แล้วไปอยู่ข้าง ๆ หัวเรื่องแทนที่จะอยู่ใต้ — ต้องบังคับเป็น block */
+    display: block !important;
+    text-shadow: none;
+}
+.page-header h4::after, .page-header h1::after {
+    content: ''; display: block;
+    width: 34px; height: 2px;
+    background: var(--kp-accent);
+    margin-top: 11px; opacity: .85;
+}
+.page-header .header-icon { display: none; }
+
+.container { max-width: 1180px; padding-top: 34px; padding-bottom: 12px; }
+
+/* --- การ์ด / กล่องตาราง --- */
+.table-container, .card {
+    background: var(--kp-surface);
+    border: 1px solid var(--kp-border);
+    border-radius: var(--kp-radius);
+    box-shadow: none !important;
+}
+.table-header {
+    background: none !important;
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--kp-border);
+}
+.table-title {
+    font-family: var(--kp-serif);
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--kp-text);
+}
+.table-title .icon { display: none; }
+.table-title .badge {
+    background: var(--kp-raise) !important;
+    color: var(--kp-body) !important;
+    font-weight: 500;
+    font-size: 12px;
+    border-radius: var(--kp-radius);
+}
+
+/* --- ตาราง: เส้นบาง ไม่มีพื้นหัวตาราง --- */
+.table thead th, table thead th {
+    background: none !important;
+    color: var(--kp-muted) !important;
+    font-family: var(--kp-sans) !important;
+    font-weight: 500 !important;
+    font-size: 12px !important;
+    border: none !important;
+    border-bottom: 1px solid var(--kp-border-2) !important;
+    padding: 11px 14px !important;
+    text-transform: none;
+    letter-spacing: 0;
+}
+.table tbody td, table tbody td {
+    padding: 13px 14px;
+    border-bottom: 1px solid var(--kp-border);
+    border-top: none;
+    font-size: 13.5px;
+    color: var(--kp-body);
+    vertical-align: middle;
+}
+.table tbody tr:last-child td { border-bottom: none; }
+.table-hover tbody tr:hover, .table tbody tr:hover { background: var(--kp-raise) !important; }
+.table tbody td.fw-bold, .table tbody td .fw-bold { color: var(--kp-text) !important; font-weight: 500 !important; }
+
+/* --- ป้ายสถานะ: จุดสี + ตัวอักษร แทนแท่งสีเต็ม --- */
+.status-badge {
+    background: none !important;
+    color: var(--kp-body) !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    min-width: 0 !important;
+    font-weight: 400 !important;
+    font-size: 13px !important;
+    display: inline-flex !important;
+    align-items: center;
+    gap: 7px;
+    white-space: nowrap;
+}
+.status-badge::before {
+    content: '';
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: var(--st-retired);
+}
+.status-badge[data-status="ใช้งานปกติ"]::before  { background: var(--st-ok); }
+.status-badge[data-status="ถูกยืม"]::before      { background: var(--st-borrowed); }
+.status-badge[data-status="รออนุมัติ"]::before    { background: var(--st-pending); }
+.status-badge[data-status="ชำรุด"]::before       { background: var(--st-broken); }
+.status-badge[data-status="ส่งซ่อม"]::before      { background: var(--st-repair); }
+.status-badge[data-status="ซ่อมแซม"]::before      { background: var(--st-repair); }
+.status-badge[data-status="จำหน่าย"]::before      { background: var(--st-retired); }
+.status-badge[data-status="เลิกใช้"]::before      { background: var(--st-retired); }
+.status-badge[data-status="เกินวันที่กำหนด"]::before { background: var(--st-broken); }
+.status-badge[data-status="คืนแล้ว"]::before      { background: var(--st-retired); }
+.status-badge[data-status="อนุมัติ"]::before      { background: var(--st-ok); }
+.status-badge[data-status="ปฏิเสธ"]::before       { background: var(--st-broken); }
+
+/* --- ปุ่ม: เส้นขอบเป็นหลัก ทึบเฉพาะปุ่มสำคัญ --- */
+.btn-borrow, .btn-add-asset, .btn-submit,
+.btn-primary, .btn-success, .btn-danger, .btn-outline-primary,
+.btn-outline-dark, .btn-outline-danger, .btn-outline-secondary {
+    background: var(--kp-surface) !important;
+    background-image: none !important;
+    border: 1px solid var(--kp-primary) !important;
+    color: var(--kp-primary) !important;
+    border-radius: var(--kp-radius) !important;
+    font-weight: 500 !important;
+    font-size: 13px !important;
+    padding: 7px 17px !important;
+    box-shadow: none !important;
+    transform: none !important;
+    text-decoration: none;
+}
+.btn-borrow:hover, .btn-add-asset:hover, .btn-submit:hover,
+.btn-primary:hover, .btn-success:hover, .btn-outline-primary:hover {
+    background: var(--kp-primary-w) !important;
+    color: var(--kp-primary) !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+.btn-danger, .btn-outline-danger {
+    border-color: var(--kp-border-2) !important;
+    color: var(--st-broken) !important;
+}
+.btn-danger:hover, .btn-outline-danger:hover { background: var(--kp-raise) !important; color: var(--st-broken) !important; }
+
+/* ปุ่มหลักของหน้า — ทึบ ใช้ปุ่มเดียวต่อหน้า */
+.btn-submit, .kp-btn-solid {
+    background: var(--kp-primary) !important;
+    border-color: var(--kp-primary) !important;
+    color: #fff !important;
+    font-size: 13.5px !important;
+    padding: 10px 22px !important;
+    width: auto;
+}
+.btn-submit:hover, .kp-btn-solid:hover { background: var(--kp-primary-s) !important; color: #fff !important; }
+
+.btn-secondary, .btn:disabled, .btn.disabled {
+    background: none !important;
+    border: none !important;
+    color: var(--kp-faint) !important;
+    box-shadow: none !important;
+    padding: 7px 4px !important;
+}
+
+/* --- ฟอร์ม --- */
+.form-label { font-weight: 500; font-size: 12.5px; color: var(--kp-body); }
+.form-control, .form-select {
+    border: 1px solid var(--kp-border-2);
+    border-radius: var(--kp-radius);
+    font-family: var(--kp-sans);
+    font-size: 13.5px;
+    color: var(--kp-text);
+    padding: 9px 12px;
+}
+.form-control:focus, .form-select:focus {
+    border-color: var(--kp-primary);
+    box-shadow: 0 0 0 3px rgba(44, 74, 115, .08);
+}
+.form-text { font-size: 11.5px; color: var(--kp-muted); }
+
+/* --- ข้อความแจ้งเตือน --- */
+.alert { border: none; border-radius: var(--kp-radius); font-size: 13px; padding: 12px 16px; }
+.alert-success { background: #F1F5EF; color: var(--st-ok); }
+.alert-danger  { background: #FAF0EC; color: var(--st-broken); }
+.alert-info    { background: #EFF4F4; color: var(--st-pending); }
+.alert-warning { background: #FAF4E8; color: var(--st-repair); }
+
+/* --- เบรดครัมบ์ --- */
+.breadcrumb { font-size: 12px; margin-bottom: 0; }
+.breadcrumb-item, .breadcrumb-item a { color: var(--kp-faint); }
+.breadcrumb-item.active { color: var(--kp-muted); }
+
+/* --- แบ่งหน้า (DataTables) --- */
+.dataTables_wrapper .pagination .page-link {
+    border: none; color: var(--kp-muted); font-size: 12.5px; border-radius: var(--kp-radius);
+}
+.dataTables_wrapper .pagination .page-item.active .page-link {
+    background: var(--kp-primary-w) !important;
+    border-color: transparent !important;
+    color: var(--kp-primary) !important;
+    font-weight: 500;
+}
+.dataTables_filter input {
+    border: 1px solid var(--kp-border-2) !important;
+    border-radius: var(--kp-radius) !important;
+    padding: 7px 11px !important;
+    font-size: 13px;
+}
+.dataTables_filter label, .dataTables_length label, .dataTables_info {
+    color: var(--kp-muted); font-size: 12.5px;
+}
+
+/* --- ท้ายหน้า --- */
+footer {
+    border-top: 1px solid var(--kp-border);
+    margin-top: 52px;
+    background: none;
+}
+footer p { font-size: 11.5px; color: var(--kp-faint); margin: 0; }
+
+/* --- สถานะว่าง --- */
+.empty-state { padding: 44px; text-align: center; color: var(--kp-muted); }
+.empty-state .icon { color: var(--kp-faint); }
+
+/* --- การ์ดแบบฟอร์มขอยืม --- */
+.borrow-card {
+    border: 1px solid var(--kp-border);
+    border-radius: var(--kp-radius) !important;
+    box-shadow: none !important;
+}
+.borrow-card-header {
+    background: var(--kp-surface) !important;
+    color: var(--kp-text) !important;
+    border-bottom: 1px solid var(--kp-border);
+    padding: 15px 22px !important;
+}
+.borrow-card-header h5 {
+    font-family: var(--kp-serif);
+    font-weight: 500;
+    font-size: 16px;
+}
+.borrow-card-header i { color: var(--kp-accent); }
+.asset-info-strip { background: none !important; border-bottom: 1px solid var(--kp-border); }
+.asset-thumb, .asset-thumb-placeholder {
+    border: 1px solid var(--kp-border) !important;
+    background: var(--kp-raise);
+    border-radius: var(--kp-radius) !important;
+}
+.back-link { border-top: 1px solid var(--kp-border); color: var(--kp-muted); font-size: 13px; }
+.back-link:hover { color: var(--kp-primary); }
+.not-available-box { color: var(--kp-muted); }
+
+/* --- หน้าล็อกอิน: ตัดก้อนเบลอตกแต่งออก ใช้พื้นกระดาษเรียบ --- */
+body::before { background: none !important; }
+.login-card, .login-container .card {
+    border: 1px solid var(--kp-border) !important;
+    border-radius: var(--kp-radius) !important;
+    box-shadow: none !important;
+}
+
+/* ==========================================================================
+   หน้าแรกของผู้ใช้ — ตอบว่า "ฉันยืมอะไรอยู่ ต้องคืนเมื่อไหร่"
+   ========================================================================== */
+.kp-page-head {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 20px; flex-wrap: wrap; margin-bottom: 26px;
+}
+.kp-h1 { font-family: var(--kp-serif); font-size: 25px; font-weight: 500; margin: 0; color: var(--kp-text); }
+.kp-rule { width: 34px; height: 2px; background: var(--kp-accent); margin-top: 11px; opacity: .85; }
+
+/* แถบตัวเลขของผู้ใช้เอง */
+.kp-minibar {
+    display: flex; gap: 32px; flex-wrap: wrap; align-items: baseline;
+    padding: 0 2px 22px; border-bottom: 1px solid var(--kp-border); margin-bottom: 24px;
+}
+.kp-mini { font-size: 13px; color: var(--kp-muted); }
+.kp-mini-n {
+    font-family: var(--kp-serif); font-size: 21px; font-weight: 500;
+    color: var(--kp-text); margin-right: 6px;
+}
+.kp-mini-n.is-late { color: var(--st-broken); }
+
+/* กล่องแจ้งเตือน */
+.kp-note {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 12px 16px; border-radius: var(--kp-radius);
+    font-size: 13px; line-height: 1.6; margin-bottom: 22px;
+}
+.kp-note-bad { background: #FAF0EC; color: var(--st-broken); }
+
+/* สองคอลัมน์ */
+.kp-cols { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; align-items: start; }
+@media (max-width: 900px) { .kp-cols { grid-template-columns: 1fr; } }
+
+/* แถวรายการ */
+.kp-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; padding: 16px 20px; border-bottom: 1px solid var(--kp-border);
+}
+.kp-row.is-last { border-bottom: none; }
+.kp-row-main { min-width: 0; }
+.kp-row-name { font-weight: 500; font-size: 14px; color: var(--kp-text); }
+.kp-row-meta { font-size: 12.5px; color: var(--kp-muted); margin-top: 2px; }
+.kp-row-side { text-align: right; white-space: nowrap; }
+.kp-when { font-size: 12.5px; color: var(--kp-muted); }
+.kp-when.is-late { color: var(--st-broken); }
+.kp-when.is-soon { color: var(--st-borrowed); }
+.kp-row-foot {
+    padding: 13px 20px; border-top: 1px solid var(--kp-border);
+    font-size: 12.5px; color: var(--kp-muted);
+}
+.kp-empty { padding: 36px; text-align: center; color: var(--kp-muted); font-size: 13px; margin: 0; }
+.kp-quiet { font-size: 12.5px; color: var(--kp-link); }
+.kp-cols .btn-sm { padding: 5px 14px !important; font-size: 12.5px !important; }
+
+/* หัวการ์ดของหน้าแรกผู้ใช้ (ตั้งชื่อขึ้นต้น kp- เพื่อไม่ชนกับ .card-header ของ Bootstrap) */
+.kp-card-h {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 20px; padding: 15px 20px; border-bottom: 1px solid var(--kp-border);
+}
+.kp-card-t { font-family: var(--kp-serif); font-size: 16px; font-weight: 500; color: var(--kp-text); }

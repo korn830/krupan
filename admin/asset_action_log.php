@@ -31,16 +31,17 @@ $locations = $conn->query("SELECT location_id, name FROM locations")->fetchAll(P
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
-    <link rel="stylesheet" href="css/asset_action_log.css">
+    <?php require_once __DIR__ . '/../assets/kp_assets.php'; ?>
+<link rel="stylesheet" href="<?= kp_asset('admin/css/asset_action_log.css', '../') ?>">
     <style>
-        .dataTables_wrapper .pagination .page-item.active .page-link { background-color: #667eea; border-color: #667eea; }
-        .dataTables_filter input { border-radius: 8px; padding: 5px 10px; border: 1px solid #ced4da; }
+        .dataTables_wrapper .pagination .page-item.active .page-link { background-color: var(--kp-primary); border-color: var(--kp-primary); }
+        .dataTables_filter input { border-radius: 8px; padding: 5px 10px; border: 1px solid var(--kp-border-2); }
     </style>
 </head>
 <body>
 <?php include 'header.php'; ?>
 <div class="container fade-in mt-4">
-    <div class="page-header mb-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);">
+    <div class="page-header mb-3" style="background: var(--kp-primary); color: white; padding: 2rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(44, 74, 115, 0.2);">
         <h4 class="m-0"><i class="fas fa-history me-2"></i> ประวัติการเคลื่อนไหว (Activity Log)</h4>
     </div>
     

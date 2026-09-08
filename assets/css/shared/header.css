@@ -16,18 +16,18 @@ html {
 
 body {
     font-family: 'Sarabun', sans-serif;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    background: var(--kp-bg);
     min-height: 100vh;
-    color: #2d3748;
+    color: var(--kp-text);
     line-height: 1.6;
     padding-top: 80px; /* Account for fixed navbar */
 }
 
 /* Enhanced Navbar */
 .navbar {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    background: var(--kp-primary) !important;
     box-shadow: 
-        0 4px 20px rgba(102, 126, 234, 0.3),
+        0 4px 20px rgba(44, 74, 115, 0.3),
         0 2px 8px rgba(0, 0, 0, 0.1);
     backdrop-filter: blur(10px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -43,7 +43,7 @@ body {
 .navbar.scrolled {
     padding: 0.5rem 0;
     box-shadow: 
-        0 6px 25px rgba(102, 126, 234, 0.4),
+        0 6px 25px rgba(44, 74, 115, 0.4),
         0 3px 10px rgba(0, 0, 0, 0.15);
 }
 
@@ -244,12 +244,12 @@ body {
 
 .breadcrumb-item + .breadcrumb-item::before {
     content: '›';
-    color: #667eea;
+    color: var(--kp-primary);
     font-weight: 600;
 }
 
 .breadcrumb-item.active {
-    color: #667eea;
+    color: var(--kp-primary);
     font-weight: 600;
 }
 
@@ -263,7 +263,7 @@ body {
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #48bb78, #38a169);
+    background: var(--st-ok);
     display: flex;
     align-items: center;
     justify-content: center;

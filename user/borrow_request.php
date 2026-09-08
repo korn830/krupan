@@ -88,14 +88,15 @@ $noteValue     = (string)($oldInput['note'] ?? '');
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/header.css">
+    <?php require_once __DIR__ . '/../assets/kp_assets.php'; ?>
+<link rel="stylesheet" href="<?= kp_asset('assets/css/shared/header.css', '../') ?>">
     <style>
         .borrow-card {
             max-width: 620px;
             margin: 2.5rem auto;
             background: var(--kp-surface);
             border-radius: var(--kp-radius);
-            box-shadow: 0 4px 24px rgba(102,126,234,.13);
+            box-shadow: 0 4px 24px rgba(44, 74, 115, .13);
             overflow: hidden;
         }
         .borrow-card-header {
@@ -142,7 +143,7 @@ $noteValue     = (string)($oldInput['note'] ?? '');
         }
         .form-control:focus, .form-select:focus {
             border-color: var(--kp-primary);
-            box-shadow: 0 0 0 3px rgba(102,126,234,.15);
+            box-shadow: 0 0 0 3px rgba(44, 74, 115, .15);
         }
         .btn-submit {
             background: var(--kp-gradient);

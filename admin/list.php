@@ -259,17 +259,18 @@ if (isset($_GET['delete_department'])) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    <link href="css/assets-list.css" rel="stylesheet">
+    <?php require_once __DIR__ . '/../assets/kp_assets.php'; ?>
+<link rel="stylesheet" href="<?= kp_asset('assets/css/shared/assets-list.css', '../') ?>">
     
     <style>
         .dataTables_wrapper .pagination .page-item.active .page-link {
-            background-color: #667eea;
-            border-color: #667eea;
+            background-color: var(--kp-primary);
+            border-color: var(--kp-primary);
         }
         .dataTables_filter input {
             border-radius: 8px;
             padding: 5px 10px;
-            border: 1px solid #ced4da;
+            border: 1px solid var(--kp-border-2);
         }
     </style>
 </head>
@@ -288,7 +289,7 @@ if (isset($_GET['delete_department'])) {
         <button class="btn-add-asset" data-bs-toggle="modal" data-bs-target="#addModal">
             <i class="fas fa-plus icon"></i> เพิ่มครุภัณฑ์
         </button>
-        <a href="export_excel.php" class="btn-add-asset ms-2" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+        <a href="export_excel.php" class="btn-add-asset ms-2" style="background: var(--st-ok);">
             <i class="fas fa-file-excel me-1"></i> Export เป็น Excel
         </a>
         <button class="btn btn-primary ms-2" data-bs-toggle="modal" data-bs-target="#importModal">
@@ -685,8 +686,8 @@ function confirmDelete(id, name) {
         html: `คุณแน่ใจหรือไม่ที่จะลบ <b>${name}</b>?<br><small class="text-danger">* ข้อมูลนี้จะไม่สามารถกู้คืนได้</small>`,
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#6c757d',
+        confirmButtonColor: '#A8503C',
+        cancelButtonColor: '#9A9284',
         confirmButtonText: '<i class="fas fa-trash"></i> ใช่, ลบข้อมูล!',
         cancelButtonText: 'ยกเลิก'
     }).then((result) => {
