@@ -50,9 +50,9 @@
 #ai-chat-btn {
     position: fixed; bottom: 28px; right: 28px;
     width: 60px; height: 60px; border-radius: 50%;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: var(--kp-primary);
     border: none; color: #fff; font-size: 1.4rem;
-    box-shadow: 0 4px 18px rgba(102,126,234,.4);
+    box-shadow: 0 4px 18px rgba(44, 74, 115, .4);
     cursor: pointer; z-index: 9998;
     transition: transform .2s, box-shadow .2s;
     display: flex; align-items: center; justify-content: center;
@@ -72,7 +72,7 @@
 .chat-hidden { transform: scale(0); opacity: 0; pointer-events: none; }
 
 #ai-chat-header {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: var(--kp-primary);
     color: #fff; padding: .75rem 1rem;
     display: flex; align-items: center; justify-content: space-between;
     flex-shrink: 0;
@@ -88,7 +88,7 @@
 .ai-msg   { display: flex; justify-content: flex-start; }
 
 .user-bubble {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: var(--kp-primary);
     color: #fff; padding: .5rem .85rem;
     border-radius: 18px 18px 4px 18px;
     max-width: 82%; font-size: .9rem; line-height: 1.5;
@@ -120,10 +120,10 @@
     font-family: 'Sarabun', sans-serif; font-size: .9rem;
     outline: none;
 }
-#ai-chat-input:focus { border-color: #667eea; }
+#ai-chat-input:focus { border-color: var(--kp-primary); }
 #ai-chat-form button[type=submit] {
     width: 38px; height: 38px; border-radius: 50%;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: var(--kp-primary);
     border: none; color: #fff; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;

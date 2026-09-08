@@ -263,8 +263,8 @@ if (isset($_GET['delete_department'])) {
     
     <style>
         .dataTables_wrapper .pagination .page-item.active .page-link {
-            background-color: #667eea;
-            border-color: #667eea;
+            background-color: var(--kp-primary);
+            border-color: var(--kp-primary);
         }
         .dataTables_filter input {
             border-radius: 8px;

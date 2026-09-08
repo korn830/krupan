@@ -75,9 +75,9 @@ $pending_count = (int)$my_pending->fetchColumn();
         <div class="status-cards">
             <?php foreach ($all_statuses as $status): ?>
                 <div class="status-card" data-status="<?= htmlspecialchars($status) ?>"
-                     style="--card-color: <?= $colorMap[$status] ?? '#667eea' ?>;">
+                     style="--card-color: <?= $colorMap[$status] ?? 'var(--kp-primary)' ?>;">
                     <div class="card-header">
-                        <div class="card-icon" style="background: <?= $colorMap[$status] ?? '#667eea' ?>;">
+                        <div class="card-icon" style="background: <?= $colorMap[$status] ?? 'var(--kp-primary)' ?>;">
                             <?= $iconMap[$status] ?? '📋' ?>
                         </div>
                         <h6 class="card-title"><?= htmlspecialchars($status) ?></h6>
@@ -112,7 +112,7 @@ $pending_count = (int)$my_pending->fetchColumn();
         ดูรายการครุภัณฑ์ทั้งหมด <span class="icon">→</span>
     </a>
     &nbsp;
-    <a href="my_borrow.php" class="btn-view-all" style="background: linear-gradient(135deg,#764ba2,#667eea);">
+    <a href="my_borrow.php" class="btn-view-all" style="background: var(--kp-primary);">
         การยืมของฉัน <span class="icon">→</span>
     </a>
 </div>

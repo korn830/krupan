@@ -58,9 +58,9 @@ $user_count = $conn->query("SELECT COUNT(*) FROM users WHERE role != 'admin'")->
         <h5 class="summary-title">สรุปภาพรวมครุภัณฑ์</h5>
         <div class="status-cards">
             <?php foreach ($all_statuses as $status): ?>
-                <div class="status-card" data-status="<?= htmlspecialchars($status) ?>" style="--card-color: <?= $colorMap[$status] ?? '#667eea' ?>;">
+                <div class="status-card" data-status="<?= htmlspecialchars($status) ?>" style="--card-color: <?= $colorMap[$status] ?? 'var(--kp-primary)' ?>;">
                     <div class="card-header">
-                        <div class="card-icon" style="background: <?= $colorMap[$status] ?? '#667eea' ?>;">
+                        <div class="card-icon" style="background: <?= $colorMap[$status] ?? 'var(--kp-primary)' ?>;">
                             <?= $iconMap[$status] ?? '📋' ?>
                         </div>
                         <h6 class="card-title"><?= htmlspecialchars($status) ?></h6>

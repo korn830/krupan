@@ -17,12 +17,12 @@ body {
 
 /* --- Page Header --- */
 .page-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--kp-primary);
     color: white;
     padding: 2rem;
     border-radius: 20px;
     margin-bottom: 2rem;
-    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+    box-shadow: 0 10px 30px rgba(44, 74, 115, 0.2);
     position: relative;
     overflow: hidden;
     /* Added from your second example for a subtle bottom border and adjusted margin */
@@ -72,7 +72,7 @@ body {
 
 .table-title .icon {
     margin-right: 0.75rem;
-    color: #667eea;
+    color: var(--kp-primary);
 }
 
 .table {
@@ -125,7 +125,7 @@ body {
     color: #fff !important;
 }
 .badge.bg-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    background: var(--kp-primary) !important;
     color: #fff !important;
 }
 .badge.bg-info {
@@ -282,7 +282,7 @@ body {
 }
 
 .modal-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--kp-primary);
     color: white;
     border-radius: 16px 16px 0 0;
     border-bottom: none;

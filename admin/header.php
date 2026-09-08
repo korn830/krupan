@@ -34,6 +34,8 @@ if (!function_exists('isActive')) {
     <title>ระบบจัดการครุภัณฑ์</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="<?= $base_url ?>css/header.css">
+    <!-- ชั้นหน้าตาหลักของระบบ โหลดท้ายสุดเพื่อให้ทับสไตล์เดิม -->
+    <link rel="stylesheet" href="<?= $base_url ?>../assets/css/kp.css">
     <script src="<?= $base_url ?>js/script.js"></script>
     <script>
         const baseUrlForJs = '<?= $base_url ?>';
