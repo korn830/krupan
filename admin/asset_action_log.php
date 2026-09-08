@@ -34,7 +34,7 @@ $locations = $conn->query("SELECT location_id, name FROM locations")->fetchAll(P
     <link rel="stylesheet" href="css/asset_action_log.css">
     <style>
         .dataTables_wrapper .pagination .page-item.active .page-link { background-color: var(--kp-primary); border-color: var(--kp-primary); }
-        .dataTables_filter input { border-radius: 8px; padding: 5px 10px; border: 1px solid #ced4da; }
+        .dataTables_filter input { border-radius: 8px; padding: 5px 10px; border: 1px solid var(--kp-border-2); }
     </style>
 </head>
 <body>

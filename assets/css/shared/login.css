@@ -37,9 +37,9 @@ body::before {
     right: 0;
     bottom: 0;
     background:
-        radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 20% 80%, rgba(44, 74, 115, 0.05) 0%, transparent 50%),
         radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.2) 0%, transparent 50%);
+        radial-gradient(circle at 40% 40%, rgba(44, 74, 115, 0.05) 0%, transparent 50%);
     z-index: -1;
 }
 
@@ -95,7 +95,7 @@ body::before {
 }
 
 .login-header h4 {
-    color: #2d3748;
+    color: var(--kp-text);
     font-weight: 600;
     font-size: 1.8rem;
     margin-bottom: 0.5rem;
@@ -103,7 +103,7 @@ body::before {
 }
 
 .login-header .subtitle {
-    color: #718096;
+    color: var(--kp-muted);
     font-size: 0.95rem;
     font-weight: 400;
 }
@@ -135,7 +135,7 @@ body::before {
 .form-label {
     display: block;
     margin-bottom: 0.5rem;
-    color: #4a5568;
+    color: var(--kp-body);
     font-weight: 500;
     font-size: 0.95rem;
 }
@@ -143,13 +143,13 @@ body::before {
 .form-control {
     width: 100%;
     padding: 0.875rem 1rem;
-    border: 2px solid #e2e8f0;
+    border: 2px solid var(--kp-border);
     border-radius: 12px;
     font-size: 1rem;
     font-family: 'Sarabun', sans-serif;
     transition: all 0.3s ease;
     background: #ffffff;
-    color: #2d3748;
+    color: var(--kp-text);
     -webkit-appearance: none;
     appearance: none;
     font-size: max(16px, 1rem);
@@ -163,7 +163,7 @@ body::before {
 }
 
 .form-control:hover {
-    border-color: #cbd5e0;
+    border-color: var(--kp-border-2);
 }
 
 /* Input icons */
@@ -176,7 +176,7 @@ body::before {
     right: 1rem;
     top: 50%;
     transform: translateY(-50%);
-    color: #a0aec0;
+    color: var(--kp-faint);
     font-size: 1.1rem;
     pointer-events: none;
     transition: color 0.3s ease;
@@ -245,9 +245,9 @@ body::before {
 }
 
 .alert-danger {
-    background: linear-gradient(135deg, #fed7d7 0%, #feb2b2 100%);
+    background: #FAF0EC;
     color: #c53030;
-    border-left: 4px solid #e53e3e;
+    border-left: 4px solid var(--st-broken);
 }
 
 .alert-danger::before {

@@ -208,7 +208,7 @@ $departments = $conn->query("SELECT * FROM departments")->fetchAll();
         .dataTables_filter input {
             border-radius: 8px;
             padding: 5px 10px;
-            border: 1px solid #ced4da;
+            border: 1px solid var(--kp-border-2);
         }
     </style>
 </head>

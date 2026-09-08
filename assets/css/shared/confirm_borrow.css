@@ -4,9 +4,9 @@
 /* Global Body and Container Styling */
 body {
     font-family: 'Sarabun', sans-serif;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    background: var(--kp-bg);
     min-height: 100vh;
-    color: #2d3748;
+    color: var(--kp-text);
     line-height: 1.6;
 }
 
@@ -79,12 +79,12 @@ h4 .fas {
 }
 
 .alert-success {
-    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    background: #F1F5EF;
     color: #155724;
 }
 
 .alert-danger {
-    background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+    background: #FAF0EC;
     color: #721c24;
 }
 
@@ -102,16 +102,16 @@ h4 .fas {
 }
 
 .table-header {
-    background: linear-gradient(135deg, #f8f9ff 0%, #e6efff 100%);
+    background: var(--kp-raise);
     padding: 1.5rem;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--kp-border);
 }
 
 .table-title {
     font-family: 'Prompt', sans-serif;
     font-size: 1.25rem;
     font-weight: 600;
-    color: #2d3748;
+    color: var(--kp-text);
     margin: 0;
     display: flex;
     align-items: center;
@@ -128,10 +128,10 @@ h4 .fas {
 }
 
 .table thead th {
-    background: #f8fafc;
+    background: var(--kp-raise);
     border: none;
-    border-bottom: 2px solid #e2e8f0;
-    color: #4a5568;
+    border-bottom: 2px solid var(--kp-border);
+    color: var(--kp-body);
     font-weight: 600;
     padding: 1rem;
     vertical-align: middle;
@@ -140,10 +140,10 @@ h4 .fas {
 
 .table tbody td {
     border: none;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--kp-raise);
     padding: 1rem;
     vertical-align: middle;
-    color: #4a5568;
+    color: var(--kp-body);
 }
 
 .table tbody tr {
@@ -151,7 +151,7 @@ h4 .fas {
 }
 
 .table tbody tr:hover {
-    background: #f8fafc;
+    background: var(--kp-raise);
     transform: translateX(4px);
 }
 
@@ -171,29 +171,29 @@ h4 .fas {
 }
 
 .status-pending {
-    background: linear-gradient(135deg, #ffc107 0%, #ffa000 100%);
+    background: var(--st-repair);
     color: #343a40;
 }
 
 .status-approved {
-    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    background: var(--st-ok);
 }
 
 .status-rejected {
-    background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+    background: var(--st-broken);
 }
 
 .status-borrowing {
-    background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+    background: var(--st-pending);
 }
 
 .status-overdue {
-    background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%);
+    background: var(--st-broken);
 }
 
 /* Action Buttons in Table - Enhanced to match reference */
 .btn-success.btn-sm {
-    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    background: var(--st-ok);
     border: none;
     color: white;
     padding: 0.5rem 1rem;
@@ -201,7 +201,7 @@ h4 .fas {
     font-weight: 500;
     font-size: 0.875rem;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(72, 187, 120, 0.3);
+    box-shadow: 0 2px 8px rgba(74, 122, 85, 0.3);
     display: inline-flex;
     align-items: center;
     cursor: pointer;
@@ -209,12 +209,12 @@ h4 .fas {
 
 .btn-success.btn-sm:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(72, 187, 120, 0.4);
+    box-shadow: 0 4px 12px rgba(74, 122, 85, 0.4);
     color: white;
 }
 
 .btn-danger.btn-sm {
-    background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+    background: var(--st-broken);
     border: none;
     color: white;
     padding: 0.5rem 1rem;
@@ -222,7 +222,7 @@ h4 .fas {
     font-weight: 500;
     font-size: 0.875rem;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(245, 101, 101, 0.3);
+    box-shadow: 0 2px 8px rgba(168, 80, 60, 0.3);
     display: inline-flex;
     align-items: center;
     cursor: pointer;
@@ -230,7 +230,7 @@ h4 .fas {
 
 .btn-danger.btn-sm:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(245, 101, 101, 0.4);
+    box-shadow: 0 4px 12px rgba(168, 80, 60, 0.4);
     color: white;
 }
 
@@ -242,7 +242,7 @@ h4 .fas {
 
 /* Back Button - Enhanced to match reference */
 .btn-secondary.mt-3 {
-    background: linear-gradient(135deg, #a0aec0 0%, #718096 100%);
+    background: var(--st-retired);
     border: none;
     color: white;
     padding: 0.875rem 1.5rem;
@@ -252,12 +252,12 @@ h4 .fas {
     display: inline-flex;
     align-items: center;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(160, 174, 192, 0.3);
+    box-shadow: 0 4px 15px rgba(154, 146, 132, 0.3);
 }
 
 .btn-secondary.mt-3:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(160, 174, 192, 0.4);
+    box-shadow: 0 8px 25px rgba(154, 146, 132, 0.4);
     color: white;
     text-decoration: none;
 }
@@ -271,7 +271,7 @@ h4 .fas {
 .empty-state {
     text-align: center;
     padding: 3rem 1rem;
-    color: #718096;
+    color: var(--kp-muted);
     background-color: white;
     border-radius: 16px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
@@ -279,12 +279,12 @@ h4 .fas {
 
 .empty-state .icon {
     font-size: 4rem;
-    color: #a0aec0;
+    color: var(--kp-faint);
     margin-bottom: 1rem;
 }
 
 .empty-state h5 {
-    color: #4a5568;
+    color: var(--kp-body);
     font-weight: 600;
     margin-bottom: 0.5rem;
     font-family: 'Prompt', sans-serif;
@@ -349,7 +349,7 @@ h4 .fas {
         width: calc(50% - 2rem);
         text-align: left;
         font-weight: bold;
-        color: #495057;
+        color: var(--kp-body);
         font-family: 'Prompt', sans-serif;
     }
 

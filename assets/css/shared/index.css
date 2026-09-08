@@ -6,9 +6,9 @@
 /* Global dashboard styles */
 body {
     font-family: 'Sarabun', sans-serif;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    background: var(--kp-bg);
     min-height: 100vh;
-    color: #2d3748;
+    color: var(--kp-text);
     line-height: 1.6;
 }
 
@@ -77,7 +77,7 @@ hr {
     font-family: 'Prompt', sans-serif;
     font-size: 1.5rem;
     font-weight: 600;
-    color: #2d3748;
+    color: var(--kp-text);
     margin-bottom: 1.5rem;
     position: relative;
     padding-left: 1rem;
@@ -141,23 +141,23 @@ hr {
 
 /* Status-specific colors */
 .status-card[data-status="ใช้งานปกติ"] {
-    --card-color: linear-gradient(90deg, #48bb78, #38a169);
+    --card-color: var(--st-ok);
 }
 
 .status-card[data-status="ชำรุด"] {
-    --card-color: linear-gradient(90deg, #f56565, #e53e3e);
+    --card-color: var(--st-broken);
 }
 
 .status-card[data-status="ซ่อมแซม"] {
-    --card-color: linear-gradient(90deg, #ed8936, #dd6b20);
+    --card-color: var(--st-repair);
 }
 
 .status-card[data-status="เลิกใช้"] {
-    --card-color: linear-gradient(90deg, #a0aec0, #718096);
+    --card-color: var(--st-retired);
 }
 
 .status-card[data-status="รออนุมัติ"] {
-    --card-color: linear-gradient(90deg, #4299e1, #3182ce);
+    --card-color: var(--st-pending);
 }
 
 /* Card content */
@@ -185,7 +185,7 @@ hr {
     font-family: 'Prompt', sans-serif;
     font-size: 1.1rem;
     font-weight: 600;
-    color: #2d3748;
+    color: var(--kp-text);
     margin: 0;
     flex-grow: 1;
     margin-left: 1rem;
@@ -195,14 +195,14 @@ hr {
     font-family: 'Prompt', sans-serif;
     font-size: 2.5rem;
     font-weight: 700;
-    color: #2d3748;
+    color: var(--kp-text);
     margin: 0;
     text-align: center;
 }
 
 .card-label {
     font-size: 0.9rem;
-    color: #718096;
+    color: var(--kp-muted);
     text-align: center;
     margin-top: 0.25rem;
 }
@@ -272,18 +272,18 @@ hr {
 
 .empty-state .icon {
     font-size: 4rem;
-    color: #a0aec0;
+    color: var(--kp-faint);
     margin-bottom: 1rem;
 }
 
 .empty-state h5 {
-    color: #4a5568;
+    color: var(--kp-body);
     font-weight: 600;
     margin-bottom: 0.5rem;
 }
 
 .empty-state p {
-    color: #718096;
+    color: var(--kp-muted);
 }
 
 /* Statistics animations */
@@ -411,7 +411,7 @@ hr {
     .status-card {
         break-inside: avoid;
         box-shadow: none;
-        border: 1px solid #e2e8f0;
+        border: 1px solid var(--kp-border);
     }
     
     .welcome-header {

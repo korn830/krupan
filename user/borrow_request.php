@@ -95,7 +95,7 @@ $noteValue     = (string)($oldInput['note'] ?? '');
             margin: 2.5rem auto;
             background: var(--kp-surface);
             border-radius: var(--kp-radius);
-            box-shadow: 0 4px 24px rgba(102,126,234,.13);
+            box-shadow: 0 4px 24px rgba(44, 74, 115, .13);
             overflow: hidden;
         }
         .borrow-card-header {
@@ -142,7 +142,7 @@ $noteValue     = (string)($oldInput['note'] ?? '');
         }
         .form-control:focus, .form-select:focus {
             border-color: var(--kp-primary);
-            box-shadow: 0 0 0 3px rgba(102,126,234,.15);
+            box-shadow: 0 0 0 3px rgba(44, 74, 115, .15);
         }
         .btn-submit {
             background: var(--kp-gradient);

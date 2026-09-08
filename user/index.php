@@ -11,12 +11,14 @@ $stmt = $conn->query("SELECT status, COUNT(*) AS total FROM assets GROUP BY stat
 $status_summary = $stmt->fetchAll();
 
 $colorMap = [
-    'ใช้งานปกติ' => '#10b981',
-    'ชำรุด'      => '#ef4444',
-    'ส่งซ่อม'    => '#f59e0b',
-    'ถูกยืม'     => '#3b82f6',
-    'จำหน่าย'   => '#6b7280',
-    'รออนุมัติ'  => '#8b5cf6',
+    // ต้องเป็นค่า hex จริง เพราะ Chart.js วาดบน <canvas> ซึ่งอ่าน var() ไม่ได้
+    // ค่าเหล่านี้ตรงกับ --st-* ใน assets/css/tokens.css
+    'ใช้งานปกติ' => '#4A7A55',
+    'ชำรุด'      => '#A8503C',
+    'ส่งซ่อม'    => '#A86B2E',
+    'ถูกยืม'     => '#A8801F',
+    'จำหน่าย'   => '#9A9284',
+    'รออนุมัติ'  => '#3D8080',
 ];
 
 $iconMap = [
@@ -38,7 +40,7 @@ foreach ($status_summary as $row) {
     if ($row['total'] > 0) {
         $chart_labels[] = $row['status'];
         $chart_data[]   = $row['total'];
-        $chart_colors[] = $colorMap[$row['status']] ?? '#cbd5e1';
+        $chart_colors[] = $colorMap[$row['status']] ?? '#9A9284';
     }
 }
 
@@ -62,7 +64,7 @@ $pending_count = (int)$my_pending->fetchColumn();
 </div>
 
 <?php if ($pending_count > 0): ?>
-<div class="alert alert-warning fade-in mb-4" role="alert" style="border-radius:12px; border-left:4px solid #f59e0b;">
+<div class="alert alert-warning fade-in mb-4" role="alert" style="border-radius:12px; border-left:4px solid var(--st-repair);">
     <i class="fas fa-clock me-2"></i>
     คุณมีคำขอยืมที่รออนุมัติอยู่ <strong><?= $pending_count ?></strong> รายการ
     — <a href="my_borrow.php" class="alert-link">ดูรายการยืมของฉัน</a>
@@ -92,7 +94,7 @@ $pending_count = (int)$my_pending->fetchColumn();
     <div class="col-lg-4">
         <div class="card shadow-sm border-0 mb-4" style="border-radius:16px; overflow:hidden;">
             <div class="card-header bg-white border-0 pt-4 pb-0 text-center">
-                <h6 class="fw-bold" style="color:#475569;">
+                <h6 class="fw-bold" style="color:var(--kp-body);">
                     <i class="fas fa-chart-pie me-1"></i> สัดส่วนสถานะครุภัณฑ์
                 </h6>
             </div>

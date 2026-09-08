@@ -312,3 +312,11 @@ footer p { font-size: 11.5px; color: var(--kp-faint); margin: 0; }
 .back-link { border-top: 1px solid var(--kp-border); color: var(--kp-muted); font-size: 13px; }
 .back-link:hover { color: var(--kp-primary); }
 .not-available-box { color: var(--kp-muted); }
+
+/* --- หน้าล็อกอิน: ตัดก้อนเบลอตกแต่งออก ใช้พื้นกระดาษเรียบ --- */
+body::before { background: none !important; }
+.login-card, .login-container .card {
+    border: 1px solid var(--kp-border) !important;
+    border-radius: var(--kp-radius) !important;
+    box-shadow: none !important;
+}

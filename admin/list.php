@@ -269,7 +269,7 @@ if (isset($_GET['delete_department'])) {
         .dataTables_filter input {
             border-radius: 8px;
             padding: 5px 10px;
-            border: 1px solid #ced4da;
+            border: 1px solid var(--kp-border-2);
         }
     </style>
 </head>
@@ -288,7 +288,7 @@ if (isset($_GET['delete_department'])) {
         <button class="btn-add-asset" data-bs-toggle="modal" data-bs-target="#addModal">
             <i class="fas fa-plus icon"></i> เพิ่มครุภัณฑ์
         </button>
-        <a href="export_excel.php" class="btn-add-asset ms-2" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+        <a href="export_excel.php" class="btn-add-asset ms-2" style="background: var(--st-ok);">
             <i class="fas fa-file-excel me-1"></i> Export เป็น Excel
         </a>
         <button class="btn btn-primary ms-2" data-bs-toggle="modal" data-bs-target="#importModal">
@@ -685,8 +685,8 @@ function confirmDelete(id, name) {
         html: `คุณแน่ใจหรือไม่ที่จะลบ <b>${name}</b>?<br><small class="text-danger">* ข้อมูลนี้จะไม่สามารถกู้คืนได้</small>`,
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#6c757d',
+        confirmButtonColor: '#A8503C',
+        cancelButtonColor: '#9A9284',
         confirmButtonText: '<i class="fas fa-trash"></i> ใช่, ลบข้อมูล!',
         cancelButtonText: 'ยกเลิก'
     }).then((result) => {
