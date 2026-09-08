@@ -320,3 +320,65 @@ body::before { background: none !important; }
     border-radius: var(--kp-radius) !important;
     box-shadow: none !important;
 }
+
+/* ==========================================================================
+   หน้าแรกของผู้ใช้ — ตอบว่า "ฉันยืมอะไรอยู่ ต้องคืนเมื่อไหร่"
+   ========================================================================== */
+.kp-page-head {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 20px; flex-wrap: wrap; margin-bottom: 26px;
+}
+.kp-h1 { font-family: var(--kp-serif); font-size: 25px; font-weight: 500; margin: 0; color: var(--kp-text); }
+.kp-rule { width: 34px; height: 2px; background: var(--kp-accent); margin-top: 11px; opacity: .85; }
+
+/* แถบตัวเลขของผู้ใช้เอง */
+.kp-minibar {
+    display: flex; gap: 32px; flex-wrap: wrap; align-items: baseline;
+    padding: 0 2px 22px; border-bottom: 1px solid var(--kp-border); margin-bottom: 24px;
+}
+.kp-mini { font-size: 13px; color: var(--kp-muted); }
+.kp-mini-n {
+    font-family: var(--kp-serif); font-size: 21px; font-weight: 500;
+    color: var(--kp-text); margin-right: 6px;
+}
+.kp-mini-n.is-late { color: var(--st-broken); }
+
+/* กล่องแจ้งเตือน */
+.kp-note {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 12px 16px; border-radius: var(--kp-radius);
+    font-size: 13px; line-height: 1.6; margin-bottom: 22px;
+}
+.kp-note-bad { background: #FAF0EC; color: var(--st-broken); }
+
+/* สองคอลัมน์ */
+.kp-cols { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; align-items: start; }
+@media (max-width: 900px) { .kp-cols { grid-template-columns: 1fr; } }
+
+/* แถวรายการ */
+.kp-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; padding: 16px 20px; border-bottom: 1px solid var(--kp-border);
+}
+.kp-row.is-last { border-bottom: none; }
+.kp-row-main { min-width: 0; }
+.kp-row-name { font-weight: 500; font-size: 14px; color: var(--kp-text); }
+.kp-row-meta { font-size: 12.5px; color: var(--kp-muted); margin-top: 2px; }
+.kp-row-side { text-align: right; white-space: nowrap; }
+.kp-when { font-size: 12.5px; color: var(--kp-muted); }
+.kp-when.is-late { color: var(--st-broken); }
+.kp-when.is-soon { color: var(--st-borrowed); }
+.kp-row-foot {
+    padding: 13px 20px; border-top: 1px solid var(--kp-border);
+    font-size: 12.5px; color: var(--kp-muted);
+}
+.kp-empty { padding: 36px; text-align: center; color: var(--kp-muted); font-size: 13px; margin: 0; }
+.kp-quiet { font-size: 12.5px; color: var(--kp-link); }
+.kp-cols .btn-sm { padding: 5px 14px !important; font-size: 12.5px !important; }
+
+/* หัวการ์ดของหน้าแรกผู้ใช้ (ตั้งชื่อขึ้นต้น kp- เพื่อไม่ชนกับ .card-header ของ Bootstrap) */
+.kp-card-h {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 20px; padding: 15px 20px; border-bottom: 1px solid var(--kp-border);
+}
+.kp-card-t { font-family: var(--kp-serif); font-size: 16px; font-weight: 500; color: var(--kp-text); }

@@ -1,175 +1,165 @@
 <?php
 require 'header.php';
 require '../config/db.php';
+
 if (!isset($_SESSION["user_id"]) || $_SESSION['role'] !== 'user') {
     header("Location: ../index.php");
     exit;
 }
+$user_id = (int)$_SESSION['user_id'];
 
-// นับจำนวนครุภัณฑ์แต่ละสถานะ
-$stmt = $conn->query("SELECT status, COUNT(*) AS total FROM assets GROUP BY status");
-$status_summary = $stmt->fetchAll();
-
-$colorMap = [
-    // ต้องเป็นค่า hex จริง เพราะ Chart.js วาดบน <canvas> ซึ่งอ่าน var() ไม่ได้
-    // ค่าเหล่านี้ตรงกับ --st-* ใน assets/css/tokens.css
-    'ใช้งานปกติ' => '#4A7A55',
-    'ชำรุด'      => '#A8503C',
-    'ส่งซ่อม'    => '#A86B2E',
-    'ถูกยืม'     => '#A8801F',
-    'จำหน่าย'   => '#9A9284',
-    'รออนุมัติ'  => '#3D8080',
-];
-
-$iconMap = [
-    'ใช้งานปกติ' => '✅',
-    'ชำรุด'      => '🔧',
-    'ส่งซ่อม'    => '🛠️',
-    'ถูกยืม'     => '📚',
-    'จำหน่าย'   => '📤',
-    'รออนุมัติ'  => '⏳',
-];
-
-$status_map    = [];
-$chart_labels  = [];
-$chart_data    = [];
-$chart_colors  = [];
-
-foreach ($status_summary as $row) {
-    $status_map[$row['status']] = $row['total'];
-    if ($row['total'] > 0) {
-        $chart_labels[] = $row['status'];
-        $chart_data[]   = $row['total'];
-        $chart_colors[] = $colorMap[$row['status']] ?? '#9A9284';
-    }
+/* --- แปลงวันที่เป็นรูปแบบไทย พ.ศ. --- */
+function kp_thai_date(?string $ymd): string {
+    static $mon = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+    $d = $ymd ? DateTimeImmutable::createFromFormat('!Y-m-d', substr($ymd, 0, 10)) : false;
+    if (!$d) return '-';
+    return (int)$d->format('j') . ' ' . $mon[(int)$d->format('n') - 1] . ' ' . ((int)$d->format('Y') + 543);
 }
 
-$all_statuses = ['ใช้งานปกติ', 'ชำรุด', 'ส่งซ่อม', 'ถูกยืม', 'จำหน่าย', 'รออนุมัติ'];
+/* --- เหลืออีกกี่วันถึงกำหนดคืน (ติดลบ = เกินกำหนด) --- */
+function kp_days_left(?string $ymd): ?int {
+    if (!$ymd) return null;
+    $due = DateTimeImmutable::createFromFormat('!Y-m-d', substr($ymd, 0, 10));
+    if (!$due) return null;
+    return (int)(new DateTimeImmutable('today'))->diff($due)->format('%r%a');
+}
 
-// คำขอยืมของฉันที่ยังรออนุมัติ
-$my_pending = $conn->prepare("SELECT COUNT(*) FROM borrow_history WHERE user_id = ? AND status = 'รออนุมัติ'");
-$my_pending->execute([$_SESSION['user_id']]);
-$pending_count = (int)$my_pending->fetchColumn();
+/* --- รายการยืมของผู้ใช้คนนี้เท่านั้น ไม่ใช่สถิติทั้งวิทยาลัย --- */
+$stmtMine = $conn->prepare(
+    "SELECT b.borrow_id, b.borrow_date, b.return_date, b.status,
+            a.asset_id, a.asset_code, a.name AS asset_name
+     FROM borrow_history b
+     JOIN assets a ON a.asset_id = b.asset_id
+     WHERE b.user_id = ?
+       AND b.status IN ('อนุมัติ', 'ยืมอยู่', 'เกินวันที่กำหนด', 'รออนุมัติ')
+     ORDER BY b.return_date ASC"
+);
+$stmtMine->execute([$user_id]);
+$myBorrows = $stmtMine->fetchAll(PDO::FETCH_ASSOC);
+
+$active = [];   // กำลังยืมอยู่จริง (คืนได้)
+$pending = [];  // ยังรออนุมัติ
+foreach ($myBorrows as $row) {
+    if ($row['status'] === 'รออนุมัติ') { $pending[] = $row; continue; }
+    $row['days_left'] = kp_days_left($row['return_date']);
+    $row['is_late']   = $row['status'] === 'เกินวันที่กำหนด'
+                        || ($row['days_left'] !== null && $row['days_left'] < 0);
+    $active[] = $row;
+}
+// เกินกำหนดขึ้นก่อน แล้วเรียงตามวันที่ใกล้ครบกำหนด
+usort($active, function ($x, $y) {
+    if ($x['is_late'] !== $y['is_late']) return $x['is_late'] ? -1 : 1;
+    return ($x['days_left'] ?? PHP_INT_MAX) <=> ($y['days_left'] ?? PHP_INT_MAX);
+});
+$lateCount = count(array_filter($active, fn($r) => $r['is_late']));
+
+/* --- ครุภัณฑ์ที่ยืมได้ตอนนี้ --- */
+$stmtAvail = $conn->query(
+    "SELECT a.asset_id, a.asset_code, a.name, c.name AS category_name, l.name AS location_name
+     FROM assets a
+     LEFT JOIN categories c ON c.category_id = a.category_id
+     LEFT JOIN locations  l ON l.location_id = a.location_id
+     WHERE a.borrowable_status = 'สามารถยืมได้' AND a.status = 'ใช้งานปกติ'
+     ORDER BY a.asset_id DESC
+     LIMIT 4"
+);
+$available = $stmtAvail->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <link rel="stylesheet" href="css/index.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<div class="welcome-header mb-4 fade-in">
-    <h4 class="m-0">
-        <span class="user-icon">👋</span>
-        ยินดีต้อนรับ, <?= htmlspecialchars($_SESSION["name"]) ?>
-    </h4>
-    <p class="m-0 mt-2 text-white-50">ระบบจัดการครุภัณฑ์ — วิทยาลัยการอาชีพวังไกลกังวล</p>
+<div class="kp-page-head">
+    <div>
+        <h1 class="kp-h1">สวัสดี <?= htmlspecialchars($_SESSION['name'] ?? 'ผู้ใช้') ?></h1>
+        <div class="kp-rule"></div>
+    </div>
+    <a href="list.php" class="kp-btn-solid">ค้นหาครุภัณฑ์ที่ต้องการยืม</a>
 </div>
 
-<?php if ($pending_count > 0): ?>
-<div class="alert alert-warning fade-in mb-4" role="alert" style="border-radius:12px; border-left:4px solid var(--st-repair);">
-    <i class="fas fa-clock me-2"></i>
-    คุณมีคำขอยืมที่รออนุมัติอยู่ <strong><?= $pending_count ?></strong> รายการ
-    — <a href="my_borrow.php" class="alert-link">ดูรายการยืมของฉัน</a>
+<?php if (!empty($_SESSION['success_message'])): ?>
+    <div class="alert alert-success"><?= htmlspecialchars($_SESSION['success_message']) ?></div>
+    <?php unset($_SESSION['success_message']); ?>
+<?php endif; ?>
+
+<!-- ตัวเลขของฉันเอง ไม่ใช่ของทั้งวิทยาลัย -->
+<div class="kp-minibar">
+    <div class="kp-mini"><span class="kp-mini-n num"><?= count($active) - $lateCount ?></span> กำลังยืม</div>
+    <div class="kp-mini"><span class="kp-mini-n num"><?= count($pending) ?></span> รออนุมัติ</div>
+    <div class="kp-mini"><span class="kp-mini-n num<?= $lateCount ? ' is-late' : '' ?>"><?= $lateCount ?></span> เกินกำหนดคืน</div>
+</div>
+
+<?php if ($lateCount): ?>
+<div class="kp-note kp-note-bad">
+    <i class="fas fa-exclamation-circle"></i>
+    <div>คุณมีครุภัณฑ์ <strong class="num"><?= $lateCount ?></strong> รายการที่เกินกำหนดคืนแล้ว กรุณาติดต่องานพัสดุ</div>
 </div>
 <?php endif; ?>
 
-<div class="row fade-in">
-    <div class="col-lg-8">
-        <h5 class="summary-title">สรุปภาพรวมครุภัณฑ์</h5>
-        <div class="status-cards">
-            <?php foreach ($all_statuses as $status): ?>
-                <div class="status-card" data-status="<?= htmlspecialchars($status) ?>"
-                     style="--card-color: <?= $colorMap[$status] ?? 'var(--kp-primary)' ?>;">
-                    <div class="card-header">
-                        <div class="card-icon" style="background: <?= $colorMap[$status] ?? 'var(--kp-primary)' ?>;">
-                            <?= $iconMap[$status] ?? '📋' ?>
-                        </div>
-                        <h6 class="card-title"><?= htmlspecialchars($status) ?></h6>
+<div class="kp-cols">
+    <!-- ของที่ยืมอยู่ -->
+    <section class="card">
+        <div class="kp-card-h">
+            <div class="kp-card-t">ครุภัณฑ์ที่ฉันยืมอยู่</div>
+            <a href="my_borrow.php" class="kp-quiet">ดูประวัติทั้งหมด</a>
+        </div>
+
+        <?php if (!$active): ?>
+            <p class="kp-empty">ยังไม่มีครุภัณฑ์ที่ยืมอยู่</p>
+        <?php else: foreach ($active as $i => $r):
+            $d = $r['days_left'];
+            $late = $r['is_late'];
+            $soon = !$late && $d !== null && $d <= 2;
+            if ($late)            $when = 'เกินกำหนด ' . abs($d) . ' วัน';
+            elseif ($d === 0)     $when = 'ครบกำหนดวันนี้';
+            elseif ($d === null)  $when = '';
+            else                  $when = 'เหลืออีก ' . $d . ' วัน';
+        ?>
+            <div class="kp-row<?= $i === count($active) - 1 ? ' is-last' : '' ?>">
+                <div class="kp-row-main">
+                    <div class="kp-row-name"><?= htmlspecialchars($r['asset_name']) ?></div>
+                    <div class="kp-row-meta">
+                        <span class="num"><?= htmlspecialchars($r['asset_code']) ?></span>
+                        · คืนภายใน <span class="num"><?= kp_thai_date($r['return_date']) ?></span>
                     </div>
-                    <div class="card-count"><?= number_format($status_map[$status] ?? 0) ?></div>
-                    <div class="card-label">รายการ</div>
                 </div>
-            <?php endforeach; ?>
-        </div>
-    </div>
-
-    <div class="col-lg-4">
-        <div class="card shadow-sm border-0 mb-4" style="border-radius:16px; overflow:hidden;">
-            <div class="card-header bg-white border-0 pt-4 pb-0 text-center">
-                <h6 class="fw-bold" style="color:var(--kp-body);">
-                    <i class="fas fa-chart-pie me-1"></i> สัดส่วนสถานะครุภัณฑ์
-                </h6>
+                <div class="kp-row-side">
+                    <div class="kp-when<?= $late ? ' is-late' : ($soon ? ' is-soon' : '') ?>"><?= $when ?></div>
+                    <form method="POST" action="my_borrow.php" class="mt-2">
+                        <input type="hidden" name="action" value="return_asset">
+                        <input type="hidden" name="borrow_id" value="<?= (int)$r['borrow_id'] ?>">
+                        <button type="submit" class="btn-outline-primary btn-sm">คืนครุภัณฑ์</button>
+                    </form>
+                </div>
             </div>
-            <div class="card-body d-flex justify-content-center align-items-center" style="height:280px;">
-                <?php if (empty($chart_data)): ?>
-                    <p class="text-muted">ยังไม่มีข้อมูลครุภัณฑ์</p>
-                <?php else: ?>
-                    <canvas id="statusChart"></canvas>
-                <?php endif; ?>
-            </div>
-        </div>
-    </div>
-</div>
+        <?php endforeach; endif; ?>
 
-<div class="action-section">
-    <a href="list.php" class="btn-view-all">
-        ดูรายการครุภัณฑ์ทั้งหมด <span class="icon">→</span>
-    </a>
-    &nbsp;
-    <a href="my_borrow.php" class="btn-view-all" style="background: var(--kp-primary);">
-        การยืมของฉัน <span class="icon">→</span>
-    </a>
+        <?php if ($pending): ?>
+            <div class="kp-row-foot">
+                และมีคำขออีก <strong class="num"><?= count($pending) ?></strong> รายการที่รอผู้ดูแลอนุมัติ
+            </div>
+        <?php endif; ?>
+    </section>
+
+    <!-- ยืมได้ตอนนี้ -->
+    <section class="card">
+        <div class="kp-card-h">
+            <div class="kp-card-t">ยืมได้ตอนนี้</div>
+            <a href="list.php" class="kp-quiet">ดูทั้งหมด</a>
+        </div>
+        <?php if (!$available): ?>
+            <p class="kp-empty">ตอนนี้ยังไม่มีครุภัณฑ์ที่พร้อมให้ยืม</p>
+        <?php else: foreach ($available as $i => $a): ?>
+            <div class="kp-row<?= $i === count($available) - 1 ? ' is-last' : '' ?>">
+                <div class="kp-row-main">
+                    <div class="kp-row-name"><?= htmlspecialchars($a['name']) ?></div>
+                    <div class="kp-row-meta">
+                        <?= htmlspecialchars($a['category_name'] ?? '-') ?> · <?= htmlspecialchars($a['location_name'] ?? '-') ?>
+                    </div>
+                </div>
+                <a href="borrow_request.php?id=<?= (int)$a['asset_id'] ?>" class="btn-outline-primary btn-sm">ยืม</a>
+            </div>
+        <?php endforeach; endif; ?>
+    </section>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    // คลิกการ์ดเพื่อกรองรายการครุภัณฑ์
-    document.querySelectorAll('.status-card').forEach(card => {
-        card.style.cursor = 'pointer';
-        card.addEventListener('click', function () {
-            window.location.href = 'list.php?search=' + encodeURIComponent(this.dataset.status);
-        });
-    });
-
-    // นับขึ้น animation
-    document.querySelectorAll('.card-count').forEach(counter => {
-        const target = parseInt(counter.textContent.replace(/,/g, ''));
-        let current = 0;
-        const increment = Math.ceil(target / 30) || 1;
-        const timer = setInterval(() => {
-            current += increment;
-            if (current >= target) {
-                counter.textContent = target.toLocaleString();
-                clearInterval(timer);
-            } else {
-                counter.textContent = current.toLocaleString();
-            }
-        }, 30);
-    });
-
-    <?php if (!empty($chart_data)): ?>
-    const ctx = document.getElementById('statusChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: <?= json_encode($chart_labels, JSON_UNESCAPED_UNICODE) ?>,
-            datasets: [{
-                data: <?= json_encode($chart_data) ?>,
-                backgroundColor: <?= json_encode($chart_colors) ?>,
-                borderWidth: 2,
-                hoverOffset: 5
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'bottom', labels: { font: { family: 'Sarabun' } } }
-            },
-            cutout: '65%'
-        }
-    });
-    <?php endif; ?>
-});
-</script>
-
-<?php require 'footer.php'; ?>
