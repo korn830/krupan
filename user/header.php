@@ -220,14 +220,14 @@ if (!function_exists('isActive')) {
             // Alt + A for Assets
             if (e.altKey && e.key === 'a') {
                 e.preventDefault();
-                window.location.href = 'assets/list.php';
+                window.location.href = 'list.php';
             }
             
             // Alt + L for Logout
             if (e.altKey && e.key === 'l') {
                 e.preventDefault();
                 if (confirm('คุณต้องการออกจากระบบหรือไม่?')) {
-                    window.location.href = '/logout.php';
+                    window.location.href = '../logout.php';
                 }
             }
         });

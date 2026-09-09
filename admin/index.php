@@ -1,10 +1,12 @@
 <?php
-require 'header.php';
-require '../config/db.php';
+// ตรวจสิทธิ์ให้เสร็จก่อนพ่น HTML ใด ๆ มิฉะนั้น header("Location:") จะใช้ไม่ได้
+// เพราะส่ง output ออกไปแล้ว (รูปแบบเดียวกับ list.php)
+session_start();
 if (!isset($_SESSION["user_id"]) || $_SESSION['role'] !== 'admin') {
     header("Location: ../index.php");
     exit;
 }
+require '../config/db.php';
 
 // นับจำนวนครุภัณฑ์แต่ละสถานะ
 $stmt = $conn->query("SELECT status, COUNT(*) AS total FROM assets GROUP BY status");
@@ -43,6 +45,8 @@ foreach ($status_summary as $row) {
 
 $all_statuses = ['ใช้งานปกติ', 'ชำรุด', 'ส่งซ่อม', 'จำหน่าย', 'ถูกยืม'];
 $user_count = $conn->query("SELECT COUNT(*) FROM users WHERE role != 'admin'")->fetchColumn();
+
+require 'header.php'; // พ่น <head> และแถบเมนู
 ?>
 
 <?php require_once __DIR__ . '/../assets/kp_assets.php'; ?>

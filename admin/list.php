@@ -406,7 +406,7 @@ if (isset($_GET['delete_department'])) {
           <select name="category_id" class="form-select" required>
             <option value="">-- เลือก --</option>
             <?php foreach ($categories as $c): ?>
-              <option value="<?= $c['category_id'] ?>"><?= $c['name'] ?></option>
+              <option value="<?= $c['category_id'] ?>"><?= htmlspecialchars($c['name']) ?></option>
             <?php endforeach; ?>
           </select>
         </div>
@@ -415,7 +415,7 @@ if (isset($_GET['delete_department'])) {
           <select name="location_id" class="form-select" required>
             <option value="">-- เลือก --</option>
             <?php foreach ($locations as $l): ?>
-              <option value="<?= $l['location_id'] ?>"><?= $l['name'] ?></option>
+              <option value="<?= $l['location_id'] ?>"><?= htmlspecialchars($l['name']) ?></option>
             <?php endforeach; ?>
           </select>
         </div>
@@ -424,7 +424,7 @@ if (isset($_GET['delete_department'])) {
           <select name="department_id" class="form-select" required>
             <option value="">-- เลือก --</option>
             <?php foreach ($departments as $d): ?>
-              <option value="<?= $d['department_id'] ?>"><?= $d['name'] ?></option>
+              <option value="<?= $d['department_id'] ?>"><?= htmlspecialchars($d['name']) ?></option>
             <?php endforeach; ?>
           </select>
         </div>
@@ -489,7 +489,7 @@ if (isset($_GET['delete_department'])) {
             <select name="category_id" id="edit_category_id" class="form-select" required>
               <option value="">-- เลือก --</option>
               <?php foreach ($categories as $c): ?>
-                <option value="<?= $c['category_id'] ?>"><?= $c['name'] ?></option>
+                <option value="<?= $c['category_id'] ?>"><?= htmlspecialchars($c['name']) ?></option>
               <?php endforeach; ?>
             </select>
           </div>
@@ -498,7 +498,7 @@ if (isset($_GET['delete_department'])) {
             <select name="location_id" id="edit_location_id" class="form-select" required>
               <option value="">-- เลือก --</option>
               <?php foreach ($locations as $l): ?>
-                <option value="<?= $l['location_id'] ?>"><?= $l['name'] ?></option>
+                <option value="<?= $l['location_id'] ?>"><?= htmlspecialchars($l['name']) ?></option>
               <?php endforeach; ?>
             </select>
           </div>
@@ -507,7 +507,7 @@ if (isset($_GET['delete_department'])) {
             <select name="department_id" id="edit_department_id" class="form-select" required>
               <option value="">-- เลือก --</option>
               <?php foreach ($departments as $d): ?>
-                <option value="<?= $d['department_id'] ?>"><?= $d['name'] ?></option>
+                <option value="<?= $d['department_id'] ?>"><?= htmlspecialchars($d['name']) ?></option>
               <?php endforeach; ?>
             </select>
           </div>

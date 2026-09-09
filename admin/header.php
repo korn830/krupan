@@ -218,7 +218,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         if (e.altKey && e.key === 'a') {
             e.preventDefault();
-            window.location.href = 'assets/list.php';
+            window.location.href = 'list.php';
         }
         if (e.altKey && e.key === 'l') {
             e.preventDefault();

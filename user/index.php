@@ -1,10 +1,12 @@
 <?php
-require 'header.php';
-require '../config/db.php';
+// ตรวจสิทธิ์ให้เสร็จก่อนพ่น HTML ใด ๆ มิฉะนั้น header("Location:") จะใช้ไม่ได้
+// เพราะส่ง output ออกไปแล้ว (รูปแบบเดียวกับ list.php)
+session_start();
 if (!isset($_SESSION["user_id"]) || $_SESSION['role'] !== 'user') {
     header("Location: ../index.php");
     exit;
 }
+require '../config/db.php';
 
 // นับจำนวนครุภัณฑ์แต่ละสถานะ
 $stmt = $conn->query("SELECT status, COUNT(*) AS total FROM assets GROUP BY status");
@@ -48,6 +50,8 @@ $all_statuses = ['ใช้งานปกติ', 'ชำรุด', 'ส่ง
 $my_pending = $conn->prepare("SELECT COUNT(*) FROM borrow_history WHERE user_id = ? AND status = 'รออนุมัติ'");
 $my_pending->execute([$_SESSION['user_id']]);
 $pending_count = (int)$my_pending->fetchColumn();
+
+require 'header.php'; // พ่น <head> และแถบเมนู
 ?>
 
 <?php require_once __DIR__ . '/../assets/kp_assets.php'; ?>
