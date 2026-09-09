@@ -50,7 +50,8 @@ $my_pending->execute([$_SESSION['user_id']]);
 $pending_count = (int)$my_pending->fetchColumn();
 ?>
 
-<link rel="stylesheet" href="css/index.css">
+<?php require_once __DIR__ . '/../assets/kp_assets.php'; ?>
+<link rel="stylesheet" href="<?= kp_asset('assets/css/shared/index.css', '../') ?>">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <div class="welcome-header mb-4 fade-in">

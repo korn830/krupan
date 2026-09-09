@@ -259,7 +259,8 @@ if (isset($_GET['delete_department'])) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    <link href="css/assets-list.css" rel="stylesheet">
+    <?php require_once __DIR__ . '/../assets/kp_assets.php'; ?>
+<link rel="stylesheet" href="<?= kp_asset('assets/css/shared/assets-list.css', '../') ?>">
     
     <style>
         .dataTables_wrapper .pagination .page-item.active .page-link {

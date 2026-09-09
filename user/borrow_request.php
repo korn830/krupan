@@ -88,7 +88,8 @@ $noteValue     = (string)($oldInput['note'] ?? '');
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/header.css">
+    <?php require_once __DIR__ . '/../assets/kp_assets.php'; ?>
+<link rel="stylesheet" href="<?= kp_asset('assets/css/shared/header.css', '../') ?>">
     <style>
         .borrow-card {
             max-width: 620px;

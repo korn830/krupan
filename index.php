@@ -71,7 +71,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-    <link rel="stylesheet" href="admin/css/login.css">
+<?php require_once __DIR__ . '/assets/kp_assets.php'; ?>
+    <link rel="stylesheet" href="<?= kp_asset('assets/css/tokens.css') ?>">
+    <link rel="stylesheet" href="<?= kp_asset('assets/css/shared/login.css') ?>">
 </head>
 <body>
     <div class="container">

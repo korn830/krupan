@@ -63,7 +63,6 @@ if (isset($_GET['fetch_asset']) && isset($_GET['id'])) {
     $stmtCheckAsset = $conn->prepare("SELECT asset_id, status, borrowable_status FROM assets WHERE asset_id = ?");
     $stmtCheckAsset->execute([$asset_id]);
     $assetInfo = $stmtCheckAsset->fetch(PDO::FETCH_ASSOC);
-    error_log('DEBUG asset_id POST: ' . $asset_id . ' | assetInfo: ' . print_r($assetInfo, true));
 
     if (!$assetInfo) {
         $errors[] = "ไม่พบครุภัณฑ์ที่คุณต้องการยืม กรุณาลองใหม่อีกครั้ง";
@@ -199,7 +198,8 @@ $departments = $conn->query("SELECT * FROM departments")->fetchAll();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
-    <link href="css/assets-list.css" rel="stylesheet">
+    <?php require_once __DIR__ . '/../assets/kp_assets.php'; ?>
+<link rel="stylesheet" href="<?= kp_asset('assets/css/shared/assets-list.css', '../') ?>">
     <style>
         .dataTables_wrapper .pagination .page-item.active .page-link {
             background-color: #667eea;
