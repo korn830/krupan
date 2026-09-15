@@ -1,6 +1,7 @@
 <?php
 session_start();
 require '../config/db.php';
+require_once dirname(__DIR__) . '/assets/fsn.php';
 
 if (!isset($_SESSION["user_id"]) || $_SESSION['role'] !== 'admin') {
     header("Location: ../index.php");
@@ -10,8 +11,11 @@ if (!isset($_SESSION["user_id"]) || $_SESSION['role'] !== 'admin') {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_category'])) {
     $name = $_POST['name'];
     if ($name) {
-        $stmt = $conn->prepare("INSERT INTO categories (name) VALUES (?)");
-        $stmt->execute([$name]);
+        $fsn = trim((string)($_POST['fsn_class'] ?? ''));
+    // ประเภท 4 หลักตามคู่มือ ปล่อยว่างได้ถ้ายังไม่ได้ผูก
+    $fsn = preg_match('/^\\d{4}$/', $fsn) ? $fsn : null;
+    $stmt = $conn->prepare("INSERT INTO categories (name, fsn_class) VALUES (?, ?)");
+        $stmt->execute([$name, $fsn]);
         header("Location: categories.php");
         exit;
     }
@@ -21,8 +25,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_category'])) {
     $id = (int)$_POST['edit_category_id'];
     $name = $_POST['edit_category_name'];
     if ($id && $name) {
-        $stmt = $conn->prepare("UPDATE categories SET name = ? WHERE category_id = ?");
-        $stmt->execute([$name, $id]);
+        $fsn = trim((string)($_POST['edit_fsn_class'] ?? ''));
+    // ประเภท 4 หลักตามคู่มือ ปล่อยว่างได้ถ้ายังไม่ได้ผูก
+    $fsn = preg_match('/^\\d{4}$/', $fsn) ? $fsn : null;
+    $stmt = $conn->prepare("UPDATE categories SET name = ?, fsn_class = ? WHERE category_id = ?");
+        $stmt->execute([$name, $fsn, $id]);
         header("Location: categories.php");
         exit;
     }
@@ -127,6 +134,13 @@ $categories = $conn->query("SELECT * FROM categories ORDER BY category_id DESC")
       <div class="modal-body">
         <label class="form-label">ชื่อหมวดหมู่</label>
         <input type="text" name="name" class="form-control" required>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">ประเภทพัสดุ (4 หลัก)</label>
+          <input type="text" name="fsn_class" class="form-control" inputmode="numeric"
+                 pattern="[0-9]{4}" maxlength="4" placeholder="7110"
+                 title="เลขประเภท 4 หลักตามคู่มือสำนักงบประมาณ เช่น 7110">
+          <div class="form-text">ใช้เติมเลขครุภัณฑ์ให้อัตโนมัติ (เว้นว่างได้)</div>
       </div>
       <div class="modal-footer">
         <button type="submit" name="add_category" class="btn-primary">

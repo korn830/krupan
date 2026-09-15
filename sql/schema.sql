@@ -14,7 +14,8 @@ CREATE TABLE users (
 -- ตารางหมวดหมู่
 CREATE TABLE categories (
     category_id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL
+    name VARCHAR(100) NOT NULL,
+    fsn_class CHAR(4) NULL -- ประเภทพัสดุ 4 หลักตามคู่มือสำนักงบประมาณ
 );
 
 -- ตารางสถานที่
@@ -34,6 +35,7 @@ CREATE TABLE departments (
 CREATE TABLE assets (
     asset_id INT AUTO_INCREMENT PRIMARY KEY,
     asset_code VARCHAR(50) NOT NULL UNIQUE,
+    old_code VARCHAR(50) NULL, -- หมายเลขเดิมก่อนแปลงเป็นระบบ FSN
     name VARCHAR(255) NOT NULL,
     description TEXT,
     category_id INT,

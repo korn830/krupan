@@ -5,6 +5,7 @@ if (!isset($_SESSION["user_id"]) || $_SESSION['role'] !== 'admin') {
     exit;
 }
 require dirname(__DIR__) . '/config/db.php';
+require_once dirname(__DIR__) . '/assets/fsn.php'; // กฎการกำหนดหมายเลขพัสดุตามคู่มือสำนักงบประมาณ
 
 $uploadDir = '../uploads/';
 
@@ -136,7 +137,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && $_SESSION['role'] === 'admin') {
         }
 
     } else { // ตรวจจับการเพิ่มครุภัณฑ์ใหม่
-        $asset_code = $_POST['asset_code'];
+        $asset_code = ''; // ประกอบจาก ประเภท+ชนิด+ลำดับ ด้านล่าง
         $name = $_POST['name'];
         $description = $_POST['description'];
         $category_id = $_POST['category_id'];
@@ -149,6 +150,35 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && $_SESSION['role'] === 'admin') {
 
         $image_filename = null;
 
+        // --- หมายเลขพัสดุตามระบบ FSN ---
+        // ผู้ดูแลกรอกแค่ ประเภท (4 หลัก) กับ ชนิด (3 หลัก)
+        // เลขลำดับ 4 หลักท้าย คู่มือให้หน่วยงานกำหนดเองแบบเรียงลำดับไม่ซ้ำ ระบบจึงหาเลขว่างถัดไปให้
+        $fsn_class = trim((string)($_POST['fsn_class'] ?? ''));
+        $fsn_type  = trim((string)($_POST['fsn_type']  ?? ''));
+
+        // ต้องเป็นตัวเลขครบตามจำนวนหลักเท่านั้น ไม่ตัดอักขระอื่นทิ้งเงียบ ๆ
+        // เพราะ '71x0' ที่ถูกตัดเหลือ '710' จะกลายเป็นเลขครุภัณฑ์ที่ผิดโดยไม่มีใครรู้
+        if (!preg_match('/^\\d{4}$/', $fsn_class) || !preg_match('/^\\d{3}$/', $fsn_type)) {
+            $_SESSION['error_message'] = 'กรุณากรอกประเภท 4 หลัก และชนิด 3 หลัก เป็นตัวเลขเท่านั้น — ' . fsn_hint();
+            header("Location: list.php");
+            exit;
+        }
+
+        $prefix = $fsn_class . '-' . $fsn_type;
+        $next   = fsn_next_serial($conn, $prefix);
+        if ($next === 0) {
+            $_SESSION['error_message'] = "เลขลำดับของ {$prefix} เต็ม 9999 แล้ว กรุณาใช้ชนิดอื่น";
+            header("Location: list.php");
+            exit;
+        }
+        $asset_code = $prefix . '-' . sprintf('%04d', $next);
+
+        // ตรวจซ้ำอีกชั้นเผื่อ prefix ที่ประกอบขึ้นยังไม่ผ่านกฎ เช่น กลุ่มต่ำกว่า 10
+        if (!fsn_is_valid($asset_code)) {
+            $_SESSION['error_message'] = 'เลขครุภัณฑ์ไม่ถูกรูปแบบตามคู่มือสำนักงบประมาณ — ' . fsn_hint();
+            header("Location: list.php");
+            exit;
+        }
         $stmt = $conn->prepare("SELECT COUNT(*) FROM assets WHERE asset_code = ?");
         $stmt->execute([$asset_code]);
         if ($stmt->fetchColumn() > 0) {
@@ -391,7 +421,26 @@ if (isset($_GET['delete_department'])) {
       <div class="modal-body row g-3">
         <div class="col-md-6">
           <label class="form-label">เลขครุภัณฑ์</label>
-          <input type="text" name="asset_code" class="form-control" required>
+          <div class="row g-2">
+            <div class="col-5">
+              <input type="text" name="fsn_class" id="fsn_class" class="form-control"
+                     inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="7110" required
+                     title="ประเภท 4 หลัก (2 หลักแรกคือกลุ่ม)">
+              <div class="form-text">ประเภท</div>
+            </div>
+            <div class="col-3">
+              <input type="text" name="fsn_type" id="fsn_type" class="form-control"
+                     inputmode="numeric" pattern="[0-9]{3}" maxlength="3" placeholder="002" required
+                     title="ชนิด 3 หลัก">
+              <div class="form-text">ชนิด</div>
+            </div>
+            <div class="col-4">
+              <input type="text" class="form-control" id="fsn_serial_preview" value="auto" readonly
+                     title="เลขลำดับ ระบบกำหนดให้อัตโนมัติ">
+              <div class="form-text">ลำดับ (อัตโนมัติ)</div>
+            </div>
+          </div>
+          <div class="form-text mt-1" id="fsn_help"><?= htmlspecialchars(fsn_hint()) ?></div>
         </div>
         <div class="col-md-6">
           <label class="form-label">ชื่อรายการ</label>
@@ -406,7 +455,7 @@ if (isset($_GET['delete_department'])) {
           <select name="category_id" class="form-select" required>
             <option value="">-- เลือก --</option>
             <?php foreach ($categories as $c): ?>
-              <option value="<?= $c['category_id'] ?>"><?= htmlspecialchars($c['name']) ?></option>
+              <option value="<?= $c['category_id'] ?>" data-fsn-class="<?= htmlspecialchars($c['fsn_class'] ?? '') ?>"><?= htmlspecialchars($c['name']) ?></option>
             <?php endforeach; ?>
           </select>
         </div>
@@ -489,7 +538,7 @@ if (isset($_GET['delete_department'])) {
             <select name="category_id" id="edit_category_id" class="form-select" required>
               <option value="">-- เลือก --</option>
               <?php foreach ($categories as $c): ?>
-                <option value="<?= $c['category_id'] ?>"><?= htmlspecialchars($c['name']) ?></option>
+                <option value="<?= $c['category_id'] ?>" data-fsn-class="<?= htmlspecialchars($c['fsn_class'] ?? '') ?>"><?= htmlspecialchars($c['name']) ?></option>
               <?php endforeach; ?>
             </select>
           </div>
@@ -737,7 +786,38 @@ function printQR() {
             <div class="info"><strong>ชื่อ:</strong> ${assetName}</div>
             <img src="${qrImage}" alt="QR Code">
             <p><small>ระบบจัดการครุภัณฑ์ วิทยาลัยการอาชีพวังไกลกังวล</small></p>
-        </body>
+        <script>
+// เลือกหมวดหมู่ -> เติม "ประเภท" 4 หลักตามที่ผูกไว้กับหมวดหมู่นั้น
+// และแสดงชื่อกลุ่มจาก 2 หลักแรก เพื่อให้ผู้ดูแลเห็นว่ากำลังกรอกกลุ่มอะไร
+(function () {
+  var GROUPS = <?= json_encode(fsn_groups(), JSON_UNESCAPED_UNICODE) ?>;
+  var cls  = document.getElementById("fsn_class");
+  var help = document.getElementById("fsn_help");
+  var baseHelp = help ? help.textContent : "";
+  if (!cls) return;
+
+  function showGroup() {
+    var v = (cls.value || "").replace(/\D/g, "");
+    if (v.length >= 2 && GROUPS[v.slice(0, 2)]) {
+      help.textContent = "กลุ่ม " + v.slice(0, 2) + " — " + GROUPS[v.slice(0, 2)];
+    } else {
+      help.textContent = baseHelp;
+    }
+  }
+  cls.addEventListener("input", showGroup);
+
+  // หมวดหมู่ที่ผูกประเภทไว้แล้วจะเติมให้อัตโนมัติ ผู้ดูแลยังแก้เองได้
+  document.querySelectorAll('select[name="category_id"]').forEach(function (sel) {
+    sel.addEventListener("change", function () {
+      var fsn = this.options[this.selectedIndex] &&
+                this.options[this.selectedIndex].getAttribute("data-fsn-class");
+      if (fsn && !cls.value) { cls.value = fsn; showGroup(); }
+    });
+  });
+  showGroup();
+})();
+</script>
+</body>
         </html>
     `);
     
