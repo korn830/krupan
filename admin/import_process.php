@@ -1,10 +1,8 @@
 <?php
 session_start();
 // ตรวจสอบสิทธิ์
-if (!isset($_SESSION["user_id"]) || $_SESSION['role'] !== 'admin') {
-    header("Location: ../index.php");
-    exit;
-}
+require_once __DIR__ . '/../assets/roles.php';
+kp_require_cap('asset.import', '../');
 
 require '../config/db.php';
 require '../vendor/autoload.php';

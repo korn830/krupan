@@ -1,11 +1,9 @@
 <?php
 session_start();
-require '../config/db.php';
+require_once __DIR__ . '/../assets/roles.php';
+kp_require_cap('taxonomy.manage', '../');
 
-if (!isset($_SESSION["user_id"]) || $_SESSION['role'] !== 'admin') {
-    header("Location: ../index.php");
-    exit;
-}
+require '../config/db.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_category'])) {
     $name = $_POST['name'];

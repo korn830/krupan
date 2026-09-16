@@ -2,10 +2,8 @@
 // ตรวจสิทธิ์ให้เสร็จก่อนพ่น HTML ใด ๆ มิฉะนั้น header("Location:") จะใช้ไม่ได้
 // เพราะส่ง output ออกไปแล้ว (รูปแบบเดียวกับ list.php)
 session_start();
-if (!isset($_SESSION["user_id"]) || $_SESSION['role'] !== 'admin') {
-    header("Location: ../index.php");
-    exit;
-}
+require_once __DIR__ . '/../assets/roles.php';
+kp_require_cap('overview.view', '../');
 require '../config/db.php';
 
 // นับจำนวนครุภัณฑ์แต่ละสถานะ

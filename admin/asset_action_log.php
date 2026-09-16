@@ -1,9 +1,7 @@
 <?php
 session_start();
-if (!isset($_SESSION["user_id"]) || $_SESSION['role'] !== 'admin') {
-     header("Location: ../index.php");
-     exit;
-}
+require_once __DIR__ . '/../assets/roles.php';
+kp_require_cap('log.view', '../');
 require '../config/db.php';
 
 // ดึงข้อมูลประวัติทั้งหมด (ไม่ใช้ LIMIT แล้ว เพราะ DataTables จะจัดการให้)

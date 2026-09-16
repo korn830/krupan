@@ -3,8 +3,15 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-if (!isset($_SESSION["user_id"])) {
+require_once __DIR__ . '/../assets/roles.php';
+
+// โซนนี้สำหรับเจ้าหน้าที่พัสดุและหัวหน้าพัสดุเท่านั้น
+if (!kp_is_logged_in()) {
     header("Location: ../index.php");
+    exit;
+}
+if (!kp_is_staff()) {
+    header("Location: ../" . kp_home_for_role());
     exit;
 }
 
@@ -60,47 +67,63 @@ if (!function_exists('isActive')) {
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <?php if (kp_can('overview.view')): ?>
                     <li class="nav-item">
                         <a class="nav-link <?= isActive('index.php') ?>" href="<?= $base_url ?>index.php" title="หน้าแรก">
                             หน้าแรก
                         </a>
                     </li>
+                    <?php endif; ?>
+                    <?php if (kp_can('asset.view.all')): ?>
                     <li class="nav-item">
                         <a class="nav-link <?= isActive('list.php', 'assets') ?>" href="<?= $base_url ?>list.php" title="จัดการครุภัณฑ์">
                             ครุภัณฑ์
                         </a>
                     </li>
+                    <?php endif; ?>
                     <!-- [เพิ่มปุ่มเมนูอนุมัติการยืมตรงนี้] -->
+                    <?php if (kp_can('borrow.approve')): ?>
                     <li class="nav-item">
                         <a class="nav-link <?= isActive('confirm_borrow.php') ?>" href="<?= $base_url ?>confirm_borrow.php" title="อนุมัติการยืมครุภัณฑ์">
                             อนุมัติการยืม
                         </a>
                     </li>
+                    <?php endif; ?>
+                    <?php if (kp_can('taxonomy.manage')): ?>
                     <li class="nav-item">
                         <a class="nav-link <?= isActive('departments.php') ?>" href="<?= $base_url ?>departments.php" title="จัดการแผนก">
                             แผนก
                         </a>
                     </li>
+                    <?php endif; ?>
+                    <?php if (kp_can('taxonomy.manage')): ?>
                     <li class="nav-item">
                         <a class="nav-link <?= isActive('categories.php') ?>" href="<?= $base_url ?>categories.php" title="หมวดหมู่ครุภัณฑ์">
                             <i class="fas fa-layer-group me-1"></i> หมวดหมู่
                         </a>
                     </li>
+                    <?php endif; ?>
+                    <?php if (kp_can('taxonomy.manage')): ?>
                     <li class="nav-item">
                         <a class="nav-link <?= isActive('locations.php') ?>" href="<?= $base_url ?>locations.php" title="จัดการสถานที่">
                             สถานที่
                         </a>
                     </li>
+                    <?php endif; ?>
+                    <?php if (kp_can('log.view')): ?>
                     <li class="nav-item">
                         <a class="nav-link <?= isActive('asset_action_log.php') ?>" href="<?= $base_url ?>asset_action_log.php" title="ประวัติการเพิ่ม/แก้ไข">
                             <i class="fas fa-history me-1"></i> ประวัติการเพิ่ม/แก้ไข
                         </a>
                     </li>
+                    <?php endif; ?>
+                    <?php if (kp_can('user.manage')): ?>
                     <li class="nav-item">
                         <a class="nav-link <?= isActive('add_user.php') ?>" href="<?= $base_url ?>add_user.php" title="เพิ่มผู้ใช้ใหม่">
                             <i class="fas fa-user-plus me-1"></i> เพิ่มผู้ใช้
                         </a>
                     </li>
+                    <?php endif; ?>
                 </ul>
                 <ul class="navbar-nav">
                     <li class="nav-item dropdown" style="display: none;" id="userDropdown">
