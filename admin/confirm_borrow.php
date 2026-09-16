@@ -9,6 +9,9 @@ if (!isset($_SESSION["user_id"]) || $_SESSION['role'] !== 'admin') {
 
 // รวมไฟล์เชื่อมต่อฐานข้อมูล PDO
 require '../config/db.php';
+require_once dirname(__DIR__) . '/assets/borrow_status.php';
+// ปรับรายการที่เลยกำหนดคืนให้เป็น 'เกินวันที่กำหนด' ก่อนอ่านข้อมูลมาแสดง
+kp_mark_overdue_borrows($conn);
 
 // --- ส่วนของการอนุมัติ/ปฏิเสธ ---
 if (isset($_POST['action']) && isset($_POST['borrow_id'])) {

@@ -7,6 +7,9 @@ if (!isset($_SESSION["user_id"]) || $_SESSION['role'] !== 'user') {
     exit;
 }
 require '../config/db.php';
+require_once dirname(__DIR__) . '/assets/borrow_status.php';
+// ปรับรายการที่เลยกำหนดคืนให้เป็น 'เกินวันที่กำหนด' ก่อนอ่านข้อมูลมาแสดง
+kp_mark_overdue_borrows($conn);
 
 // นับจำนวนครุภัณฑ์แต่ละสถานะ
 $stmt = $conn->query("SELECT status, COUNT(*) AS total FROM assets GROUP BY status");
@@ -46,10 +49,12 @@ foreach ($status_summary as $row) {
 
 $all_statuses = ['ใช้งานปกติ', 'ชำรุด', 'ส่งซ่อม', 'ถูกยืม', 'จำหน่าย', 'รออนุมัติ'];
 
-// คำขอยืมของฉันที่ยังรออนุมัติ
-$my_pending = $conn->prepare("SELECT COUNT(*) FROM borrow_history WHERE user_id = ? AND status = 'รออนุมัติ'");
-$my_pending->execute([$_SESSION['user_id']]);
-$pending_count = (int)$my_pending->fetchColumn();
+// สรุปการยืมของผู้ใช้คนนี้ แยกตามสถานะ
+$my_summary     = kp_my_borrow_summary($conn, (int)$_SESSION['user_id']);
+$pending_count  = $my_summary['pending'];
+$approved_count = $my_summary['approved'];
+$overdue_count  = $my_summary['overdue'];
+$my_open        = kp_my_open_borrows($conn, (int)$_SESSION['user_id']);
 
 require 'header.php'; // พ่น <head> และแถบเมนู
 ?>
@@ -66,13 +71,83 @@ require 'header.php'; // พ่น <head> และแถบเมนู
     <p class="m-0 mt-2 text-white-50">ระบบจัดการครุภัณฑ์ — วิทยาลัยการอาชีพวังไกลกังวล</p>
 </div>
 
-<?php if ($pending_count > 0): ?>
-<div class="alert alert-warning fade-in mb-4" role="alert" style="border-radius:12px; border-left:4px solid #f59e0b;">
-    <i class="fas fa-clock me-2"></i>
-    คุณมีคำขอยืมที่รออนุมัติอยู่ <strong><?= $pending_count ?></strong> รายการ
-    — <a href="my_borrow.php" class="alert-link">ดูรายการยืมของฉัน</a>
+<?php if ($overdue_count > 0): ?>
+<div class="alert alert-danger fade-in mb-3" role="alert" style="border-radius:12px; border-left:4px solid #e53e3e;">
+    <i class="fas fa-exclamation-circle me-2"></i>
+    คุณมีครุภัณฑ์ <strong><?= $overdue_count ?></strong> รายการที่เกินกำหนดคืนแล้ว
+    — <a href="my_borrow.php" class="alert-link">ดูรายการและคืนครุภัณฑ์</a>
 </div>
 <?php endif; ?>
+
+<!-- สรุปการยืมของฉัน -->
+<div class="card fade-in mb-4" style="border-radius:12px;">
+  <div class="card-body">
+    <h5 class="card-title mb-3"><i class="fas fa-hand-holding me-2"></i>การยืมของฉัน</h5>
+
+    <div class="row text-center mb-3">
+      <div class="col-4 border-end">
+        <div class="h3 mb-0"><?= $pending_count ?></div>
+        <div class="text-muted small">รออนุมัติ</div>
+      </div>
+      <div class="col-4 border-end">
+        <div class="h3 mb-0"><?= $approved_count ?></div>
+        <div class="text-muted small">กำลังยืม</div>
+      </div>
+      <div class="col-4">
+        <div class="h3 mb-0<?= $overdue_count > 0 ? ' text-danger' : '' ?>"><?= $overdue_count ?></div>
+        <div class="text-muted small">เกินกำหนดคืน</div>
+      </div>
+    </div>
+
+    <?php if (empty($my_open)): ?>
+      <p class="text-muted text-center mb-0 py-2">ยังไม่มีรายการยืมที่ดำเนินการอยู่</p>
+    <?php else: ?>
+      <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0">
+          <thead>
+            <tr><th>เลขครุภัณฑ์</th><th>ชื่อครุภัณฑ์</th><th>กำหนดคืน</th><th>สถานะ</th></tr>
+          </thead>
+          <tbody>
+          <?php foreach ($my_open as $row):
+              $d = $row['days_left'];
+              if ($row['status'] === 'เกินวันที่กำหนด') {
+                  $when = 'เกินกำหนด ' . abs((int)$d) . ' วัน'; $tone = 'text-danger';
+              } elseif ($row['status'] === 'รออนุมัติ') {
+                  $when = 'รอผู้ดูแลอนุมัติ'; $tone = 'text-muted';
+              } elseif ($d === null) {
+                  $when = '-'; $tone = 'text-muted';
+              } elseif ((int)$d === 0) {
+                  $when = 'ครบกำหนดวันนี้'; $tone = 'text-warning';
+              } else {
+                  $when = 'เหลืออีก ' . (int)$d . ' วัน';
+                  $tone = (int)$d <= 2 ? 'text-warning' : 'text-muted';
+              }
+          ?>
+            <tr>
+              <td><?= htmlspecialchars($row['asset_code']) ?></td>
+              <td><?= htmlspecialchars($row['asset_name']) ?></td>
+              <td><?= htmlspecialchars((string)$row['return_date']) ?></td>
+              <td>
+                <?php
+                  $badge = match ($row['status']) {
+                      'เกินวันที่กำหนด' => 'bg-danger',
+                      'รออนุมัติ'       => 'bg-primary',
+                      'อนุมัติ', 'ยืมอยู่' => 'bg-success',
+                      default            => 'bg-secondary',
+                  };
+                ?>
+                <span class="badge <?= $badge ?>"><?= htmlspecialchars($row['status']) ?></span>
+                <div class="small <?= $tone ?>"><?= htmlspecialchars($when) ?></div>
+              </td>
+            </tr>
+          <?php endforeach; ?>
+          </tbody>
+        </table>
+      </div>
+      <div class="text-end mt-2"><a href="my_borrow.php" class="small">ดูประวัติการยืมทั้งหมด</a></div>
+    <?php endif; ?>
+  </div>
+</div>
 
 <div class="row fade-in">
     <div class="col-lg-8">

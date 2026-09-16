@@ -8,6 +8,9 @@ if (!isset($_SESSION["user_id"]) || $_SESSION['role'] !== 'user') {
 }
 // รวมไฟล์เชื่อมต่อฐานข้อมูล PDO
 require '../config/db.php';
+require_once dirname(__DIR__) . '/assets/borrow_status.php';
+// ปรับรายการที่เลยกำหนดคืนให้เป็น 'เกินวันที่กำหนด' ก่อนอ่านข้อมูลมาแสดง
+kp_mark_overdue_borrows($conn);
 
 $user_id = $_SESSION["user_id"];
 

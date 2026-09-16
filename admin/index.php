@@ -7,6 +7,9 @@ if (!isset($_SESSION["user_id"]) || $_SESSION['role'] !== 'admin') {
     exit;
 }
 require '../config/db.php';
+require_once dirname(__DIR__) . '/assets/borrow_status.php';
+// ปรับรายการที่เลยกำหนดคืนให้เป็น 'เกินวันที่กำหนด' ก่อนอ่านข้อมูลมาแสดง
+kp_mark_overdue_borrows($conn);
 
 // นับจำนวนครุภัณฑ์แต่ละสถานะ
 $stmt = $conn->query("SELECT status, COUNT(*) AS total FROM assets GROUP BY status");
