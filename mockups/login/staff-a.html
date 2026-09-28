@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1e293b">
+    <title>แบบ A — ประตูเจ้าหน้าที่พัสดุ</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="../../assets/vendor/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="../../assets/vendor/fontawesome/css/all.min.css">
+
+    <style>
+        :root {
+            --navy-900: #0f172a;
+            --navy-800: #1e293b;
+            --navy-700: #334155;
+            --gold:     #d4a418;
+            --line:     #e2e8f0;
+            --ink:      #1e293b;
+            --muted:    #64748b;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background: #f1f5f9;
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        /* แผงสองฝั่ง — รูปทรงต่างจากการ์ดกลางจอของหน้าผู้ใช้ทั่วไปอย่างชัดเจน */
+        .panel {
+            display: grid;
+            grid-template-columns: 1.05fr .95fr;
+            width: 100%;
+            max-width: 900px;
+            min-height: 520px;
+            background: #fff;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 24px 60px rgba(15, 23, 42, .18);
+        }
+
+        /* ฝั่งซ้าย — ตัวตนของหน่วยงาน */
+        .brand {
+            background: linear-gradient(160deg, var(--navy-900) 0%, var(--navy-700) 100%);
+            color: #fff;
+            padding: 3rem 2.75rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+        }
+        .brand::after {
+            content: '';
+            position: absolute; inset: 0;
+            background:
+                radial-gradient(circle at 85% 15%, rgba(212,164,24,.16) 0%, transparent 45%),
+                radial-gradient(circle at 10% 90%, rgba(255,255,255,.07) 0%, transparent 45%);
+            pointer-events: none;
+        }
+        .crest {
+            width: 62px; height: 62px;
+            border-radius: 14px;
+            background: rgba(212,164,24,.14);
+            border: 1.5px solid rgba(212,164,24,.5);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.6rem; color: var(--gold);
+            margin-bottom: 1.6rem;
+        }
+        .brand h1 {
+            font-family: 'Prompt', sans-serif;
+            font-size: 1.6rem; font-weight: 600;
+            line-height: 1.45; margin-bottom: .6rem;
+        }
+        .brand .org { color: rgba(255,255,255,.72); font-size: .95rem; line-height: 1.7; }
+        .brand .rule { width: 46px; height: 3px; background: var(--gold); border-radius: 2px; margin: 1.4rem 0; }
+        .brand .note {
+            font-size: .85rem; color: rgba(255,255,255,.55);
+            display: flex; align-items: flex-start; gap: .55rem; line-height: 1.6;
+        }
+        .brand .note i { color: var(--gold); margin-top: .2rem; }
+
+        /* ฝั่งขวา — ฟอร์ม */
+        .form-side { padding: 3rem 2.75rem; display: flex; flex-direction: column; justify-content: center; }
+        .eyebrow {
+            display: inline-flex; align-items: center; gap: .45rem;
+            background: #f1f5f9; color: var(--navy-700);
+            font-size: .76rem; font-weight: 600; letter-spacing: .04em;
+            padding: .4rem .8rem; border-radius: 999px;
+            margin-bottom: 1.1rem; width: fit-content;
+        }
+        .eyebrow i { color: var(--gold); }
+        .form-side h2 {
+            font-family: 'Prompt', sans-serif;
+            font-size: 1.45rem; font-weight: 600; color: var(--ink); margin-bottom: .35rem;
+        }
+        .form-side .sub { color: var(--muted); font-size: .92rem; margin-bottom: 2rem; }
+
+        label { display:block; font-size:.88rem; font-weight:600; color:#475569; margin-bottom:.45rem; }
+        .field { position: relative; margin-bottom: 1.15rem; }
+        .field input {
+            width: 100%; padding: .8rem 2.6rem .8rem 1rem;
+            border: 1.5px solid var(--line); border-radius: 10px;
+            font-family: 'Sarabun', sans-serif; font-size: max(16px, .98rem);
+            color: var(--ink); background: #fff; transition: all .2s ease;
+        }
+        .field input:focus {
+            outline: none; border-color: var(--navy-700);
+            box-shadow: 0 0 0 3px rgba(51,65,85,.10);
+        }
+        .field i {
+            position: absolute; right: 1rem; top: 50%; transform: translateY(-50%);
+            color: #94a3b8; font-size: 1rem; pointer-events: none;
+        }
+        .btn {
+            width: 100%; min-height: 48px; margin-top: .6rem;
+            background: var(--navy-800); color: #fff;
+            border: none; border-radius: 10px;
+            font-family: 'Prompt', sans-serif; font-size: 1rem; font-weight: 500;
+            cursor: pointer; transition: all .2s ease;
+            display: flex; align-items: center; justify-content: center; gap: .5rem;
+        }
+        .btn:hover { background: var(--navy-900); transform: translateY(-1px); box-shadow: 0 8px 20px rgba(15,23,42,.22); }
+        .btn i { color: var(--gold); font-size: .9rem; }
+
+        .switch {
+            margin-top: 1.6rem; padding-top: 1.15rem;
+            border-top: 1px solid var(--line);
+            font-size: .88rem; color: var(--muted); text-align: center;
+        }
+        .switch a { color: var(--navy-800); font-weight: 600; text-decoration: none; }
+        .switch a:hover { text-decoration: underline; }
+
+        @media (max-width: 800px) {
+            .panel { grid-template-columns: 1fr; max-width: 460px; min-height: 0; }
+            .brand { padding: 2.25rem 2rem; }
+            .brand .note { display: none; }
+            .crest { width: 52px; height: 52px; margin-bottom: 1.1rem; }
+            .brand h1 { font-size: 1.35rem; }
+            .form-side { padding: 2.25rem 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="panel">
+        <aside class="brand">
+            <div>
+                <div class="crest"><i class="fas fa-shield-halved"></i></div>
+                <h1>งานพัสดุ<br>ระบบทะเบียนครุภัณฑ์</h1>
+                <div class="rule"></div>
+                <p class="org">วิทยาลัยการอาชีพวังไกลกังวล</p>
+            </div>
+            <p class="note">
+                <i class="fas fa-circle-info"></i>
+                <span>ส่วนนี้สำหรับเจ้าหน้าที่พัสดุและหัวหน้าพัสดุเท่านั้น<br>การเข้าใช้งานถูกบันทึกไว้ทุกครั้ง</span>
+            </p>
+        </aside>
+
+        <main class="form-side">
+            <span class="eyebrow"><i class="fas fa-lock"></i> เฉพาะเจ้าหน้าที่</span>
+            <h2>เข้าสู่ระบบ</h2>
+            <p class="sub">กรุณายืนยันตัวตนเพื่อจัดการทะเบียนครุภัณฑ์</p>
+
+            <form onsubmit="return false;">
+                <label for="u">ชื่อผู้ใช้</label>
+                <div class="field">
+                    <input id="u" type="text" autocomplete="username">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+
+                <label for="p">รหัสผ่าน</label>
+                <div class="field">
+                    <input id="p" type="password" autocomplete="current-password">
+                    <i class="fas fa-key"></i>
+                </div>
+
+                <button class="btn"><i class="fas fa-arrow-right-to-bracket"></i> เข้าสู่ระบบเจ้าหน้าที่</button>
+            </form>
+
+            <div class="switch">
+                ต้องการยืมครุภัณฑ์? <a href="user.html">เข้าสู่ระบบสำหรับผู้ใช้ทั่วไป</a>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
