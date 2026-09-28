@@ -51,7 +51,7 @@ require 'header.php'; // พ่น <head> และแถบเมนู
 
 <?php require_once __DIR__ . '/../assets/kp_assets.php'; ?>
 <link rel="stylesheet" href="<?= kp_asset('assets/css/shared/index.css', '../') ?>">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="../assets/vendor/chartjs/chart.umd.js"></script>
 
 <div class="welcome-header mb-4 fade-in">
     <h4 class="m-0"><i class="fas fa-chart-pie me-2"></i> แผงควบคุม (Dashboard)</h4>

@@ -89,8 +89,8 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>รายการครุภัณฑ์ที่ยืม - ระบบจัดการครุภัณฑ์</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="../assets/vendor/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/vendor/fontawesome/css/all.min.css">
     <?php require_once __DIR__ . '/../assets/kp_assets.php'; ?>
 <link rel="stylesheet" href="<?= kp_asset('user/css/my-borrow.css', '../') ?>">
 </head>
@@ -243,8 +243,8 @@ try {
     <input type="hidden" name="action" value="return_asset">
 </form>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+<script src="../assets/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+<script src="../assets/vendor/fontawesome/css/all.min.css"></script>
 <script>
 let currentBorrowId = null;
 

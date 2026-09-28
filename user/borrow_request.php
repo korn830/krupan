@@ -85,8 +85,8 @@ $noteValue     = (string)($oldInput['note'] ?? '');
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ขอยืมครุภัณฑ์ — <?= htmlspecialchars($asset['name']) ?></title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="../assets/vendor/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/vendor/fontawesome/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
     <?php require_once __DIR__ . '/../assets/kp_assets.php'; ?>
 <link rel="stylesheet" href="<?= kp_asset('assets/css/shared/header.css', '../') ?>">
@@ -297,7 +297,7 @@ $noteValue     = (string)($oldInput['note'] ?? '');
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../assets/vendor/bootstrap/bootstrap.bundle.min.js"></script>
     <script>
         // ตรวจสอบว่า return_date ต้องหลังจาก borrow_date และไม่เกิน MAX_BORROW_DAYS วัน
         (function () {
