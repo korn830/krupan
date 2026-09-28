@@ -8,44 +8,35 @@ require '../config/db.php';
 
 // สรุปการยืม "ของผู้ใช้คนนี้เท่านั้น"
 // ผู้ใช้ทั่วไปไม่ต้องเห็นภาพรวมครุภัณฑ์ของทั้งวิทยาลัย นั่นเป็นงานของเจ้าหน้าที่พัสดุ
-$stmt = $conn->prepare(
-    "SELECT status, COUNT(*) AS total
-       FROM borrow_history
-      WHERE user_id = ?
-      GROUP BY status"
-);
-$stmt->execute([$_SESSION['user_id']]);
+require_once __DIR__ . '/../assets/borrow_status.php';
 
-$my_counts = [];
-foreach ($stmt->fetchAll() as $row) {
-    $my_counts[$row['status']] = (int)$row['total'];
-}
+// ปรับรายการที่เลยกำหนดคืนให้เป็น 'เกินวันที่กำหนด' ก่อนอ่านตัวเลข
+// ไม่งั้นตัวนับ "เกินกำหนดคืน" จะเป็นศูนย์ตลอดไป
+kp_mark_overdue_borrows($conn);
 
-$pending_count = $my_counts['รออนุมัติ'] ?? 0;
-$overdue_count = $my_counts['เกินวันที่กำหนด'] ?? 0;
+$my_summary    = kp_my_borrow_summary($conn, (int)$_SESSION['user_id']);
+$pending_count = $my_summary['pending'];
+$overdue_count = $my_summary['overdue'];
 
-// 'อนุมัติ' กับ 'ยืมอยู่' รวมเป็นถังเดียว เพราะผู้ใช้มองว่าเป็น "ของที่ยังอยู่กับเรา" เหมือนกัน
+// 'อนุมัติ' กับ 'ยืมอยู่' ถูกรวมเป็น approved ไว้แล้วในตัวช่วย
+// เพราะผู้ใช้มองว่าเป็น "ของที่ยังอยู่กับเรา" เหมือนกัน
 $summary_cards = [
     ['label' => 'รออนุมัติ',     'icon' => '⏳', 'color' => '#f59e0b', 'count' => $pending_count],
-    ['label' => 'กำลังยืม',      'icon' => '📚', 'color' => '#3b82f6', 'count' => ($my_counts['อนุมัติ'] ?? 0) + ($my_counts['ยืมอยู่'] ?? 0)],
+    ['label' => 'กำลังยืม',      'icon' => '📚', 'color' => '#3b82f6', 'count' => $my_summary['approved']],
     ['label' => 'เกินกำหนดคืน', 'icon' => '⚠️', 'color' => '#ef4444', 'count' => $overdue_count],
-    ['label' => 'คืนแล้ว',       'icon' => '✅', 'color' => '#10b981', 'count' => $my_counts['คืนแล้ว'] ?? 0],
+    ['label' => 'คืนแล้ว',       'icon' => '✅', 'color' => '#10b981', 'count' => $my_summary['returned']],
 ];
 
-// รายการที่ยังไม่ได้คืน เรียงตามวันที่ครบกำหนดก่อน
-$open = $conn->prepare(
-    "SELECT bh.borrow_id, bh.return_date, bh.status,
-            a.name AS asset_name, a.asset_code,
-            DATEDIFF(bh.return_date, CURDATE()) AS days_left
-       FROM borrow_history bh
-       JOIN assets a ON bh.asset_id = a.asset_id
-      WHERE bh.user_id = ?
-        AND bh.status IN ('อนุมัติ', 'ยืมอยู่', 'เกินวันที่กำหนด')
-      ORDER BY bh.return_date ASC
-      LIMIT 5"
+// รายการที่ยังอยู่กับผู้ใช้ (ตัวช่วยเรียงรายการเกินกำหนดขึ้นก่อนให้แล้ว)
+// ตัด 'รออนุมัติ' ออก เพราะยังไม่ได้รับของ จึงไม่ใช่ "ของที่ยังไม่ได้คืน"
+$open_borrows = array_slice(
+    array_filter(
+        kp_my_open_borrows($conn, (int)$_SESSION['user_id']),
+        fn(array $b): bool => $b['status'] !== 'รออนุมัติ'
+    ),
+    0,
+    5
 );
-$open->execute([$_SESSION['user_id']]);
-$open_borrows = $open->fetchAll();
 
 /** แปลงวันที่เป็นรูปแบบไทย (พ.ศ.) */
 function kp_thai_date(?string $date): string

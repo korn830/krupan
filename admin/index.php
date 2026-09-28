@@ -5,6 +5,9 @@ session_start();
 require_once __DIR__ . '/../assets/roles.php';
 kp_require_cap('overview.view', '../');
 require '../config/db.php';
+require_once dirname(__DIR__) . '/assets/borrow_status.php';
+// ปรับรายการที่เลยกำหนดคืนให้เป็น 'เกินวันที่กำหนด' ก่อนอ่านข้อมูลมาแสดง
+kp_mark_overdue_borrows($conn);
 
 // นับจำนวนครุภัณฑ์แต่ละสถานะ
 $stmt = $conn->query("SELECT status, COUNT(*) AS total FROM assets GROUP BY status");
