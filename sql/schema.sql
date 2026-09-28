@@ -8,7 +8,11 @@ CREATE TABLE users (
     username VARCHAR(50) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     name VARCHAR(100),
-    role ENUM('admin', 'staff') DEFAULT 'staff'
+    -- user    ผู้ใช้ทั่วไป   ยืมครุภัณฑ์ได้อย่างเดียว
+    -- officer เจ้าหน้าที่พัสดุ จัดการทะเบียนครุภัณฑ์ และอนุมัติการยืม
+    -- head    หัวหน้าพัสดุ   เพิ่มสิทธิ์ลบ นำเข้าข้อมูล จัดการผู้ใช้ และดูประวัติ
+    -- admin/staff เป็นชื่อเดิม เก็บไว้ให้ฐานข้อมูลเก่าใช้งานต่อได้
+    role ENUM('user', 'officer', 'head', 'admin', 'staff') NOT NULL DEFAULT 'user'
 );
 
 -- ตารางหมวดหมู่

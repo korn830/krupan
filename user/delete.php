@@ -1,10 +1,8 @@
 <?php
 session_start();
 // ตรวจสอบว่าผู้ใช้ล็อกอินอยู่และมีสิทธิ์เป็น admin หรือไม่
-if (!isset($_SESSION["user_id"]) || $_SESSION['role'] !== 'admin') {
-    header("Location: ../login.php");
-    exit;
-}
+require_once __DIR__ . '/../assets/roles.php';
+kp_require_cap('asset.delete', '../');
 
 require __DIR__ . '/config/db.php';
 

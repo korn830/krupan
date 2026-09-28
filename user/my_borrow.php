@@ -2,10 +2,8 @@
 session_start();
 
 // ตรวจสอบการเข้าสู่ระบบ
-if (!isset($_SESSION["user_id"]) || $_SESSION['role'] !== 'user') {
-    header("Location: ../index.php");
-    exit;
-}
+require_once __DIR__ . '/../assets/roles.php';
+kp_require_cap('borrow.view.own', '../');
 // รวมไฟล์เชื่อมต่อฐานข้อมูล PDO
 require '../config/db.php';
 

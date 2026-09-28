@@ -2,10 +2,8 @@
 session_start();
 
 // ตรวจสอบการเข้าสู่ระบบและสิทธิ์การเป็น admin
-if (!isset($_SESSION["user_id"]) || $_SESSION['role'] !== 'admin') {
-    header("Location: ../index.php");
-    exit;
-}
+require_once __DIR__ . '/../assets/roles.php';
+kp_require_cap('borrow.approve', '../');
 
 // รวมไฟล์เชื่อมต่อฐานข้อมูล PDO
 require '../config/db.php';

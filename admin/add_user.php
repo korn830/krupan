@@ -1,10 +1,31 @@
 <?php
 session_start();
-if (!isset($_SESSION["user_id"]) || $_SESSION['role'] !== 'admin') {
-    header("Location: ../index.php");
-    exit;
-}
+require_once __DIR__ . '/../assets/roles.php';
+kp_require_cap('user.manage', '../');
 require '../config/db.php';
+
+/**
+ * นับจำนวนบัญชีหัวหน้าพัสดุที่ยังใช้งานอยู่ (นับ admin เดิมด้วย)
+ * ใช้กันไม่ให้ลบหรือลดสิทธิ์จนไม่เหลือคนจัดการผู้ใช้เลย
+ */
+function kp_count_heads(PDO $conn): int
+{
+    return (int)$conn->query(
+        "SELECT COUNT(*) FROM users WHERE role IN ('head', 'admin')"
+    )->fetchColumn();
+}
+
+/** บัญชีนี้เป็นหัวหน้าพัสดุคนสุดท้ายหรือไม่ */
+function kp_is_last_head(PDO $conn, int $userId): bool
+{
+    $stmt = $conn->prepare("SELECT role FROM users WHERE user_id = ?");
+    $stmt->execute([$userId]);
+    $role = $stmt->fetchColumn();
+    if ($role === false) {
+        return false;
+    }
+    return kp_normalize_role($role) === KP_ROLE_HEAD && kp_count_heads($conn) <= 1;
+}
 
 // Initialize message variable
 $message = '';
@@ -16,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $name = trim($_POST['name']);
     $role = $_POST['role'];
 
-    if ($username && $password && $name && in_array($role, ['admin', 'user'])) {
+    if ($username && $password && $name && in_array($role, [KP_ROLE_USER, KP_ROLE_OFFICER, KP_ROLE_HEAD], true)) {
         $dbRole = $role;
         
         // Check for duplicate username
@@ -42,7 +63,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 // Handle delete user พร้อมลบ log
 if (isset($_GET['delete_user_id'])) {
     $delete_id = (int)$_GET['delete_user_id'];
-    if ($delete_id > 0) {
+    if ($delete_id === (int)$_SESSION['user_id']) {
+        $message = '<div class="alert alert-danger">ไม่สามารถลบบัญชีของตัวเองได้</div>';
+    } elseif ($delete_id > 0 && kp_is_last_head($conn, $delete_id)) {
+        // ถ้าลบไป จะไม่เหลือใครจัดการผู้ใช้อีกเลย
+        $message = '<div class="alert alert-danger">ต้องมีหัวหน้าพัสดุอย่างน้อย 1 บัญชีเสมอ จึงลบบัญชีนี้ไม่ได้</div>';
+    } elseif ($delete_id > 0) {
         try {
             // ตรวจสอบว่าผู้ใช้ยังมีรายการยืมอยู่หรือไม่
             $stmt = $conn->prepare("SELECT COUNT(*) FROM borrow_history WHERE user_id = ?");
@@ -74,7 +100,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $edit_name = trim($_POST['edit_name']);
     $edit_role = $_POST['edit_role'];
     $edit_password = $_POST['edit_password'] ?? '';
-    if ($edit_id > 0 && $edit_name && in_array($edit_role, ['admin', 'user'])) {
+    $selfDemotion = ($edit_id === (int)$_SESSION['user_id'] && $edit_role !== KP_ROLE_HEAD);
+
+    // ถ้ากำลังลดสิทธิ์หัวหน้าพัสดุคนสุดท้าย ระบบจะไม่เหลือคนจัดการผู้ใช้
+    $lastHead = ($edit_id > 0 && $edit_role !== KP_ROLE_HEAD && kp_is_last_head($conn, $edit_id));
+
+    if ($selfDemotion) {
+        $message = '<div class="alert alert-danger">ไม่สามารถลดสิทธิ์ของบัญชีตัวเองได้</div>';
+    } elseif ($lastHead) {
+        $message = '<div class="alert alert-danger">ต้องมีหัวหน้าพัสดุอย่างน้อย 1 บัญชีเสมอ</div>';
+    } elseif ($edit_id > 0 && $edit_name && in_array($edit_role, [KP_ROLE_USER, KP_ROLE_OFFICER, KP_ROLE_HEAD], true)) {
         if ($edit_password) {
             $hash = password_hash($edit_password, PASSWORD_DEFAULT);
             $stmt = $conn->prepare("UPDATE users SET name = ?, role = ?, password_hash = ? WHERE user_id = ?");
@@ -152,11 +187,13 @@ try {
                             <td><?= htmlspecialchars($user['name']) ?></td>
                             <td>
                                 <?php
-                                    if ($user['role'] === 'admin') {
-                                        echo '<span class="badge bg-danger">ผู้ดูแลระบบ</span>';
-                                    } else {
-                                        echo '<span class="badge bg-success">ผู้ใช้ทั่วไป</span>';
-                                    }
+                                    $roleBadge = [
+                                        KP_ROLE_HEAD    => 'bg-danger',
+                                        KP_ROLE_OFFICER => 'bg-primary',
+                                        KP_ROLE_USER    => 'bg-success',
+                                    ];
+                                    $r = kp_normalize_role($user['role']);
+                                    printf('<span class="badge %s">%s</span>', $roleBadge[$r], htmlspecialchars(kp_role_label($r)));
                                 ?>
                             </td>
                             <td>
@@ -164,7 +201,7 @@ try {
                                     data-user-id="<?= $user['user_id'] ?>" 
                                     data-username="<?= htmlspecialchars($user['username']) ?>" 
                                     data-name="<?= htmlspecialchars($user['name']) ?>" 
-                                    data-role="<?= $user['role'] ?>"
+                                    data-role="<?= kp_normalize_role($user['role']) ?>"
                                     title="แก้ไข"><i class="fas fa-edit"></i></button>
                                 <a href="?delete_user_id=<?= $user['user_id'] ?>" class="btn btn-sm btn-danger" title="ลบ" onclick="return confirm('คุณแน่ใจหรือไม่ว่าต้องการลบผู้ใช้นี้?');"><i class="fas fa-trash-alt"></i></a>
                             </td>
@@ -205,8 +242,9 @@ try {
                     <div class="mb-3">
                         <label class="form-label">สิทธิ์การใช้งาน</label>
                         <select name="role" class="form-select" required>
-                            <option value="user">ผู้ใช้ทั่วไป</option>
-                            <option value="admin">ผู้ดูแลระบบ</option>
+                            <option value="<?= KP_ROLE_USER ?>">ผู้ใช้ทั่วไป — ยืมครุภัณฑ์ได้อย่างเดียว</option>
+                            <option value="<?= KP_ROLE_OFFICER ?>">เจ้าหน้าที่พัสดุ — จัดการทะเบียนและอนุมัติการยืม</option>
+                            <option value="<?= KP_ROLE_HEAD ?>">หัวหน้าพัสดุ — เพิ่มสิทธิ์ลบ นำเข้าข้อมูล และจัดการผู้ใช้</option>
                         </select>
                     </div>
                 </div>
@@ -242,8 +280,9 @@ try {
                     <div class="mb-3">
                         <label class="form-label">สิทธิ์การใช้งาน</label>
                         <select name="edit_role" id="edit_role" class="form-select" required>
-                            <option value="user">ผู้ใช้ทั่วไป</option>
-                            <option value="admin">ผู้ดูแลระบบ</option>
+                            <option value="<?= KP_ROLE_USER ?>">ผู้ใช้ทั่วไป — ยืมครุภัณฑ์ได้อย่างเดียว</option>
+                            <option value="<?= KP_ROLE_OFFICER ?>">เจ้าหน้าที่พัสดุ — จัดการทะเบียนและอนุมัติการยืม</option>
+                            <option value="<?= KP_ROLE_HEAD ?>">หัวหน้าพัสดุ — เพิ่มสิทธิ์ลบ นำเข้าข้อมูล และจัดการผู้ใช้</option>
                         </select>
                     </div>
                     <div class="mb-3">

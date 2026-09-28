@@ -12,6 +12,12 @@ if (!isset($_SESSION["user_id"])) {
     header('Location: ../index.php?redirect=' . urlencode($redirect));
     exit;
 }
+
+// ล็อกอินแล้ว แต่การยืมเป็นเรื่องของผู้ใช้ทั่วไป
+// เจ้าหน้าที่พัสดุจัดการครุภัณฑ์ได้โดยตรงอยู่แล้ว จึงไม่ต้องยื่นคำขอยืม
+require_once dirname(__DIR__) . '/assets/roles.php';
+kp_require_cap('borrow.request', '../');
+
 require_once dirname(__DIR__) . '/config/db.php';
 
 $asset_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;

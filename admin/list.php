@@ -1,9 +1,7 @@
 <?php
 session_start();
-if (!isset($_SESSION["user_id"]) || $_SESSION['role'] !== 'admin') {
-    header("Location: ../index.php");
-    exit;
-}
+require_once __DIR__ . '/../assets/roles.php';
+kp_require_cap('asset.view.all', '../');
 require dirname(__DIR__) . '/config/db.php';
 
 $uploadDir = '../uploads/';
@@ -18,12 +16,13 @@ if (isset($_GET['fetch_asset']) && isset($_GET['id'])) {
     exit;
 }
 
-if ($_SERVER["REQUEST_METHOD"] === "POST" && $_SESSION['role'] === 'admin') {
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // กำหนดค่าเริ่มต้นสำหรับข้อความแจ้งเตือน
     $_SESSION['success_message'] = "";
     $_SESSION['error_message'] = "";
 
     if (isset($_POST['asset_id'])) { // ตรวจจับการแก้ไขครุภัณฑ์
+        kp_require_cap('asset.edit', '../');
         $asset_id = $_POST['asset_id'];
         // ดึงข้อมูลเก่าก่อนแก้ไข
         $stmtOld = $conn->prepare("SELECT * FROM assets WHERE asset_id = ?");
@@ -136,6 +135,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && $_SESSION['role'] === 'admin') {
         }
 
     } else { // ตรวจจับการเพิ่มครุภัณฑ์ใหม่
+        kp_require_cap('asset.create', '../');
         $asset_code = $_POST['asset_code'];
         $name = $_POST['name'];
         $description = $_POST['description'];
@@ -286,18 +286,24 @@ if (isset($_GET['delete_department'])) {
     </div>
     
     <div class="action-section text-start mb-3">
+        <?php if (kp_can('asset.create')): ?>
         <button class="btn-add-asset" data-bs-toggle="modal" data-bs-target="#addModal">
             <i class="fas fa-plus icon"></i> เพิ่มครุภัณฑ์
         </button>
+        <?php endif; ?>
+        <?php if (kp_can('asset.export')): ?>
         <a href="export_excel.php" class="btn-add-asset ms-2" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
             <i class="fas fa-file-excel me-1"></i> Export เป็น Excel
         </a>
+        <?php endif; ?>
+        <?php if (kp_can('asset.import')): ?>
         <button class="btn btn-primary ms-2" data-bs-toggle="modal" data-bs-target="#importModal">
             <i class="fas fa-file-import me-1"></i> นำเข้าข้อมูล (Import)
         </button>
         <a href="export_template.php" class="btn btn-outline-secondary ms-2 bg-white">
             <i class="fas fa-download me-1"></i> ดาวน์โหลด Template
         </a>
+        <?php endif; ?>
     </div>
 
     <div class="table-container">
@@ -350,20 +356,24 @@ if (isset($_GET['delete_department'])) {
                                 </td>
                                 <td class="text-center">
                                     <span class="action-buttons">
+                                        <?php if (kp_can('asset.edit')): ?>
                                         <button class="btn btn-sm btn-outline-primary edit-btn"
                                                 data-id="<?= $row['asset_id'] ?>"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#editAssetModal">
                                             <i class="fas fa-edit"></i>
                                         </button>
+                                        <?php endif; ?>
                                         <button type="button" class="btn btn-sm btn-outline-dark" 
                                                 onclick="showQRModal(<?= $row['asset_id'] ?>, '<?= htmlspecialchars($row['asset_code'], ENT_QUOTES) ?>', '<?= htmlspecialchars($row['name'], ENT_QUOTES) ?>')">
                                             <i class="fas fa-qrcode"></i>
                                         </button>
+                                        <?php if (kp_can('asset.delete')): ?>
                                         <button type="button" class="btn btn-sm btn-outline-danger"
                                                 onclick="confirmDelete(<?= $row['asset_id'] ?>, '<?= htmlspecialchars($row['name'], ENT_QUOTES) ?>')">
                                             <i class="fas fa-trash"></i>
                                         </button>
+                                        <?php endif; ?>
                                     </span>
                                 </td>
                             </tr>

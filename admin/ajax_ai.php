@@ -9,7 +9,9 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-$currentRole   = $_SESSION['role'] ?? 'user';
+require_once dirname(__DIR__) . '/assets/roles.php';
+
+$currentRole   = kp_current_role();
 $currentUserId = (int)$_SESSION['user_id'];
 
 require dirname(__DIR__) . '/config/db.php';
@@ -221,11 +223,11 @@ function tool_check_my_borrows(PDO $conn, array $input, int $userId): array
 }
 
 /**
- * รันเครื่องมือจริงๆ ตาม role (admin เข้าถึงได้ทุกอย่าง, user เข้าถึงได้เฉพาะที่อนุญาต)
+ * รันเครื่องมือจริงๆ ตามสิทธิ์ (แก้ไขครุภัณฑ์ได้ = ใช้เครื่องมืออัปเดตสถานะได้)
  */
 function run_tool(string $toolName, array $toolInput, PDO $conn, int $userId, string $role): array
 {
-    if ($role === 'admin') {
+    if (kp_can('asset.edit', $role)) {
         switch ($toolName) {
             case 'search_assets':
                 return tool_search_assets($conn, $toolInput);
@@ -323,8 +325,8 @@ $toolsUser = [
     ],
 ];
 
-// เลือก tools และ system prompt ตาม role
-if ($currentRole === 'admin') {
+// เลือก tools และ system prompt ตามสิทธิ์
+if (kp_can('asset.edit', $currentRole)) {
     $toolsOpenAI = $toolsAdmin;
     $systemPrompt = <<<EOT
 คุณคือ "Krupan AI" ผู้ช่วยจัดการครุภัณฑ์ของวิทยาลัย ตอบเป็นภาษาไทยเท่านั้น พูดสุภาพ กระชับ เป็นกันเอง

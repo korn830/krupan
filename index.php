@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once __DIR__ . '/assets/roles.php';
 require 'config/db.php';
 
 // Generate a new CSRF token on page load if one doesn't exist
@@ -32,8 +33,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Regenerate session ID after successful login
             session_regenerate_id(true);
 
-            if ($user["role"] === 'admin') {
-                header("Location: admin/index.php");
+            // เจ้าหน้าที่พัสดุและหัวหน้าพัสดุเข้าหน้าจัดการ ผู้ใช้ทั่วไปเข้าหน้ายืม
+            if (kp_is_staff($user["role"])) {
+                header("Location: " . kp_home_for_role($user["role"]));
             } else {
                 // ถ้ามาจาก QR ให้กลับไปหน้าขอยืมของ asset นั้น
                 if (
