@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#667eea">
+    <title>ประตูผู้ใช้ทั่วไป — ตัวอย่างหน้าเข้าสู่ระบบ</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- ใช้ไฟล์จริงของระบบ เพื่อให้ตัวอย่างนี้เหมือนหน้าจริงทุกจุด -->
+    <link rel="stylesheet" href="../../assets/vendor/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="../../assets/vendor/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="../../assets/css/tokens.css">
+    <link rel="stylesheet" href="../../assets/css/shared/login.css">
+
+    <style>
+        /* ลิงก์ข้ามไปอีกประตู — ส่วนที่เพิ่มจากหน้าเดิม */
+        .door-switch {
+            margin-top: 1.75rem;
+            padding-top: 1.25rem;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+            font-size: .9rem;
+            color: #718096;
+        }
+        .door-switch a {
+            color: #667eea;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .door-switch a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center align-items-center min-vh-100">
+            <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-4">
+                <div class="login-card">
+                    <div class="login-header">
+                        <div class="login-icon"></div>
+                        <h4>ระบบยืมครุภัณฑ์</h4>
+                        <p class="subtitle">สำหรับครูและนักเรียน</p>
+                    </div>
+
+                    <form method="POST" autocomplete="on" novalidate onsubmit="return false;">
+                        <div class="form-group">
+                            <label for="username" class="form-label">ชื่อผู้ใช้</label>
+                            <div class="input-group">
+                                <input type="text" id="username" class="form-control" autocomplete="username" required>
+                                <span class="input-icon"><i class="fas fa-user"></i></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="password" class="form-label">รหัสผ่าน</label>
+                            <div class="input-group">
+                                <input type="password" id="password" class="form-control" autocomplete="current-password" required>
+                                <span class="input-icon"><i class="fas fa-lock"></i></span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-login">เข้าสู่ระบบ</button>
+                    </form>
+
+                    <div class="door-switch">
+                        เป็นเจ้าหน้าที่? <a href="staff-a.html">เข้าสู่ระบบเจ้าหน้าที่</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
