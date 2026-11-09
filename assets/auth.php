@@ -13,14 +13,22 @@ const KP_LOGIN_OK         = 'ok';
 const KP_LOGIN_BAD_CREDS  = 'bad_credentials';
 const KP_LOGIN_WRONG_DOOR = 'wrong_door';
 
-/** โหมดของหน้าเข้าสู่ระบบ */
-const KP_MODE_USER  = 'user';
-const KP_MODE_STAFF = 'staff';
+/**
+ * โหมดของหน้าเข้าสู่ระบบ — ตรงกับระดับสิทธิ์หนึ่งต่อหนึ่ง
+ * หน้าเข้าสู่ระบบจึงมีสามช่อง: ครู / เจ้าหน้าที่พัสดุ / หัวหน้าพัสดุ
+ */
+function kp_login_modes(): array
+{
+    return [KP_ROLE_USER, KP_ROLE_OFFICER, KP_ROLE_HEAD];
+}
 
-/** รับค่าโหมดจากฟอร์มหรือ query string ให้เหลือแค่สองค่าที่ยอมรับได้ */
+/**
+ * รับค่าโหมดจากฟอร์มหรือ query string ให้เหลือเฉพาะค่าที่ยอมรับได้
+ * ค่าแปลกปลอมตกมาเป็นโหมดครูเสมอ ไม่ใช่โหมดที่มีสิทธิ์สูงกว่า
+ */
 function kp_clean_mode($mode): string
 {
-    return $mode === KP_MODE_STAFF ? KP_MODE_STAFF : KP_MODE_USER;
+    return in_array($mode, kp_login_modes(), true) ? $mode : KP_ROLE_USER;
 }
 
 /**
@@ -59,7 +67,8 @@ function kp_attempt_login(PDO $conn, string $username, string $password, string 
     }
 
     // รหัสผ่านถูกต้องแล้ว จึงบอกได้ว่าเข้าผิดประตูโดยไม่รั่วข้อมูลให้ใคร
-    if (kp_is_staff($user['role']) !== ($mode === KP_MODE_STAFF)) {
+    // แต่ละระดับสิทธิ์มีช่องของตัวเอง หัวหน้าพัสดุจึงเข้าทางช่องเจ้าหน้าที่ไม่ได้
+    if (kp_normalize_role($user['role']) !== $mode) {
         return ['status' => KP_LOGIN_WRONG_DOOR, 'user' => $user];
     }
 
@@ -77,8 +86,8 @@ function kp_start_session(array $user): void
     $_SESSION['name']    = $user['name'];
 }
 
-/** โหมดของหน้าเข้าสู่ระบบที่ตรงกับสิทธิ์ของบัญชีนี้ */
+/** ช่องเข้าสู่ระบบที่ตรงกับสิทธิ์ของบัญชีนี้ (admin/staff เดิมถูกแปลงให้แล้ว) */
 function kp_mode_for_role(?string $role): string
 {
-    return kp_is_staff($role) ? KP_MODE_STAFF : KP_MODE_USER;
+    return kp_normalize_role($role);
 }

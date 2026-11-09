@@ -3,7 +3,7 @@
  * ระดับสิทธิ์และการตรวจสอบสิทธิ์ของระบบจัดการครุภัณฑ์
  *
  * ระบบแบ่งผู้ใช้เป็น 3 ระดับ
- *   user    ผู้ใช้ทั่วไป   — ครูและบุคลากร ยืมครุภัณฑ์ได้อย่างเดียว
+ *   user    ครู           — ยืมครุภัณฑ์ได้อย่างเดียว
  *   officer เจ้าหน้าที่พัสดุ — ดูแลทะเบียนครุภัณฑ์ประจำวัน และอนุมัติการยืม
  *   head    หัวหน้าพัสดุ   — สิทธิ์ของเจ้าหน้าที่ บวกงานที่ย้อนกลับไม่ได้
  *                            (ลบครุภัณฑ์ นำเข้าข้อมูล จัดการผู้ใช้ ดูประวัติ)
@@ -20,7 +20,7 @@ const KP_ROLE_HEAD    = 'head';
 function kp_role_labels(): array
 {
     return [
-        KP_ROLE_USER    => 'ผู้ใช้ทั่วไป',
+        KP_ROLE_USER    => 'ครู',
         KP_ROLE_OFFICER => 'เจ้าหน้าที่พัสดุ',
         KP_ROLE_HEAD    => 'หัวหน้าพัสดุ',
     ];
@@ -126,9 +126,16 @@ function kp_home_for_role(?string $role = null): string
 function kp_require_cap(string $capability, string $base = '../'): void
 {
     if (!kp_is_logged_in()) {
-        // พาไปที่โหมดที่ตรงกับหน้าที่เขาพยายามเข้า
-        // ถ้าเป็นสิ่งที่ผู้ใช้ทั่วไปทำได้ ก็คือฝั่งผู้ใช้ นอกนั้นคือฝั่งเจ้าหน้าที่
-        $mode = kp_can($capability, KP_ROLE_USER) ? 'user' : 'staff';
+        // พาไปที่ช่องเข้าสู่ระบบที่ตรงกับหน้าที่เขาพยายามเข้า
+        // ครูทำได้ -> ช่องครู, เจ้าหน้าที่ทำได้ -> ช่องเจ้าหน้าที่
+        // เหลือแค่หัวหน้าที่ทำได้ -> ช่องหัวหน้า
+        if (kp_can($capability, KP_ROLE_USER)) {
+            $mode = KP_ROLE_USER;
+        } elseif (kp_can($capability, KP_ROLE_OFFICER)) {
+            $mode = KP_ROLE_OFFICER;
+        } else {
+            $mode = KP_ROLE_HEAD;
+        }
         header('Location: ' . $base . 'index.php?mode=' . $mode);
         exit;
     }

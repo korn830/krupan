@@ -58,10 +58,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         } elseif ($result['status'] === KP_LOGIN_WRONG_DOOR) {
             // รหัสผ่านถูกแล้ว แค่เลือกโหมดผิด จึงบอกได้ว่าต้องไปโหมดไหน
             // และสลับหน้าไปรอที่โหมดนั้นให้เลย ผู้ใช้จะได้กรอกซ้ำแค่ครั้งเดียว
-            $mode = kp_mode_for_role($result['user']['role']);
-            $error = $mode === KP_MODE_STAFF
-                ? "บัญชีนี้เป็นบัญชีเจ้าหน้าที่พัสดุ — สลับไปโหมดเจ้าหน้าที่ให้แล้ว กรุณาเข้าสู่ระบบอีกครั้ง"
-                : "บัญชีนี้เป็นบัญชีผู้ใช้ทั่วไป — สลับไปโหมดผู้ใช้ทั่วไปให้แล้ว กรุณาเข้าสู่ระบบอีกครั้ง";
+            $mode  = kp_mode_for_role($result['user']['role']);
+            $error = sprintf(
+                'บัญชีนี้เป็นบัญชี%s — สลับช่องให้แล้ว กรุณาเข้าสู่ระบบอีกครั้ง',
+                kp_role_label($mode)
+            );
 
         } else {
             // ข้อความเดียวกันทั้งสองโหมด ไม่บอกว่าชื่อผู้ใช้มีอยู่จริงหรือไม่
@@ -70,17 +71,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 }
 
-$isStaffMode = ($mode === KP_MODE_STAFF);
+$themeBar = ['user' => '#667eea', 'officer' => '#0f172a', 'head' => '#7f1d1d'];
 require_once __DIR__ . '/assets/kp_assets.php';
 ?>
 <!DOCTYPE html>
-<html lang="th" data-mode="<?= $isStaffMode ? 'staff' : 'user' ?>">
+<html lang="th" data-mode="<?= htmlspecialchars($mode, ENT_QUOTES, 'UTF-8') ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="theme-color" content="<?= $isStaffMode ? '#0f172a' : '#667eea' ?>">
+    <meta name="theme-color" content="<?= $themeBar[$mode] ?>">
     <title>เข้าสู่ระบบ - ระบบจัดการครุภัณฑ์</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -96,25 +97,34 @@ require_once __DIR__ . '/assets/kp_assets.php';
         <div class="login-card">
 
             <!-- สวิตช์เลือกประเภทผู้ใช้ -->
-            <div class="seg" role="radiogroup" aria-label="เลือกประเภทผู้ใช้">
+            <div class="seg seg-3" role="radiogroup" aria-label="เลือกระดับผู้ใช้งาน">
                 <span class="pill" aria-hidden="true"></span>
-                <input type="radio" name="mode_toggle" id="m-user" value="user" form="loginForm"
-                       <?= $isStaffMode ? '' : 'checked' ?>>
-                <label for="m-user"><i class="fas fa-user"></i> ครู/บุคลากร</label>
-                <input type="radio" name="mode_toggle" id="m-staff" value="staff" form="loginForm"
-                       <?= $isStaffMode ? 'checked' : '' ?>>
-                <label for="m-staff"><i class="fas fa-user-tie"></i> เจ้าหน้าที่พัสดุ</label>
+                <?php foreach ([
+                    'user'    => ['icon' => 'fa-chalkboard-user', 'label' => 'ครู'],
+                    'officer' => ['icon' => 'fa-user-tie',        'label' => 'เจ้าหน้าที่พัสดุ'],
+                    'head'    => ['icon' => 'fa-user-shield',     'label' => 'หัวหน้าพัสดุ'],
+                ] as $m => $opt): ?>
+                    <input type="radio" name="mode_toggle" id="m-<?= $m ?>" value="<?= $m ?>"
+                           form="loginForm" <?= $mode === $m ? 'checked' : '' ?>>
+                    <label for="m-<?= $m ?>">
+                        <i class="fas <?= $opt['icon'] ?>"></i>
+                        <span><?= $opt['label'] ?></span>
+                    </label>
+                <?php endforeach; ?>
             </div>
 
             <div class="login-header">
                 <div class="login-icon">
-                    <i class="fas fa-graduation-cap" data-for="user"></i>
-                    <i class="fas fa-shield-halved" data-for="staff"></i>
+                    <i class="fas fa-chalkboard-user" data-for="user"></i>
+                    <i class="fas fa-user-tie" data-for="officer"></i>
+                    <i class="fas fa-user-shield" data-for="head"></i>
                 </div>
                 <h4 data-for="user">ระบบยืมครุภัณฑ์</h4>
-                <h4 data-for="staff">ระบบทะเบียนครุภัณฑ์</h4>
-                <p class="subtitle" data-for="user">สำหรับครูและบุคลากร</p>
-                <p class="subtitle" data-for="staff">สำหรับเจ้าหน้าที่พัสดุและหัวหน้าพัสดุ</p>
+                <h4 data-for="officer">ระบบทะเบียนครุภัณฑ์</h4>
+                <h4 data-for="head">ระบบทะเบียนครุภัณฑ์</h4>
+                <p class="subtitle" data-for="user">สำหรับครูผู้ขอยืมครุภัณฑ์</p>
+                <p class="subtitle" data-for="officer">ดูแลทะเบียนและอนุมัติการยืม</p>
+                <p class="subtitle" data-for="head">ดูแลภาพรวมและจัดการผู้ใช้งาน</p>
             </div>
 
             <?php if (isset($error)): ?>
@@ -129,7 +139,7 @@ require_once __DIR__ . '/assets/kp_assets.php';
 
                 <!-- โหมดที่เลือก ส่งไปให้ฝั่งเซิร์ฟเวอร์ตรวจว่าเข้ามาถูกประตูไหม -->
                 <input type="hidden" name="mode" id="modeField"
-                       value="<?= $isStaffMode ? 'staff' : 'user' ?>">
+                       value="<?= htmlspecialchars($mode, ENT_QUOTES, 'UTF-8') ?>">
 
                 <input type="hidden" name="redirect"
                        value="<?= htmlspecialchars($redirect, ENT_QUOTES, 'UTF-8') ?>">
@@ -155,7 +165,8 @@ require_once __DIR__ . '/assets/kp_assets.php';
 
                 <button type="submit" class="btn-login">
                     <span data-for="user">เข้าสู่ระบบ</span>
-                    <span data-for="staff">เข้าสู่ระบบเจ้าหน้าที่</span>
+                    <span data-for="officer">เข้าสู่ระบบเจ้าหน้าที่</span>
+                    <span data-for="head">เข้าสู่ระบบหัวหน้าพัสดุ</span>
                 </button>
             </form>
 
@@ -163,9 +174,13 @@ require_once __DIR__ . '/assets/kp_assets.php';
                 <i class="fas fa-circle-info"></i>
                 <span>ใช้บัญชีที่ได้รับจากงานพัสดุ หากเข้าไม่ได้ กรุณาติดต่อเจ้าหน้าที่</span>
             </div>
-            <div class="login-note" data-for="staff">
+            <div class="login-note" data-for="officer">
                 <i class="fas fa-circle-info"></i>
                 <span>ส่วนนี้สำหรับเจ้าหน้าที่พัสดุเท่านั้น</span>
+            </div>
+            <div class="login-note" data-for="head">
+                <i class="fas fa-circle-info"></i>
+                <span>ส่วนนี้สำหรับหัวหน้าพัสดุเท่านั้น</span>
             </div>
         </div>
 
@@ -178,7 +193,7 @@ require_once __DIR__ . '/assets/kp_assets.php';
     var root  = document.documentElement;
     var field = document.getElementById('modeField');
     var theme = document.querySelector('meta[name="theme-color"]');
-    var bar   = { user: '#667eea', staff: '#0f172a' };
+    var bar   = { user: '#667eea', officer: '#0f172a', head: '#7f1d1d' };
 
     document.querySelectorAll('.seg input').forEach(function (radio) {
         radio.addEventListener('change', function () {
