@@ -55,6 +55,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             }
             exit;
 
+        } elseif ($result['status'] === KP_LOGIN_PENDING) {
+            // สมัครไว้แล้วแต่หัวหน้าพัสดุยังไม่อนุมัติ
+            $error = 'บัญชีนี้ยังรอหัวหน้าพัสดุอนุมัติ กรุณาติดต่องานพัสดุหากรอนาน';
+
+        } elseif ($result['status'] === KP_LOGIN_REJECTED) {
+            $error = 'คำขอสมัครของบัญชีนี้ไม่ได้รับอนุมัติ กรุณาติดต่องานพัสดุ';
+
         } elseif ($result['status'] === KP_LOGIN_WRONG_DOOR) {
             // รหัสผ่านถูกแล้ว แค่เลือกโหมดผิด จึงบอกได้ว่าต้องไปโหมดไหน
             // และสลับหน้าไปรอที่โหมดนั้นให้เลย ผู้ใช้จะได้กรอกซ้ำแค่ครั้งเดียว
@@ -166,7 +173,10 @@ require_once __DIR__ . '/assets/kp_assets.php';
 
             <div class="login-note" data-for="user">
                 <i class="fas fa-circle-info"></i>
-                <span>ใช้บัญชีที่ได้รับจากงานพัสดุ หากเข้าไม่ได้ กรุณาติดต่อเจ้าหน้าที่</span>
+                <span>
+                    ยังไม่มีบัญชี? <a href="register.php">สมัครสมาชิก</a>
+                    — บัญชีใหม่ต้องรอหัวหน้าพัสดุอนุมัติก่อน
+                </span>
             </div>
             <div class="login-note" data-for="staff">
                 <i class="fas fa-circle-info"></i>

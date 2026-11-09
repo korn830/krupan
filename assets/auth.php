@@ -12,6 +12,13 @@ require_once __DIR__ . '/roles.php';
 const KP_LOGIN_OK         = 'ok';
 const KP_LOGIN_BAD_CREDS  = 'bad_credentials';
 const KP_LOGIN_WRONG_DOOR = 'wrong_door';
+const KP_LOGIN_PENDING    = 'pending_approval';
+const KP_LOGIN_REJECTED   = 'rejected';
+
+/** สถานะบัญชี */
+const KP_STATUS_PENDING  = 'pending';
+const KP_STATUS_APPROVED = 'approved';
+const KP_STATUS_REJECTED = 'rejected';
 
 /**
  * ช่องของหน้าเข้าสู่ระบบ มีสองช่อง
@@ -54,7 +61,7 @@ function kp_attempt_login(PDO $conn, string $username, string $password, string 
     $mode = kp_clean_mode($mode);
 
     $stmt = $conn->prepare(
-        "SELECT user_id, username, password_hash, name, role FROM users WHERE username = ?"
+        "SELECT user_id, username, password_hash, name, role, status FROM users WHERE username = ?"
     );
     $stmt->execute([$username]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -71,6 +78,18 @@ function kp_attempt_login(PDO $conn, string $username, string $password, string 
 
     if (!password_verify($password, $user['password_hash'])) {
         return ['status' => KP_LOGIN_BAD_CREDS, 'user' => null];
+    }
+
+    // ตรวจสถานะบัญชีหลังรหัสผ่านผ่านแล้วเท่านั้น
+    // ถ้าตรวจก่อน คนที่ไล่สุ่มชื่อผู้ใช้จะรู้ได้ว่าบัญชีไหนเพิ่งสมัครเข้ามา
+    // ฐานข้อมูลเก่าที่ยังไม่ได้รันไมเกรชันจะไม่มีคอลัมน์นี้ ให้ถือว่าอนุมัติแล้ว
+    $accountStatus = $user['status'] ?? KP_STATUS_APPROVED;
+
+    if ($accountStatus === KP_STATUS_PENDING) {
+        return ['status' => KP_LOGIN_PENDING, 'user' => $user];
+    }
+    if ($accountStatus === KP_STATUS_REJECTED) {
+        return ['status' => KP_LOGIN_REJECTED, 'user' => $user];
     }
 
     // รหัสผ่านถูกต้องแล้ว จึงบอกได้ว่าเข้าผิดช่องโดยไม่รั่วข้อมูลให้ใคร
@@ -97,4 +116,73 @@ function kp_start_session(array $user): void
 function kp_mode_for_role(?string $role): string
 {
     return kp_is_staff($role) ? KP_MODE_STAFF : KP_MODE_USER;
+}
+
+
+/**
+ * สมัครสมาชิกด้วยตัวเอง
+ *
+ * บัญชีที่สมัครเองได้สิทธิ์ "ครู" เสมอ และต้องรอหัวหน้าพัสดุอนุมัติ
+ * ห้ามรับค่า role จากฟอร์มเด็ดขาด ไม่งั้นใครก็สมัครเป็นหัวหน้าพัสดุได้เอง
+ * ถ้าจะให้ใครเป็นเจ้าหน้าที่หรือหัวหน้า หัวหน้าพัสดุเป็นคนตั้งให้ตอนอนุมัติ
+ *
+ * @return array{ok:bool, error:?string}
+ */
+function kp_register_user(PDO $conn, string $username, string $password, string $name): array
+{
+    $username = trim($username);
+    $name     = trim($name);
+
+    if ($username === '' || $password === '' || $name === '') {
+        return ['ok' => false, 'error' => 'กรุณากรอกข้อมูลให้ครบทุกช่อง'];
+    }
+    if (!preg_match('/^[A-Za-z0-9._-]{4,50}$/', $username)) {
+        return ['ok' => false, 'error' => 'ชื่อผู้ใช้ต้องยาว 4-50 ตัว ใช้ได้เฉพาะ a-z A-Z 0-9 . _ -'];
+    }
+    if (mb_strlen($password) < 8) {
+        return ['ok' => false, 'error' => 'รหัสผ่านต้องยาวอย่างน้อย 8 ตัวอักษร'];
+    }
+    if (mb_strlen($name) > 100) {
+        return ['ok' => false, 'error' => 'ชื่อ-นามสกุลยาวเกินไป'];
+    }
+
+    try {
+        $stmt = $conn->prepare(
+            "INSERT INTO users (username, password_hash, name, role, status)
+             VALUES (?, ?, ?, ?, ?)"
+        );
+        $stmt->execute([
+            $username,
+            password_hash($password, PASSWORD_DEFAULT),
+            $name,
+            KP_ROLE_USER,        // สิทธิ์ตายตัว ไม่รับจากฟอร์ม
+            KP_STATUS_PENDING,   // รออนุมัติเสมอ
+        ]);
+    } catch (PDOException $e) {
+        // ชนคีย์ไม่ซ้ำ = ชื่อผู้ใช้นี้ถูกใช้ไปแล้ว
+        // เช็คทั้ง SQLSTATE 23000 และรหัสของ MySQL เอง (1062) เพราะ getCode()
+        // ไม่ได้คืน SQLSTATE เป็นสตริงเสมอไป ขึ้นกับไดรเวอร์และการตั้งค่า
+        $sqlState  = (string)$e->getCode();
+        $driverErr = $e->errorInfo[1] ?? null;
+        if ($sqlState === '23000' || $driverErr === 1062) {
+            return ['ok' => false, 'error' => 'ชื่อผู้ใช้นี้ถูกใช้แล้ว กรุณาเลือกชื่ออื่น'];
+        }
+        error_log('kp_register_user: ' . $e->getMessage());
+        return ['ok' => false, 'error' => 'เกิดข้อผิดพลาดในการสมัคร กรุณาลองใหม่อีกครั้ง'];
+    }
+
+    return ['ok' => true, 'error' => null];
+}
+
+/** จำนวนคำขอสมัครที่ยังรออนุมัติ */
+function kp_pending_user_count(PDO $conn): int
+{
+    try {
+        $stmt = $conn->prepare("SELECT COUNT(*) FROM users WHERE status = ?");
+        $stmt->execute([KP_STATUS_PENDING]);
+        return (int)$stmt->fetchColumn();
+    } catch (PDOException $e) {
+        error_log('kp_pending_user_count: ' . $e->getMessage());
+        return 0;
+    }
 }

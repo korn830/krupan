@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once __DIR__ . '/../assets/roles.php';
+require_once __DIR__ . '/../assets/auth.php'; // โหลด roles.php ให้ด้วย และมี KP_STATUS_* ที่หน้านี้ใช้
 kp_require_cap('user.manage', '../');
 require '../config/db.php';
 
@@ -94,6 +94,51 @@ if (isset($_GET['delete_user_id'])) {
         }
     }
 }
+// อนุมัติหรือปฏิเสธคำขอสมัคร — ทำได้เฉพาะหัวหน้าพัสดุ (หน้านี้กันด้วย user.manage อยู่แล้ว)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])
+    && in_array($_POST['action'], ['approve_user', 'reject_user'], true)) {
+
+    $target = (int)($_POST['pending_user_id'] ?? 0);
+    $decision = $_POST['action'] === 'approve_user' ? KP_STATUS_APPROVED : KP_STATUS_REJECTED;
+
+    // สิทธิ์ที่จะให้ตอนอนุมัติ เลือกได้จากฟอร์ม แต่ต้องเป็นค่าที่ยอมรับเท่านั้น
+    $grantRole = $_POST['grant_role'] ?? KP_ROLE_USER;
+    if (!in_array($grantRole, [KP_ROLE_USER, KP_ROLE_OFFICER, KP_ROLE_HEAD], true)) {
+        $grantRole = KP_ROLE_USER;
+    }
+
+    if ($target <= 0) {
+        $message = '<div class="alert alert-danger">ไม่พบคำขอที่ต้องการ</div>';
+    } else {
+        try {
+            if ($decision === KP_STATUS_APPROVED) {
+                // อนุมัติพร้อมตั้งสิทธิ์ให้ในคำสั่งเดียว
+                $stmt = $conn->prepare(
+                    "UPDATE users SET status = ?, role = ? WHERE user_id = ? AND status = ?"
+                );
+                $ok = $stmt->execute([KP_STATUS_APPROVED, $grantRole, $target, KP_STATUS_PENDING]);
+            } else {
+                $stmt = $conn->prepare(
+                    "UPDATE users SET status = ? WHERE user_id = ? AND status = ?"
+                );
+                $ok = $stmt->execute([KP_STATUS_REJECTED, $target, KP_STATUS_PENDING]);
+            }
+
+            // เงื่อนไข status = pending กันการกดซ้ำ และกันการไปแก้บัญชีที่อนุมัติไปแล้ว
+            if ($ok && $stmt->rowCount() > 0) {
+                $message = $decision === KP_STATUS_APPROVED
+                    ? '<div class="alert alert-success">อนุมัติผู้ใช้เรียบร้อยแล้ว</div>'
+                    : '<div class="alert alert-success">ปฏิเสธคำขอเรียบร้อยแล้ว</div>';
+            } else {
+                $message = '<div class="alert alert-warning">คำขอนี้ถูกดำเนินการไปแล้ว</div>';
+            }
+        } catch (PDOException $e) {
+            $message = '<div class="alert alert-danger">เกิดข้อผิดพลาด: '
+                     . htmlspecialchars($e->getMessage()) . '</div>';
+        }
+    }
+}
+
 // Handle edit user
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'edit_user') {
     $edit_id = (int)$_POST['edit_user_id'];
@@ -128,11 +173,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
+// คำขอสมัครที่ยังรออนุมัติ
+// ฐานข้อมูลที่ยังไม่ได้รันไมเกรชัน 003 จะไม่มีคอลัมน์ status
+// หน้านี้ต้องยังใช้งานได้ จึงถือว่าไม่มีคำขอค้างอยู่แทนที่จะพังทั้งหน้า
+$pending      = [];
+$hasApprovals = true;
+try {
+    $ps = $conn->prepare(
+        "SELECT user_id, username, name, created_at
+           FROM users WHERE status = ? ORDER BY created_at ASC, user_id ASC"
+    );
+    $ps->execute([KP_STATUS_PENDING]);
+    $pending = $ps->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $hasApprovals = false;
+    error_log('pending users: ' . $e->getMessage());
+}
+
 // Fetch all users for the table display
 $users = [];
 try {
-    $stmt = $conn->prepare("SELECT user_id, username, name, role FROM users ORDER BY user_id DESC");
-    $stmt->execute();
+    if ($hasApprovals) {
+        // ซ่อนคำขอที่ยังไม่อนุมัติออกจากรายชื่อหลัก เพราะมีตารางของตัวเองอยู่ด้านบน
+        $stmt = $conn->prepare(
+            "SELECT user_id, username, name, role FROM users WHERE status <> ? ORDER BY user_id DESC"
+        );
+        $stmt->execute([KP_STATUS_PENDING]);
+    } else {
+        $stmt = $conn->prepare("SELECT user_id, username, name, role FROM users ORDER BY user_id DESC");
+        $stmt->execute();
+    }
     $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     // Only set message if no other message is already set from form submission
@@ -164,6 +234,69 @@ try {
     </div>
 
     <?= $message ?>
+
+    <?php if ($pending): ?>
+    <div class="pending-panel">
+        <h6 class="pending-title">
+            <i class="fas fa-user-clock me-1"></i>
+            คำขอสมัครที่รออนุมัติ
+            <span class="pending-count"><?= count($pending) ?></span>
+        </h6>
+        <p class="pending-help">
+            ผู้ที่สมัครเองจะยังเข้าระบบไม่ได้จนกว่าจะอนุมัติ
+            เลือกสิทธิ์ที่ต้องการให้ก่อนกดอนุมัติ
+        </p>
+
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>ชื่อผู้ใช้</th>
+                        <th>ชื่อ-นามสกุล</th>
+                        <th>สมัครเมื่อ</th>
+                        <th>ให้สิทธิ์เป็น</th>
+                        <th>จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($pending as $req): ?>
+                    <tr>
+                        <td><?= htmlspecialchars($req['username']) ?></td>
+                        <td><?= htmlspecialchars((string)$req['name']) ?></td>
+                        <td class="text-muted">
+                            <?= $req['created_at']
+                                ? htmlspecialchars(date('d/m/', strtotime($req['created_at']))
+                                    . (date('Y', strtotime($req['created_at'])) + 543))
+                                : '-' ?>
+                        </td>
+                        <td>
+                            <form method="POST" class="d-flex gap-2 align-items-center m-0">
+                                <input type="hidden" name="pending_user_id" value="<?= (int)$req['user_id'] ?>">
+                                <select name="grant_role" class="form-select form-select-sm" style="min-width:150px;">
+                                    <option value="<?= KP_ROLE_USER ?>">ครู</option>
+                                    <option value="<?= KP_ROLE_OFFICER ?>">เจ้าหน้าที่พัสดุ</option>
+                                    <option value="<?= KP_ROLE_HEAD ?>">หัวหน้าพัสดุ</option>
+                                </select>
+                        </td>
+                        <td class="text-nowrap">
+                                <button type="submit" name="action" value="approve_user"
+                                        class="btn btn-sm btn-success">
+                                    <i class="fas fa-check"></i> อนุมัติ
+                                </button>
+                                <button type="submit" name="action" value="reject_user"
+                                        class="btn btn-sm btn-outline-danger"
+                                        onclick="return confirm('ปฏิเสธคำขอของ <?= htmlspecialchars($req['username'], ENT_QUOTES) ?> ?');">
+                                    <i class="fas fa-xmark"></i> ปฏิเสธ
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <?php endif; ?>
 
     <?php if (empty($users)): ?>
         <div class="alert alert-info">ยังไม่มีผู้ใช้งานในระบบ</div>

@@ -527,3 +527,38 @@ body::before {
 @media (max-width: 440px) { .seg label { font-size: .82rem; gap: .3rem; padding: .62rem .2rem; } }
 @media (max-width: 380px) { .seg label i { display: none; } .seg label { font-size: .78rem; } }
 @media (max-width: 330px) { .seg label { font-size: .72rem; } }
+
+/* ==========================================================================
+   หน้าสมัครสมาชิก — ใช้การ์ดและฟอร์มชุดเดียวกับหน้าเข้าสู่ระบบ
+   ========================================================================== */
+
+.field-hint {
+    display: block;
+    margin-top: .4rem;
+    font-size: .78rem;
+    color: #94a3b8;
+}
+
+.register-done {
+    margin: 0 0 1.4rem;
+    color: #475569;
+    font-size: .92rem;
+    line-height: 1.75;
+    text-align: center;
+}
+
+.alert-success {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    color: #065f46;
+    border-left: 4px solid #10b981;
+}
+
+.alert-success::before { content: ''; margin-right: 0; }
+
+.login-note a {
+    color: var(--lg-a1);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.login-note a:hover { text-decoration: underline; }
