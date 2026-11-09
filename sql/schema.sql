@@ -12,7 +12,12 @@ CREATE TABLE users (
     -- officer เจ้าหน้าที่พัสดุ จัดการทะเบียนครุภัณฑ์ และอนุมัติการยืม
     -- head    หัวหน้าพัสดุ   เพิ่มสิทธิ์ลบ นำเข้าข้อมูล จัดการผู้ใช้ และดูประวัติ
     -- admin/staff เป็นชื่อเดิม เก็บไว้ให้ฐานข้อมูลเก่าใช้งานต่อได้
-    role ENUM('user', 'officer', 'head', 'admin', 'staff') NOT NULL DEFAULT 'user'
+    role ENUM('user', 'officer', 'head', 'admin', 'staff') NOT NULL DEFAULT 'user',
+    -- สมัครเองจะได้ pending ต้องให้หัวหน้าพัสดุอนุมัติก่อนจึงเข้าระบบได้
+    -- บัญชีที่หัวหน้าสร้างเองเป็น approved ทันที
+    status ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'approved',
+    created_at DATETIME NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_users_status (status)
 );
 
 -- ตารางหมวดหมู่

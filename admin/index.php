@@ -47,6 +47,10 @@ foreach ($status_summary as $row) {
 $all_statuses = ['ใช้งานปกติ', 'ชำรุด', 'ส่งซ่อม', 'จำหน่าย', 'ถูกยืม'];
 $user_count = $conn->query("SELECT COUNT(*) FROM users WHERE role != 'admin'")->fetchColumn();
 
+// หัวหน้าพัสดุควรเห็นทันทีว่ามีคำขอสมัครค้างอยู่กี่รายการ
+require_once __DIR__ . '/../assets/auth.php';
+$pendingUsers = kp_can('user.manage') ? kp_pending_user_count($conn) : 0;
+
 require 'header.php'; // พ่น <head> และแถบเมนู
 ?>
 
@@ -58,6 +62,15 @@ require 'header.php'; // พ่น <head> และแถบเมนู
     <h4 class="m-0"><i class="fas fa-chart-pie me-2"></i> แผงควบคุม (Dashboard)</h4>
     <p class="m-0 mt-2 text-white-50">ยินดีต้อนรับคุณ <?= htmlspecialchars($_SESSION["name"]) ?></p>
 </div>
+
+<?php if ($pendingUsers > 0): ?>
+<div class="alert alert-warning fade-in mb-4" role="alert"
+     style="border-radius:12px; border-left:4px solid #f59e0b;">
+    <i class="fas fa-user-clock me-2"></i>
+    มีคำขอสมัครรออนุมัติ <strong><?= $pendingUsers ?></strong> รายการ
+    — <a href="add_user.php" class="alert-link">ไปที่หน้าจัดการผู้ใช้</a>
+</div>
+<?php endif; ?>
 
 <div class="row fade-in">
     <div class="col-lg-8">
