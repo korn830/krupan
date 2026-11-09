@@ -7,7 +7,7 @@ require_once __DIR__ . '/../assets/roles.php';
 
 // โซนนี้สำหรับเจ้าหน้าที่พัสดุและหัวหน้าพัสดุเท่านั้น
 if (!kp_is_logged_in()) {
-    header("Location: ../index.php");
+    header("Location: ../index.php?mode=staff");
     exit;
 }
 if (!kp_is_staff()) {

@@ -126,7 +126,10 @@ function kp_home_for_role(?string $role = null): string
 function kp_require_cap(string $capability, string $base = '../'): void
 {
     if (!kp_is_logged_in()) {
-        header('Location: ' . $base . 'index.php');
+        // พาไปที่โหมดที่ตรงกับหน้าที่เขาพยายามเข้า
+        // ถ้าเป็นสิ่งที่ผู้ใช้ทั่วไปทำได้ ก็คือฝั่งผู้ใช้ นอกนั้นคือฝั่งเจ้าหน้าที่
+        $mode = kp_can($capability, KP_ROLE_USER) ? 'user' : 'staff';
+        header('Location: ' . $base . 'index.php?mode=' . $mode);
         exit;
     }
 

@@ -9,7 +9,7 @@ if (!isset($_SESSION["user_id"])) {
         $redirect .= '?id=' . (int)$_GET['id'];
     }
 
-    header('Location: ../index.php?redirect=' . urlencode($redirect));
+    header('Location: ../index.php?mode=user&redirect=' . urlencode($redirect));
     exit;
 }
 

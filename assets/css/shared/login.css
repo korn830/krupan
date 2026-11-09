@@ -3,6 +3,26 @@
 /* Thai-friendly font imports */
 @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
 
+
+/* ==========================================================================
+   โหมดผู้ใช้ทั่วไป / โหมดเจ้าหน้าที่
+   สลับชุดตัวแปรชุดเดียว หน้าทั้งหน้าก็เปลี่ยนตาม
+   ========================================================================== */
+:root[data-mode="user"] {
+    --lg-a1:   #667eea;
+    --lg-a2:   #764ba2;
+    --lg-page: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --lg-ring: rgba(102, 126, 234, 0.14);
+    --lg-note: #667eea;
+}
+:root[data-mode="staff"] {
+    --lg-a1:   #1e293b;
+    --lg-a2:   #334155;
+    --lg-page: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+    --lg-ring: rgba(30, 41, 59, 0.16);
+    --lg-note: #c2900f;
+}
+
 /* Global styles */
 * {
     margin: 0;
@@ -18,7 +38,8 @@ html {
 
 body {
     font-family: 'Sarabun', sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--lg-page);
+    transition: background .55s ease;
     min-height: 100vh;
     min-height: 100dvh; /* Dynamic viewport height for mobile */
     display: flex;
@@ -71,7 +92,7 @@ body::before {
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
+    background: linear-gradient(90deg, var(--lg-a1), var(--lg-a2), var(--lg-a1));
     background-size: 200% 100%;
     animation: shimmer 2s infinite;
 }
@@ -112,7 +133,8 @@ body::before {
 .login-icon {
     width: 60px;
     height: 60px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, var(--lg-a1), var(--lg-a2));
+    transition: background .55s ease;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -121,9 +143,9 @@ body::before {
     box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
 }
 
-.login-icon::before {
-    content: '🔐';
-    font-size: 1.5rem;
+.login-icon {
+    color: #fff;
+    font-size: 1.4rem;
 }
 
 /* Form styles */
@@ -157,8 +179,8 @@ body::before {
 
 .form-control:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: var(--lg-a1);
+    box-shadow: 0 0 0 3px var(--lg-ring);
     transform: translateY(-1px);
 }
 
@@ -190,7 +212,7 @@ body::before {
 .btn-login {
     width: 100%;
     padding: 0.875rem 1.5rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--lg-a1) 0%, var(--lg-a2) 100%);
     border: none;
     border-radius: 12px;
     color: white;
@@ -383,4 +405,117 @@ body::before {
 .btn-login:focus-visible {
     outline: 2px solid #667eea;
     outline-offset: 2px;
+}
+/* ==========================================================================
+   สวิตช์เลือกประเภทผู้ใช้ และส่วนประกอบที่เพิ่มเข้ามากับหน้าเข้าสู่ระบบแบบสองโหมด
+   ========================================================================== */
+
+.login-wrap {
+    width: 100%;
+    max-width: 430px;
+    z-index: 1;
+    padding: 1rem;
+}
+
+.seg {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: #eef1f6;
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 1.9rem;
+}
+
+.seg input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.seg label {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .4rem;
+    padding: .62rem .4rem;
+    margin: 0;
+    font-size: .92rem;
+    font-weight: 600;
+    color: #6b7280;
+    border-radius: 9px;
+    cursor: pointer;
+    user-select: none;
+    transition: color .3s ease;
+}
+
+.seg label i { font-size: .85rem; }
+
+.seg .pill {
+    position: absolute;
+    z-index: 0;
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    width: calc(50% - 4px);
+    background: #fff;
+    border-radius: 9px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, .13);
+    transition: transform .32s cubic-bezier(.4, 0, .2, 1);
+}
+
+:root[data-mode="staff"] .seg .pill { transform: translateX(100%); }
+:root[data-mode="user"]  label[for="m-user"]  { color: var(--lg-a1); }
+:root[data-mode="staff"] label[for="m-staff"] { color: var(--lg-a1); }
+
+.seg input:focus-visible + label {
+    outline: 2px solid var(--lg-a1);
+    outline-offset: 2px;
+}
+
+/* ข้อความที่สลับตามโหมด
+   ใช้ :root นำหน้าให้ความจำเพาะสูงกว่ากฎ .login-note ด้านล่าง
+   ไม่งั้น display: flex จะชนะ แล้วข้อความจะโผล่พร้อมกันทั้งสองโหมด */
+:root [data-for] { display: none; }
+
+:root[data-mode="user"]  [data-for="user"],
+:root[data-mode="staff"] [data-for="staff"]            { display: block; }
+
+:root[data-mode="user"]  .login-note[data-for="user"],
+:root[data-mode="staff"] .login-note[data-for="staff"] { display: flex; }
+
+:root[data-mode="user"]  i[data-for="user"],
+:root[data-mode="staff"] i[data-for="staff"]           { display: inline-block; }
+
+:root[data-mode="user"]  span[data-for="user"],
+:root[data-mode="staff"] span[data-for="staff"]        { display: inline; }
+
+.login-note {
+    margin-top: 1.3rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid #eef1f6;
+    font-size: .82rem;
+    color: #6b7280;
+    line-height: 1.65;
+    align-items: flex-start;
+    gap: .5rem;
+}
+
+.login-note i {
+    color: var(--lg-note);
+    margin-top: .18rem;
+}
+
+.login-org {
+    text-align: center;
+    margin: 1.4rem 0 0;
+    color: rgba(255, 255, 255, .72);
+    font-size: .82rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body, .login-icon, .login-card, .btn-login, .seg .pill { transition: none !important; }
+    .login-card::before { animation: none; }
 }
