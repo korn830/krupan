@@ -100,7 +100,7 @@ require_once __DIR__ . '/assets/kp_assets.php';
                 <span class="pill" aria-hidden="true"></span>
                 <input type="radio" name="mode_toggle" id="m-user" value="user" form="loginForm"
                        <?= $isStaffMode ? '' : 'checked' ?>>
-                <label for="m-user"><i class="fas fa-user"></i> ผู้ใช้ทั่วไป</label>
+                <label for="m-user"><i class="fas fa-user"></i> ครู/บุคลากร</label>
                 <input type="radio" name="mode_toggle" id="m-staff" value="staff" form="loginForm"
                        <?= $isStaffMode ? 'checked' : '' ?>>
                 <label for="m-staff"><i class="fas fa-user-tie"></i> เจ้าหน้าที่พัสดุ</label>
