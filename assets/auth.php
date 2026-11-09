@@ -14,21 +14,28 @@ const KP_LOGIN_BAD_CREDS  = 'bad_credentials';
 const KP_LOGIN_WRONG_DOOR = 'wrong_door';
 
 /**
- * โหมดของหน้าเข้าสู่ระบบ — ตรงกับระดับสิทธิ์หนึ่งต่อหนึ่ง
- * หน้าเข้าสู่ระบบจึงมีสามช่อง: ครู / เจ้าหน้าที่พัสดุ / หัวหน้าพัสดุ
+ * ช่องของหน้าเข้าสู่ระบบ มีสองช่อง
+ *   user  — ครู
+ *   staff — เจ้าหน้าที่พัสดุและหัวหน้าพัสดุ ใช้ช่องเดียวกัน
+ *
+ * ระดับสิทธิ์ยังมีสามระดับเหมือนเดิม แค่สองระดับบนเข้าทางเดียวกัน
+ * สิทธิ์ที่ได้หลังเข้าระบบยังแยกกันตามบัญชี ไม่ได้ขึ้นกับช่องที่เลือก
  */
+const KP_MODE_USER  = 'user';
+const KP_MODE_STAFF = 'staff';
+
 function kp_login_modes(): array
 {
-    return [KP_ROLE_USER, KP_ROLE_OFFICER, KP_ROLE_HEAD];
+    return [KP_MODE_USER, KP_MODE_STAFF];
 }
 
 /**
  * รับค่าโหมดจากฟอร์มหรือ query string ให้เหลือเฉพาะค่าที่ยอมรับได้
- * ค่าแปลกปลอมตกมาเป็นโหมดครูเสมอ ไม่ใช่โหมดที่มีสิทธิ์สูงกว่า
+ * ค่าแปลกปลอมตกมาเป็นช่องครูเสมอ ไม่ใช่ช่องที่มีสิทธิ์สูงกว่า
  */
 function kp_clean_mode($mode): string
 {
-    return in_array($mode, kp_login_modes(), true) ? $mode : KP_ROLE_USER;
+    return in_array($mode, kp_login_modes(), true) ? $mode : KP_MODE_USER;
 }
 
 /**
@@ -66,9 +73,9 @@ function kp_attempt_login(PDO $conn, string $username, string $password, string 
         return ['status' => KP_LOGIN_BAD_CREDS, 'user' => null];
     }
 
-    // รหัสผ่านถูกต้องแล้ว จึงบอกได้ว่าเข้าผิดประตูโดยไม่รั่วข้อมูลให้ใคร
-    // แต่ละระดับสิทธิ์มีช่องของตัวเอง หัวหน้าพัสดุจึงเข้าทางช่องเจ้าหน้าที่ไม่ได้
-    if (kp_normalize_role($user['role']) !== $mode) {
+    // รหัสผ่านถูกต้องแล้ว จึงบอกได้ว่าเข้าผิดช่องโดยไม่รั่วข้อมูลให้ใคร
+    // เจ้าหน้าที่พัสดุกับหัวหน้าพัสดุใช้ช่องเดียวกัน จึงเทียบแค่ว่าเป็นฝั่งพัสดุไหม
+    if (kp_is_staff($user['role']) !== ($mode === KP_MODE_STAFF)) {
         return ['status' => KP_LOGIN_WRONG_DOOR, 'user' => $user];
     }
 
@@ -89,5 +96,5 @@ function kp_start_session(array $user): void
 /** ช่องเข้าสู่ระบบที่ตรงกับสิทธิ์ของบัญชีนี้ (admin/staff เดิมถูกแปลงให้แล้ว) */
 function kp_mode_for_role(?string $role): string
 {
-    return kp_normalize_role($role);
+    return kp_is_staff($role) ? KP_MODE_STAFF : KP_MODE_USER;
 }

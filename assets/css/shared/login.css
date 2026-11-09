@@ -5,7 +5,7 @@
 
 
 /* ==========================================================================
-   โหมดครู / เจ้าหน้าที่พัสดุ / หัวหน้าพัสดุ
+   โหมดครู / งานพัสดุ
    สลับชุดตัวแปรชุดเดียว หน้าทั้งหน้าก็เปลี่ยนตาม
    ========================================================================== */
 :root[data-mode="user"] {
@@ -15,20 +15,12 @@
     --lg-ring: rgba(102, 126, 234, 0.14);
     --lg-note: #667eea;
 }
-:root[data-mode="officer"] {
+:root[data-mode="staff"] {
     --lg-a1:   #1e293b;
     --lg-a2:   #334155;
     --lg-page: linear-gradient(135deg, #0f172a 0%, #334155 100%);
     --lg-ring: rgba(30, 41, 59, 0.16);
     --lg-note: #c2900f;
-}
-/* หัวหน้าพัสดุใช้โทนแดงเข้ม ให้ตรงกับป้ายสิทธิ์สีแดงในหน้าจัดการผู้ใช้ */
-:root[data-mode="head"] {
-    --lg-a1:   #7f1d1d;
-    --lg-a2:   #9f1239;
-    --lg-page: linear-gradient(135deg, #581c1c 0%, #9f1239 100%);
-    --lg-ring: rgba(127, 29, 29, 0.18);
-    --lg-note: #b45309;
 }
 
 /* Global styles */
@@ -474,19 +466,10 @@ body::before {
     transition: transform .32s cubic-bezier(.4, 0, .2, 1);
 }
 
-/* สามช่อง: ตัวเลื่อนกว้างหนึ่งในสาม
-   ไม่ใส่ไอคอนในช่อง เพราะชื่อเต็มอย่าง "เจ้าหน้าที่พัสดุ" ต้องอยู่บรรทัดเดียว */
-.seg-3 { grid-template-columns: repeat(3, 1fr); }
-.seg-3 .pill  { width: calc(33.3333% - 2.67px); }
-.seg-3 label  { font-size: .86rem; padding: .62rem .2rem; white-space: nowrap; }
-.seg-3 label i { display: none; }
+:root[data-mode="staff"] .seg .pill { transform: translateX(100%); }
 
-:root[data-mode="officer"] .seg-3 .pill { transform: translateX(100%); }
-:root[data-mode="head"]    .seg-3 .pill { transform: translateX(200%); }
-
-:root[data-mode="user"]    label[for="m-user"]    { color: var(--lg-a1); }
-:root[data-mode="officer"] label[for="m-officer"] { color: var(--lg-a1); }
-:root[data-mode="head"]    label[for="m-head"]    { color: var(--lg-a1); }
+:root[data-mode="user"]  label[for="m-user"]  { color: var(--lg-a1); }
+:root[data-mode="staff"] label[for="m-staff"] { color: var(--lg-a1); }
 
 .seg input:focus-visible + label {
     outline: 2px solid var(--lg-a1);
@@ -498,21 +481,17 @@ body::before {
    ไม่งั้น display: flex จะชนะ แล้วข้อความจะโผล่พร้อมกันทั้งสองโหมด */
 :root [data-for] { display: none; }
 
-:root[data-mode="user"]    [data-for="user"],
-:root[data-mode="officer"] [data-for="officer"],
-:root[data-mode="head"]    [data-for="head"]                 { display: block; }
+:root[data-mode="user"]  [data-for="user"],
+:root[data-mode="staff"] [data-for="staff"]            { display: block; }
 
-:root[data-mode="user"]    .login-note[data-for="user"],
-:root[data-mode="officer"] .login-note[data-for="officer"],
-:root[data-mode="head"]    .login-note[data-for="head"]      { display: flex; }
+:root[data-mode="user"]  .login-note[data-for="user"],
+:root[data-mode="staff"] .login-note[data-for="staff"] { display: flex; }
 
-:root[data-mode="user"]    i[data-for="user"],
-:root[data-mode="officer"] i[data-for="officer"],
-:root[data-mode="head"]    i[data-for="head"]                { display: inline-block; }
+:root[data-mode="user"]  i[data-for="user"],
+:root[data-mode="staff"] i[data-for="staff"]           { display: inline-block; }
 
-:root[data-mode="user"]    span[data-for="user"],
-:root[data-mode="officer"] span[data-for="officer"],
-:root[data-mode="head"]    span[data-for="head"]             { display: inline; }
+:root[data-mode="user"]  span[data-for="user"],
+:root[data-mode="staff"] span[data-for="staff"]        { display: inline; }
 
 .login-note {
     margin-top: 1.3rem;
@@ -543,7 +522,8 @@ body::before {
 }
 
 
-/* จอแคบ: ย่อตัวอักษรลงให้ "เจ้าหน้าที่พัสดุ" ซึ่งยาวที่สุดยังอยู่บรรทัดเดียว */
-@media (max-width: 480px) { .seg-3 label { font-size: .78rem; } }
-@media (max-width: 400px) { .seg-3 label { font-size: .72rem; padding: .6rem .1rem; } }
-@media (max-width: 340px) { .seg-3 label { font-size: .66rem; } }
+/* จอแคบ: ย่อตัวอักษรให้ "เจ้าหน้าที่/หัวหน้าพัสดุ" ยังอยู่บรรทัดเดียว */
+.seg label { white-space: nowrap; }
+@media (max-width: 440px) { .seg label { font-size: .82rem; gap: .3rem; padding: .62rem .2rem; } }
+@media (max-width: 380px) { .seg label i { display: none; } .seg label { font-size: .78rem; } }
+@media (max-width: 330px) { .seg label { font-size: .72rem; } }

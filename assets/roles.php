@@ -127,15 +127,8 @@ function kp_require_cap(string $capability, string $base = '../'): void
 {
     if (!kp_is_logged_in()) {
         // พาไปที่ช่องเข้าสู่ระบบที่ตรงกับหน้าที่เขาพยายามเข้า
-        // ครูทำได้ -> ช่องครู, เจ้าหน้าที่ทำได้ -> ช่องเจ้าหน้าที่
-        // เหลือแค่หัวหน้าที่ทำได้ -> ช่องหัวหน้า
-        if (kp_can($capability, KP_ROLE_USER)) {
-            $mode = KP_ROLE_USER;
-        } elseif (kp_can($capability, KP_ROLE_OFFICER)) {
-            $mode = KP_ROLE_OFFICER;
-        } else {
-            $mode = KP_ROLE_HEAD;
-        }
+        // ถ้าเป็นสิ่งที่ครูทำได้ ก็คือช่องครู นอกนั้นคือช่องงานพัสดุ
+        $mode = kp_can($capability, KP_ROLE_USER) ? 'user' : 'staff';
         header('Location: ' . $base . 'index.php?mode=' . $mode);
         exit;
     }
