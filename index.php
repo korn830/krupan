@@ -113,7 +113,7 @@ require_once __DIR__ . '/assets/kp_assets.php';
                 </div>
                 <h4 data-for="user">ระบบยืมครุภัณฑ์</h4>
                 <h4 data-for="staff">ระบบทะเบียนครุภัณฑ์</h4>
-                <p class="subtitle" data-for="user">สำหรับครูและนักเรียน</p>
+                <p class="subtitle" data-for="user">สำหรับครูและบุคลากร</p>
                 <p class="subtitle" data-for="staff">สำหรับเจ้าหน้าที่พัสดุและหัวหน้าพัสดุ</p>
             </div>
 
