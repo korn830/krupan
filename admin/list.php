@@ -156,6 +156,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $fsn_class = trim((string)($_POST['fsn_class'] ?? ''));
         $fsn_type  = trim((string)($_POST['fsn_type']  ?? ''));
 
+        // ประเภทยึดตามหมวดหมู่ที่เลือกเป็นหลัก ไม่เชื่อค่าที่ส่งมากับฟอร์ม
+        // ช่องในหน้าเว็บถูกล็อกไว้ก็จริง แต่ใครก็แก้ค่าที่ส่งมาได้
+        // ถ้าไม่ยึดฝั่งนี้ เลขครุภัณฑ์กับหมวดหมู่จะขัดกันเองได้
+        $catFsn = null;
+        if ($category_id !== '' && $category_id !== null) {
+            $catStmt = $conn->prepare("SELECT fsn_class FROM categories WHERE category_id = ?");
+            $catStmt->execute([$category_id]);
+            $catFsn = $catStmt->fetchColumn();
+        }
+        if (is_string($catFsn) && preg_match('/^\\d{4}$/', $catFsn)) {
+            $fsn_class = $catFsn;
+        }
+
         // ต้องเป็นตัวเลขครบตามจำนวนหลักเท่านั้น ไม่ตัดอักขระอื่นทิ้งเงียบ ๆ
         // เพราะ '71x0' ที่ถูกตัดเหลือ '710' จะกลายเป็นเลขครุภัณฑ์ที่ผิดโดยไม่มีใครรู้
         if (!preg_match('/^\\d{4}$/', $fsn_class) || !preg_match('/^\\d{3}$/', $fsn_type)) {
@@ -796,37 +809,6 @@ function printQR() {
             <div class="info"><strong>ชื่อ:</strong> ${assetName}</div>
             <img src="${qrImage}" alt="QR Code">
             <p><small>ระบบจัดการครุภัณฑ์ วิทยาลัยการอาชีพวังไกลกังวล</small></p>
-        <script>
-// เลือกหมวดหมู่ -> เติม "ประเภท" 4 หลักตามที่ผูกไว้กับหมวดหมู่นั้น
-// และแสดงชื่อกลุ่มจาก 2 หลักแรก เพื่อให้ผู้ดูแลเห็นว่ากำลังกรอกกลุ่มอะไร
-(function () {
-  var GROUPS = <?= json_encode(fsn_groups(), JSON_UNESCAPED_UNICODE) ?>;
-  var cls  = document.getElementById("fsn_class");
-  var help = document.getElementById("fsn_help");
-  var baseHelp = help ? help.textContent : "";
-  if (!cls) return;
-
-  function showGroup() {
-    var v = (cls.value || "").replace(/\D/g, "");
-    if (v.length >= 2 && GROUPS[v.slice(0, 2)]) {
-      help.textContent = "กลุ่ม " + v.slice(0, 2) + " — " + GROUPS[v.slice(0, 2)];
-    } else {
-      help.textContent = baseHelp;
-    }
-  }
-  cls.addEventListener("input", showGroup);
-
-  // หมวดหมู่ที่ผูกประเภทไว้แล้วจะเติมให้อัตโนมัติ ผู้ดูแลยังแก้เองได้
-  document.querySelectorAll('select[name="category_id"]').forEach(function (sel) {
-    sel.addEventListener("change", function () {
-      var fsn = this.options[this.selectedIndex] &&
-                this.options[this.selectedIndex].getAttribute("data-fsn-class");
-      if (fsn && !cls.value) { cls.value = fsn; showGroup(); }
-    });
-  });
-  showGroup();
-})();
-</script>
 </body>
         </html>
     `);
@@ -841,6 +823,59 @@ function printQR() {
 }
 </script>
 
+
+<script>
+// ผูกหมวดหมู่เข้ากับ "ประเภท" 4 หลักของเลขครุภัณฑ์
+// เลือกหมวดหมู่แล้วช่องประเภทเปลี่ยนตามทันที และล็อกไว้ไม่ให้พิมพ์ทับ
+// เพื่อให้เลขครุภัณฑ์ตรงกับหมวดหมู่เสมอ ฝั่งเซิร์ฟเวอร์ก็ยึดหมวดหมู่เป็นหลักเช่นกัน
+(function () {
+  var GROUPS = <?= json_encode(fsn_groups(), JSON_UNESCAPED_UNICODE) ?>;
+  var cls  = document.getElementById("fsn_class");
+  var help = document.getElementById("fsn_help");
+  if (!cls || !help) return;
+
+  var baseHelp = help.textContent;
+
+  function describe() {
+    var v = (cls.value || "").replace(/\D/g, "");
+    if (v.length >= 2 && GROUPS[v.slice(0, 2)]) {
+      help.textContent = "กลุ่ม " + v.slice(0, 2) + " — " + GROUPS[v.slice(0, 2)];
+    } else {
+      help.textContent = baseHelp;
+    }
+  }
+
+  // หมวดหมู่ที่ยังไม่ได้ผูกประเภทไว้ ต้องกรอกเอง และบอกให้รู้ว่าควรไปผูกไว้
+  function applyCategory(sel) {
+    var opt = sel.options[sel.selectedIndex];
+    var fsn = opt ? (opt.getAttribute("data-fsn-class") || "") : "";
+
+    if (/^\d{4}$/.test(fsn)) {
+      cls.value = fsn;
+      cls.readOnly = true;
+      cls.classList.add("fsn-locked");
+      describe();
+    } else {
+      // ล้างค่าเดิมทิ้งเสมอ ไม่งั้นเลขของหมวดหมู่ก่อนหน้าจะค้างอยู่
+      // แล้วถูกบันทึกไปกับหมวดหมู่ใหม่โดยไม่มีใครสังเกต
+      cls.value = "";
+      cls.readOnly = false;
+      cls.classList.remove("fsn-locked");
+      help.textContent = sel.value === ""
+        ? baseHelp
+        : "หมวดหมู่นี้ยังไม่ได้ผูกประเภท กรุณากรอกเอง หรือไปตั้งค่าที่หน้าหมวดหมู่";
+    }
+  }
+
+  cls.addEventListener("input", describe);
+
+  var addSelect = document.querySelector('#addModal select[name="category_id"]');
+  if (addSelect) {
+    addSelect.addEventListener("change", function () { applyCategory(this); });
+    applyCategory(addSelect);
+  }
+})();
+</script>
 <script src="js/assets-list.js"></script>
 
 <?php require 'footer.php'; ?>
