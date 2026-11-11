@@ -7,7 +7,7 @@ kp_require_cap('borrow.request', '../');
 require '../config/db.php';
 
 // สรุปการยืม "ของผู้ใช้คนนี้เท่านั้น"
-// ผู้ใช้งานไม่ต้องเห็นภาพรวมครุภัณฑ์ของทั้งวิทยาลัย นั่นเป็นงานของเจ้าหน้าที่พัสดุ
+// ผู้ใช้งานไม่ต้องเห็นภาพรวมครุภัณฑ์ของทั้งวิทยาลัย นั่นเป็นงานของแอดมิน
 require_once __DIR__ . '/../assets/borrow_status.php';
 
 // ปรับรายการที่เลยกำหนดคืนให้เป็น 'เกินวันที่กำหนด' ก่อนอ่านตัวเลข
@@ -66,7 +66,7 @@ require 'header.php'; // พ่น <head> และแถบเมนู
 <div class="alert alert-danger fade-in mb-3" role="alert" style="border-radius:12px; border-left:4px solid #ef4444;">
     <i class="fas fa-triangle-exclamation me-2"></i>
     คุณมีครุภัณฑ์ที่<strong>เกินกำหนดคืน</strong>อยู่ <strong><?= $overdue_count ?></strong> รายการ
-    กรุณาติดต่อเจ้าหน้าที่พัสดุเพื่อคืนโดยเร็ว
+    กรุณาติดต่อแอดมินเพื่อคืนโดยเร็ว
     — <a href="my_borrow.php" class="alert-link">ดูรายการยืมของฉัน</a>
 </div>
 <?php endif; ?>

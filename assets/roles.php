@@ -2,27 +2,24 @@
 /**
  * ระดับสิทธิ์และการตรวจสอบสิทธิ์ของระบบจัดการครุภัณฑ์
  *
- * ระบบแบ่งผู้ใช้เป็น 3 ระดับ
- *   user    ผู้ใช้งาน      — ยืมครุภัณฑ์ได้อย่างเดียว
- *   officer เจ้าหน้าที่พัสดุ — ดูแลทะเบียนครุภัณฑ์ประจำวัน และอนุมัติการยืม
- *   head    หัวหน้าพัสดุ   — สิทธิ์ของเจ้าหน้าที่ บวกงานที่ย้อนกลับไม่ได้
- *                            (ลบครุภัณฑ์ นำเข้าข้อมูล จัดการผู้ใช้ ดูประวัติ)
+ * ระบบแบ่งผู้ใช้เป็น 2 ระดับ
+ *   user  ผู้ใช้งาน — ยืมครุภัณฑ์ได้อย่างเดียว
+ *   admin แอดมิน    — ดูแลทะเบียนครุภัณฑ์ทั้งหมด อนุมัติการยืม
+ *                     ลบ นำเข้าข้อมูล จัดการผู้ใช้ และดูประวัติ
  *
  * ทุกหน้าให้เรียก kp_require_cap() แทนการเช็ค $_SESSION['role'] ตรง ๆ
  * เพื่อให้สิทธิ์ทั้งระบบมาจากตารางเดียวกันในไฟล์นี้
  */
 
-const KP_ROLE_USER    = 'user';
-const KP_ROLE_OFFICER = 'officer';
-const KP_ROLE_HEAD    = 'head';
+const KP_ROLE_USER  = 'user';
+const KP_ROLE_ADMIN = 'admin';
 
 /** ชื่อภาษาไทยของแต่ละระดับสิทธิ์ */
 function kp_role_labels(): array
 {
     return [
-        KP_ROLE_USER    => 'ผู้ใช้งาน',
-        KP_ROLE_OFFICER => 'เจ้าหน้าที่พัสดุ',
-        KP_ROLE_HEAD    => 'หัวหน้าพัสดุ',
+        KP_ROLE_USER  => 'ผู้ใช้งาน',
+        KP_ROLE_ADMIN => 'แอดมิน',
     ];
 }
 
@@ -32,58 +29,49 @@ function kp_role_label(string $role): string
 }
 
 /**
- * แปลงชื่อสิทธิ์เดิมให้เป็นชื่อใหม่
- * ฐานข้อมูลเก่าใช้ admin/staff จึงต้องรองรับไว้ ไม่งั้นผู้ใช้เดิมจะเข้าระบบไม่ได้
+ * แปลงชื่อสิทธิ์เดิมให้เป็นชื่อที่ใช้อยู่
+ *
+ * ฐานข้อมูลเคยใช้ staff/head/officer จึงต้องรองรับไว้
+ * ไม่งั้นบัญชีเดิมที่ยังไม่ถูกแปลงจะเข้าระบบไม่ได้
+ * ทุกชื่อฝั่งพัสดุรวมเป็น admin ชื่อเดียว
  */
 function kp_normalize_role(?string $role): string
 {
     switch ($role) {
-        case 'admin':                 // ผู้ดูแลเดิม = หัวหน้าพัสดุ
-        case KP_ROLE_HEAD:
-            return KP_ROLE_HEAD;
-        case 'staff':                 // staff เดิม = เจ้าหน้าที่พัสดุ
-        case KP_ROLE_OFFICER:
-            return KP_ROLE_OFFICER;
+        case KP_ROLE_ADMIN:
+        case 'head':        // หัวหน้าพัสดุเดิม
+        case 'officer':     // เจ้าหน้าที่พัสดุเดิม
+        case 'staff':       // staff เดิม
+            return KP_ROLE_ADMIN;
         default:
             return KP_ROLE_USER;
     }
 }
 
-/**
- * ตารางสิทธิ์: ระดับไหนทำอะไรได้บ้าง
- * head ได้สิทธิ์ของ officer ทั้งหมด แล้วบวกสิทธิ์ที่ย้อนกลับไม่ได้เพิ่ม
- */
+/** ตารางสิทธิ์: ระดับไหนทำอะไรได้บ้าง */
 function kp_capabilities(string $role): array
 {
-    $officer = [
-        'overview.view',          // ดูภาพรวมสถิติครุภัณฑ์
-        'asset.view.all',         // ดูทะเบียนครุภัณฑ์ทั้งหมด
-        'asset.create',
-        'asset.edit',
-        'asset.export',           // ส่งออก Excel / ดาวน์โหลด template
-        'borrow.approve',         // อนุมัติ/ปฏิเสธคำขอยืม
-        'taxonomy.manage',        // หมวดหมู่ สถานที่ แผนก
-    ];
-
-    switch (kp_normalize_role($role)) {
-        case KP_ROLE_HEAD:
-            return array_merge($officer, [
-                'asset.delete',   // ลบครุภัณฑ์ออกจากทะเบียน
-                'asset.import',   // นำเข้าข้อมูลจำนวนมาก
-                'user.manage',    // เพิ่ม/แก้ไขบัญชีผู้ใช้
-                'log.view',       // ประวัติการเพิ่ม/แก้ไข
-            ]);
-
-        case KP_ROLE_OFFICER:
-            return $officer;
-
-        default:
-            return [
-                'asset.view.borrowable',  // ดูเฉพาะรายการที่ยืมได้
-                'borrow.request',         // ส่งคำขอยืม
-                'borrow.view.own',        // ดูการยืมของตัวเอง
-            ];
+    if (kp_normalize_role($role) === KP_ROLE_ADMIN) {
+        return [
+            'overview.view',          // ดูภาพรวมสถิติครุภัณฑ์
+            'asset.view.all',         // ดูทะเบียนครุภัณฑ์ทั้งหมด
+            'asset.create',
+            'asset.edit',
+            'asset.delete',           // ลบครุภัณฑ์ออกจากทะเบียน
+            'asset.export',           // ส่งออก Excel / ดาวน์โหลด template
+            'asset.import',           // นำเข้าข้อมูลจำนวนมาก
+            'borrow.approve',         // อนุมัติ/ปฏิเสธคำขอยืม
+            'taxonomy.manage',        // หมวดหมู่ สถานที่ แผนก
+            'user.manage',            // เพิ่ม/แก้ไขบัญชีผู้ใช้
+            'log.view',               // ประวัติการเพิ่ม/แก้ไข
+        ];
     }
+
+    return [
+        'asset.view.borrowable',  // ดูเฉพาะรายการที่ยืมได้
+        'borrow.request',         // ส่งคำขอยืม
+        'borrow.view.own',        // ดูการยืมของตัวเอง
+    ];
 }
 
 /** ระดับสิทธิ์ของผู้ที่กำลังใช้งานอยู่ */
@@ -97,11 +85,10 @@ function kp_is_logged_in(): bool
     return isset($_SESSION['user_id']);
 }
 
-/** เป็นเจ้าหน้าที่พัสดุหรือหัวหน้าพัสดุหรือไม่ (ใช้เลือกเมนู/หน้าแรก) */
+/** เป็นบัญชีฝั่งแอดมินหรือไม่ (ใช้เลือกเมนู/หน้าแรก/ช่องเข้าสู่ระบบ) */
 function kp_is_staff(?string $role = null): bool
 {
-    $r = kp_normalize_role($role ?? ($_SESSION['role'] ?? null));
-    return $r === KP_ROLE_OFFICER || $r === KP_ROLE_HEAD;
+    return kp_normalize_role($role ?? ($_SESSION['role'] ?? null)) === KP_ROLE_ADMIN;
 }
 
 /** ตรวจว่าทำสิ่งนี้ได้หรือไม่ */

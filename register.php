@@ -74,7 +74,7 @@ require_once __DIR__ . '/assets/kp_assets.php';
                     ส่งคำขอสมัครเรียบร้อยแล้ว
                 </div>
                 <p class="register-done">
-                    บัญชีของคุณจะใช้งานได้หลังจาก<strong>หัวหน้าพัสดุอนุมัติ</strong>
+                    บัญชีของคุณจะใช้งานได้หลังจาก<strong>แอดมินอนุมัติ</strong>
                     หากรอนานกรุณาติดต่องานพัสดุโดยตรง
                 </p>
                 <a href="index.php" class="btn-login" style="text-decoration:none;">
@@ -140,7 +140,7 @@ require_once __DIR__ . '/assets/kp_assets.php';
                 <div class="login-note" style="display:flex;">
                     <i class="fas fa-circle-info"></i>
                     <span>
-                        สมัครได้เฉพาะบัญชีผู้ใช้งาน และต้องรอหัวหน้าพัสดุอนุมัติก่อนจึงเข้าใช้งานได้
+                        สมัครได้เฉพาะบัญชีผู้ใช้งาน และต้องรอแอดมินอนุมัติก่อนจึงเข้าใช้งานได้
                         — มีบัญชีอยู่แล้ว? <a href="index.php">เข้าสู่ระบบ</a>
                     </span>
                 </div>

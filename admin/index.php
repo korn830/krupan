@@ -47,7 +47,7 @@ foreach ($status_summary as $row) {
 $all_statuses = ['ใช้งานปกติ', 'ชำรุด', 'ส่งซ่อม', 'จำหน่าย', 'ถูกยืม'];
 $user_count = $conn->query("SELECT COUNT(*) FROM users WHERE role != 'admin'")->fetchColumn();
 
-// หัวหน้าพัสดุควรเห็นทันทีว่ามีคำขอสมัครค้างอยู่กี่รายการ
+// แอดมินควรเห็นทันทีว่ามีคำขอสมัครค้างอยู่กี่รายการ
 require_once __DIR__ . '/../assets/auth.php';
 $pendingUsers = kp_can('user.manage') ? kp_pending_user_count($conn) : 0;
 

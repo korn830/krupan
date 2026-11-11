@@ -56,8 +56,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             exit;
 
         } elseif ($result['status'] === KP_LOGIN_PENDING) {
-            // สมัครไว้แล้วแต่หัวหน้าพัสดุยังไม่อนุมัติ
-            $error = 'บัญชีนี้ยังรอหัวหน้าพัสดุอนุมัติ กรุณาติดต่องานพัสดุหากรอนาน';
+            // สมัครไว้แล้วแต่แอดมินยังไม่อนุมัติ
+            $error = 'บัญชีนี้ยังรอแอดมินอนุมัติ กรุณาติดต่องานพัสดุหากรอนาน';
 
         } elseif ($result['status'] === KP_LOGIN_REJECTED) {
             $error = 'คำขอสมัครของบัญชีนี้ไม่ได้รับอนุมัติ กรุณาติดต่องานพัสดุ';
@@ -127,7 +127,7 @@ require_once __DIR__ . '/assets/kp_assets.php';
                 <h4 data-for="user">ระบบยืมครุภัณฑ์</h4>
                 <h4 data-for="staff">ระบบทะเบียนครุภัณฑ์</h4>
                 <p class="subtitle" data-for="user">สำหรับผู้ใช้งานที่ต้องการยืมครุภัณฑ์</p>
-                <p class="subtitle" data-for="staff">สำหรับเจ้าหน้าที่พัสดุและหัวหน้าพัสดุ</p>
+                <p class="subtitle" data-for="staff">สำหรับแอดมินงานพัสดุ</p>
             </div>
 
             <?php if (isset($error)): ?>
@@ -176,12 +176,12 @@ require_once __DIR__ . '/assets/kp_assets.php';
                 <i class="fas fa-circle-info"></i>
                 <span>
                     ยังไม่มีบัญชี? <a href="register.php">สมัครสมาชิก</a>
-                    — บัญชีใหม่ต้องรอหัวหน้าพัสดุอนุมัติก่อน
+                    — บัญชีใหม่ต้องรอแอดมินอนุมัติก่อน
                 </span>
             </div>
             <div class="login-note" data-for="staff">
                 <i class="fas fa-circle-info"></i>
-                <span>ส่วนนี้สำหรับแอดมินเท่านั้น สิทธิ์ที่ได้ขึ้นกับบัญชีของคุณ</span>
+                <span>ส่วนนี้สำหรับแอดมินเท่านั้น บัญชีแอดมินสร้างได้จากในระบบ</span>
             </div>
         </div>
 
