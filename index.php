@@ -124,8 +124,7 @@ require_once __DIR__ . '/assets/kp_assets.php';
                     <i class="fas fa-chalkboard-user" data-for="user"></i>
                     <i class="fas fa-user-shield" data-for="admin"></i>
                 </div>
-                <h4 data-for="user">ระบบยืมครุภัณฑ์</h4>
-                <h4 data-for="admin">ระบบทะเบียนครุภัณฑ์</h4>
+                <h4 class="login-title">ระบบการจัดการและติดตามสถานะครุภัณฑ์</h4>
                 <p class="subtitle" data-for="user">สำหรับผู้ใช้งานที่ต้องการยืมครุภัณฑ์</p>
                 <p class="subtitle" data-for="admin">สำหรับแอดมินงานพัสดุ</p>
             </div>
