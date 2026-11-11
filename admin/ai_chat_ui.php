@@ -52,7 +52,7 @@
     width: 60px; height: 60px; border-radius: 50%;
     background: var(--kp-gradient);
     border: none; color: #fff; font-size: 1.4rem;
-    box-shadow: 0 4px 18px rgba(158, 27, 50, .4);
+    box-shadow: 0 4px 18px rgba(var(--kp-crest-rgb), .4);
     cursor: pointer; z-index: 9998;
     transition: transform .2s, box-shadow .2s;
     display: flex; align-items: center; justify-content: center;

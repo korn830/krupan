@@ -309,6 +309,8 @@ if (isset($_GET['delete_department'])) {
         .dataTables_wrapper .pagination .page-item.active .page-link {
             background-color: var(--kp-crest);
             border-color: var(--kp-crest);
+            /* สีหลักพลิกเป็นสีอ่อนในโหมดมืด ตัวอักษรจึงต้องพลิกตามคู่ของมัน */
+            color: var(--kp-on-crest);
         }
         .dataTables_filter input {
             border-radius: 8px;

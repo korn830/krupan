@@ -34,7 +34,7 @@ h4 {
     background: var(--kp-gradient);
     padding: 2rem;
     border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(158, 27, 50, 0.2);
+    box-shadow: 0 10px 30px rgba(var(--kp-crest-rgb), 0.2);
     display: flex;
     align-items: center;
     position: relative;

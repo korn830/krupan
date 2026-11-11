@@ -10,9 +10,9 @@
    ========================================================================== */
 :root[data-mode="user"] {
     --lg-a1:   var(--kp-crest);
-    --lg-a2:   #7d1527;
+    --lg-a2:   var(--kp-crest-deep);
     --lg-page: var(--kp-gradient);
-    --lg-ring: rgba(158, 27, 50, 0.14);
+    --lg-ring: rgba(var(--kp-crest-rgb), 0.14);
     --lg-note: var(--kp-crest);
 }
 :root[data-mode="admin"] {
@@ -113,9 +113,9 @@ body::before {
     right: 0;
     bottom: 0;
     background:
-        radial-gradient(circle at 20% 80%, rgba(158, 27, 50, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 20% 80%, rgba(var(--kp-crest-rgb), 0.3) 0%, transparent 50%),
         radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 40% 40%, rgba(158, 27, 50, 0.2) 0%, transparent 50%);
+        radial-gradient(circle at 40% 40%, rgba(var(--kp-crest-rgb), 0.2) 0%, transparent 50%);
     z-index: -1;
 }
 
@@ -195,7 +195,7 @@ body::before {
     align-items: center;
     justify-content: center;
     margin: 0 auto 1rem;
-    box-shadow: 0 8px 20px rgba(158, 27, 50, 0.3);
+    box-shadow: 0 8px 20px rgba(var(--kp-crest-rgb), 0.3);
 }
 
 .login-icon {
@@ -298,7 +298,7 @@ body::before {
 @media (hover: hover) {
     .btn-login:hover {
         transform: translateY(-2px);
-        box-shadow: 0 10px 25px rgba(158, 27, 50, 0.3);
+        box-shadow: 0 10px 25px rgba(var(--kp-crest-rgb), 0.3);
     }
 
     .btn-login:hover::before {
@@ -670,7 +670,7 @@ body::before { display: none !important; }
 .btn-login::before { display: none; }
 
 .form-control { border-radius: var(--kp-radius-sm); border-width: 1px; }
-.form-control:focus { border-color: var(--kp-crest); box-shadow: 0 0 0 3px rgba(158, 27, 50, .10); transform: none; }
+.form-control:focus { border-color: var(--kp-crest); box-shadow: 0 0 0 3px rgba(var(--kp-crest-rgb), .10); transform: none; }
 
 .login-org { color: var(--kp-muted) !important; }
 .seg .pill { box-shadow: 0 1px 3px rgba(29, 43, 60, .10); }

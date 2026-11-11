@@ -22,7 +22,7 @@ body {
     padding: 2rem;
     border-radius: 20px;
     margin-bottom: 2rem;
-    box-shadow: 0 10px 30px rgba(158, 27, 50, 0.2);
+    box-shadow: 0 10px 30px rgba(var(--kp-crest-rgb), 0.2);
     position: relative;
     overflow: hidden;
     /* Added from your second example for a subtle bottom border and adjusted margin */
@@ -130,7 +130,8 @@ body {
 }
 .badge.bg-primary {
     background: var(--kp-gradient) !important;
-    color: #fff !important;
+    /* ไล่สีนี้พลิกเป็นสีอ่อนในโหมดมืด ตัวอักษรจึงต้องพลิกตามคู่ของมัน */
+    color: var(--kp-on-crest) !important;
 }
 .badge.bg-info {
     background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%) !important;

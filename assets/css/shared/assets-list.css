@@ -36,7 +36,7 @@ body {
     padding: 2rem;
     border-radius: 20px;
     margin-bottom: 2rem;
-    box-shadow: 0 10px 30px rgba(158, 27, 50, 0.2);
+    box-shadow: 0 10px 30px rgba(var(--kp-crest-rgb), 0.2);
     position: relative;
     overflow: hidden;
 }
@@ -337,7 +337,7 @@ body {
     font-weight: 500;
     font-size: 0.875rem;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(158, 27, 50, 0.3);
+    box-shadow: 0 2px 8px rgba(var(--kp-crest-rgb), 0.3);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -345,7 +345,7 @@ body {
 
 .btn-qr:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(158, 27, 50, 0.4);
+    box-shadow: 0 4px 12px rgba(var(--kp-crest-rgb), 0.4);
     color: white;
 }
 
@@ -419,14 +419,15 @@ body {
 .page-link:hover {
     background: var(--kp-crest);
     border-color: var(--kp-crest);
-    color: white;
+    /* สีหลักพลิกเป็นสีอ่อนในโหมดมืด ตัวอักษรจึงต้องพลิกตามคู่ของมัน */
+    color: var(--kp-on-crest);
     transform: translateY(-1px);
 }
 
 .page-item.active .page-link {
     background: var(--kp-gradient);
     border-color: var(--kp-crest);
-    color: white;
+    color: var(--kp-on-crest);
 }
 
 .page-item.disabled .page-link {
@@ -486,7 +487,7 @@ body {
 
 .form-control:focus, .form-select:focus {
     border-color: var(--kp-crest);
-    box-shadow: 0 0 0 3px rgba(158, 27, 50, 0.1);
+    box-shadow: 0 0 0 3px rgba(var(--kp-crest-rgb), 0.1);
     outline: none;
 }
 
@@ -504,12 +505,12 @@ body {
     border-radius: 8px;
     padding: 0.625rem 1.25rem;
     font-weight: 600;
-    color: white;
+    color: var(--kp-on-crest);
     cursor: pointer;
 }
 
 .btn-primary:hover {
-    background: linear-gradient(135deg, var(--kp-crest), #7d1527);
+    background: linear-gradient(135deg, var(--kp-crest), var(--kp-crest-deep));
     color: white;
 }
 

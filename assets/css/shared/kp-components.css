@@ -381,6 +381,25 @@ h4::before, h4::after { display: none; }
 :root[data-theme="dark"] .alert.alert-warning .alert-link,
 :root[data-theme="dark"] .alert.alert-info    .alert-link { color: inherit; }
 
+/* ปุ่มหลักของ bootstrap ยังเป็นสีฟ้าประจำตัวมันเอง ไม่ใช่สีของธีม
+   และ bootstrap 5.3 วาดปุ่มจากตัวแปรของตัวเอง การตั้ง background/color
+   ทับตรง ๆ จึงไม่ชนะ ต้องตั้งตัวแปรของมันแทน
+   ตัวอักษรใช้ --kp-on-crest เพราะสีหลักพลิกเป็นสีอ่อนในโหมดมืด */
+.btn-primary {
+    --bs-btn-bg:                 var(--kp-crest);
+    --bs-btn-border-color:       var(--kp-crest);
+    --bs-btn-color:              var(--kp-on-crest);
+    --bs-btn-hover-bg:           var(--kp-crest-deep);
+    --bs-btn-hover-border-color: var(--kp-crest-deep);
+    --bs-btn-hover-color:        var(--kp-on-crest);
+    --bs-btn-active-bg:          var(--kp-crest-deep);
+    --bs-btn-active-border-color:var(--kp-crest-deep);
+    --bs-btn-active-color:       var(--kp-on-crest);
+    --bs-btn-disabled-bg:        var(--kp-crest);
+    --bs-btn-disabled-border-color: var(--kp-crest);
+    --bs-btn-disabled-color:     var(--kp-on-crest);
+}
+
 /* ปุ่มขอบของ bootstrap ที่ใช้สีเข้ม (dark/secondary) ฝังเป็น #212529 กับ #6c757d
    พอเป็นโหมดมืด ทั้งขอบและตัวอักษรจึงกลืนไปกับพื้นจนมองไม่เห็นปุ่มเลย
    เช่นปุ่ม QR ในหน้าทะเบียนครุภัณฑ์ */

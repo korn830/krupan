@@ -25,7 +25,7 @@ body {
     padding: 2rem;
     border-radius: 20px;
     margin-bottom: 2rem;
-    box-shadow: 0 10px 30px rgba(158, 27, 50, 0.2);
+    box-shadow: 0 10px 30px rgba(var(--kp-crest-rgb), 0.2);
     position: relative;
     overflow: hidden;
 }
@@ -124,7 +124,7 @@ hr {
     left: 0;
     right: 0;
     height: 4px;
-    background: var(--card-color, linear-gradient(90deg, var(--kp-crest), #7d1527));
+    background: var(--card-color, linear-gradient(90deg, var(--kp-crest), var(--kp-crest-deep)));
     transition: all 0.3s ease;
 }
 
@@ -224,7 +224,7 @@ hr {
     font-weight: 600;
     font-size: 1.1rem;
     transition: all 0.3s ease;
-    box-shadow: 0 8px 20px rgba(158, 27, 50, 0.3);
+    box-shadow: 0 8px 20px rgba(var(--kp-crest-rgb), 0.3);
     position: relative;
     overflow: hidden;
 }
@@ -242,7 +242,7 @@ hr {
 
 .btn-view-all:hover {
     transform: translateY(-3px);
-    box-shadow: 0 12px 30px rgba(158, 27, 50, 0.4);
+    box-shadow: 0 12px 30px rgba(var(--kp-crest-rgb), 0.4);
     color: white;
     text-decoration: none;
 }

@@ -26,7 +26,7 @@ body {
     padding: 2rem;
     border-radius: 20px;
     margin-bottom: 2rem;
-    box-shadow: 0 10px 30px rgba(158, 27, 50, 0.2);
+    box-shadow: 0 10px 30px rgba(var(--kp-crest-rgb), 0.2);
     position: relative;
     overflow: hidden;
 }
@@ -328,7 +328,7 @@ body {
 
 .form-control:focus {
     border-color: var(--kp-crest);
-    box-shadow: 0 0 0 3px rgba(158, 27, 50, 0.1);
+    box-shadow: 0 0 0 3px rgba(var(--kp-crest-rgb), 0.1);
 }
 
 .modal-footer {
@@ -345,7 +345,7 @@ body {
 }
 
 .btn-primary:hover {
-    background: linear-gradient(135deg, var(--kp-crest), #7d1527);
+    background: linear-gradient(135deg, var(--kp-crest), var(--kp-crest-deep));
 }
 
 .btn-secondary {
