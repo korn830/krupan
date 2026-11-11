@@ -1,0 +1,311 @@
+/* ==========================================================================
+   kp-components.css — รูปทรงของส่วนประกอบในดีไซน์ใหม่
+
+   โหลดจาก header.php ต่อจาก header.css ซึ่งอยู่หลังสไตล์ของแต่ละหน้า
+   กฎในนี้จึงมีผลกับทุกหน้า รวมถึงหน้าที่มีไฟล์สไตล์ของตัวเอง
+   (หมวดหมู่ สถานที่ แผนก เพิ่มผู้ใช้ ประวัติ การยืมของฉัน)
+   ซึ่งเดิมวาดแถบหัวเรื่องเป็นแบนเนอร์สีทึบของตัวเอง
+
+   สีทั้งหมดมาจาก tokens.css ไม่ฝังค่าสีไว้ที่นี่
+   ========================================================================== */
+
+/* ==========================================================================
+   ปรับรูปทรงให้เข้ากับดีไซน์ใหม่ — ทะเบียนแบบสมุดคุม
+   กฎด้านล่างนี้อยู่ท้ายไฟล์เดียวกัน จึงทับกฎรูปทรงเดิมด้านบนโดยไม่ต้องแก้ทีละจุด
+   สีทั้งหมดมาจาก tokens.css ไม่ฝังค่าสีไว้ที่นี่
+   ========================================================================== */
+
+/* หัวหน้า: จากแถบไล่สีทึบ เป็นหัวเรื่องบนพื้นหน้าเว็บ มีเส้นคั่นด้านล่าง */
+.page-header {
+    background: none !important;
+    border: 0;
+    border-bottom: 1px solid var(--kp-border);
+    border-radius: 0;
+    box-shadow: none;
+    padding: 24px 0 16px;
+    margin-bottom: 22px;
+    color: var(--kp-ink);
+}
+.page-header::before { display: none; }
+.page-header h4 {
+    color: var(--kp-ink);
+    font-family: var(--kp-display);
+    font-size: 23px;
+    font-weight: 700;
+    text-shadow: none;
+}
+.page-header .header-icon { color: var(--kp-crest); background: none; box-shadow: none; }
+
+/* ปุ่มหลัก */
+.btn-add-asset {
+    background: var(--kp-crest) !important;
+    border: 0;
+    border-radius: var(--kp-radius-sm);
+    box-shadow: none;
+    font-family: var(--kp-display);
+    font-weight: 600;
+    padding: 9px 16px;
+}
+.btn-add-asset:hover { filter: brightness(1.12); transform: none; box-shadow: none; }
+
+/* กล่องตาราง */
+.table-container {
+    background: var(--kp-surface);
+    border: 1px solid var(--kp-border);
+    border-radius: var(--kp-radius);
+    box-shadow: var(--kp-shadow);
+    overflow: hidden;
+}
+.table-header {
+    background: var(--kp-surface) !important;
+    border-bottom: 1px solid var(--kp-border);
+    padding: 14px 16px;
+}
+.table-title { font-family: var(--kp-display); font-size: 15px; font-weight: 600; color: var(--kp-ink); }
+.table-title .badge { background: var(--kp-crest) !important; font-family: var(--kp-mono); font-weight: 600; }
+
+/* ตารางแบบสมุดคุม: เส้นบาง หัวคอลัมน์ตัวเล็ก */
+.table thead th {
+    background: var(--kp-surface) !important;
+    color: var(--kp-muted) !important;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--kp-border) !important;
+    padding: 11px 16px;
+    white-space: nowrap;
+}
+.table tbody td {
+    border-bottom: 1px solid var(--kp-border);
+    padding: 11px 16px;
+    font-size: 13.5px;
+    vertical-align: middle;
+}
+.table tbody tr:hover { background: var(--kp-bg); transform: none; box-shadow: none; }
+
+/* เลขครุภัณฑ์เป็นตัวพิมพ์ดีด ให้หลักตรงกันทั้งคอลัมน์ และอ่านชุดตัวเลขได้ชัด */
+.table tbody td:first-child {
+    font-family: var(--kp-mono);
+    font-size: 13px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+/* ป้ายสถานะ: จากป้ายทึบ เป็นป้ายพื้นอ่อนตัวอักษรเข้ม อ่านสบายตากว่าเมื่อมีหลายแถว */
+.status-badge {
+    background: var(--st-gone-bg) !important;
+    color: var(--st-gone) !important;
+    border: 0 !important;
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 11.5px;
+    font-weight: 600;
+    box-shadow: none !important;
+    text-shadow: none;
+}
+.status-badge[data-status="ใช้งานปกติ"] { background: var(--st-ok-bg) !important;     color: var(--st-ok) !important; }
+.status-badge[data-status="ถูกยืม"]     { background: var(--st-out-bg) !important;    color: var(--st-out) !important; }
+.status-badge[data-status="ส่งซ่อม"]    { background: var(--st-repair-bg) !important; color: var(--st-repair) !important; }
+.status-badge[data-status="ชำรุด"]      { background: var(--st-broken-bg) !important; color: var(--st-broken) !important; }
+.status-badge[data-status="จำหน่าย"]    { background: var(--st-gone-bg) !important;   color: var(--st-gone) !important; }
+.status-badge[data-status="รออนุมัติ"]  { background: var(--st-wait-bg) !important;   color: var(--st-wait) !important; }
+
+/* ==========================================================================
+   ปรับรูปทรงให้เข้ากับดีไซน์ใหม่ — หน้าแรก
+   สีทั้งหมดมาจาก tokens.css
+   ========================================================================== */
+
+/* หัวหน้า: จากแถบสีทึบเต็มความกว้าง เป็นหัวเรื่องบนพื้นหน้าเว็บ */
+.welcome-header {
+    background: none !important;
+    border: 0;
+    border-bottom: 1px solid var(--kp-border);
+    border-radius: 0;
+    box-shadow: none;
+    color: var(--kp-ink);
+    padding: 24px 0 16px;
+    margin-bottom: 22px;
+}
+.welcome-header::before, .welcome-header::after { display: none; }
+.welcome-header h4 {
+    color: var(--kp-ink);
+    font-family: var(--kp-display);
+    font-size: 23px;
+    font-weight: 700;
+    text-shadow: none;
+}
+.welcome-header p, .welcome-header .text-white-50 {
+    color: var(--kp-muted) !important;
+    font-size: 13px;
+}
+
+.summary-title {
+    font-family: var(--kp-display);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--kp-ink);
+    border: 0;
+    padding: 0 0 12px;
+}
+
+/* การ์ดสถานะ: เล็กและเรียงเป็นแถว อ่านได้ในสายตาเดียว */
+.status-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
+    gap: 12px;
+}
+.status-card {
+    background: var(--kp-surface);
+    border: 1px solid var(--kp-border);
+    border-top: 3px solid var(--card-color, var(--kp-border));
+    border-radius: var(--kp-radius);
+    box-shadow: var(--kp-shadow);
+    padding: 13px 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-height: 0;
+}
+.status-card:hover { transform: none; box-shadow: var(--kp-shadow); }
+.status-card .card-header {
+    background: none;
+    border: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+/* ไอคอนกลมใหญ่กินที่โดยไม่ได้บอกอะไรเพิ่ม ตัดออกแล้วใช้สีขอบบนแทน */
+.status-card .card-icon { display: none; }
+.status-card .card-title {
+    font-family: var(--kp-font);
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--kp-muted);
+    margin: 0;
+}
+.status-card .card-count {
+    font-family: var(--kp-mono);
+    font-size: 27px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+    color: var(--card-color, var(--kp-ink));
+    text-align: left;
+}
+.status-card .card-label { font-size: 11.5px; color: var(--kp-muted); text-align: left; }
+
+/* ปุ่มลัดด้านล่าง */
+.action-section { padding-top: 22px; }
+.btn-view-all {
+    background: var(--kp-crest) !important;
+    border-radius: var(--kp-radius-sm);
+    box-shadow: none;
+    font-family: var(--kp-display);
+    font-weight: 600;
+    padding: 9px 18px;
+}
+.btn-view-all:hover { filter: brightness(1.12); transform: none; box-shadow: none; }
+
+/* index.css ตั้งพื้นหลัง body เป็นไล่สีฟ้าเทา ซึ่งทับค่าจาก header.css
+   ดีไซน์ใหม่ใช้พื้นเรียบสีเดียว และหัวข้อไม่มีแถบสีด้านหน้าแล้ว */
+body { background: var(--kp-bg) !important; font-family: var(--kp-font); color: var(--kp-ink); }
+.summary-title::before { display: none !important; }
+.summary-title { padding-left: 0 !important; }
+
+/* --------------------------------------------------------------------------
+   หน้าที่มีไฟล์สไตล์ของตัวเองวาดหัวเรื่องเป็นแบนเนอร์สีทึบเต็มความกว้าง
+   ซึ่งเป็นรูปแบบเดิม ไม่ใช่ของดีไซน์นี้ จึงปรับให้เป็นหัวเรื่องเรียบ
+   เหมือนหน้าอื่นทั้งหมด
+   -------------------------------------------------------------------------- */
+.page-header,
+.welcome-header,
+.page-title-section,
+.header-section {
+    background: none !important;
+    background-image: none !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--kp-border) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    color: var(--kp-ink) !important;
+    padding: 24px 0 16px !important;
+    margin-bottom: 22px !important;
+}
+.page-header::before, .page-header::after,
+.welcome-header::before, .welcome-header::after { display: none !important; }
+
+.page-header h1, .page-header h2, .page-header h3, .page-header h4, .page-header h5,
+.welcome-header h1, .welcome-header h2, .welcome-header h3, .welcome-header h4, .welcome-header h5 {
+    color: var(--kp-ink) !important;
+    font-family: var(--kp-display);
+    font-weight: 700;
+    text-shadow: none !important;
+}
+.page-header p, .welcome-header p,
+.page-header .text-white-50, .welcome-header .text-white-50,
+.page-header small, .welcome-header small {
+    color: var(--kp-muted) !important;
+    text-shadow: none !important;
+}
+.page-header i, .welcome-header i { color: var(--kp-crest) !important; }
+
+/* ปุ่มหลักของหน้าที่มีสไตล์ของตัวเอง */
+.btn-add, .btn-primary-custom, .btn-submit {
+    background: var(--kp-crest) !important;
+    background-image: none !important;
+    border: 0 !important;
+    border-radius: var(--kp-radius-sm) !important;
+    box-shadow: none !important;
+    font-family: var(--kp-display);
+    font-weight: 600;
+}
+.btn-add:hover, .btn-primary-custom:hover, .btn-submit:hover {
+    filter: brightness(1.12);
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   confirm_borrow.css และ my-borrow.css ตั้งกฎกับ h4 ทุกตัวในหน้า
+   ให้เป็นแบนเนอร์สีทึบ ตัวเลือกกว้างเกินไปจนหัวข้อในกล่องโต้ตอบ
+   ก็กลายเป็นแบนเนอร์ไปด้วย จึงคืน h4 ให้เป็นหัวข้อธรรมดา
+   แล้วให้เฉพาะหัวข้อแรกของหน้าเป็นหัวเรื่องแบบเดียวกับหน้าอื่น
+   -------------------------------------------------------------------------- */
+h4 {
+    background: none;
+    background-image: none;
+    color: var(--kp-ink);
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
+    font-family: var(--kp-display);
+    font-size: 1.15rem;
+    font-weight: 600;
+}
+h4::before, h4::after { display: none; }
+
+.kp-main > .container > h4:first-child,
+.kp-main > .container > .fade-in > h4:first-child {
+    font-size: 23px;
+    font-weight: 700;
+    border-bottom: 1px solid var(--kp-border);
+    padding: 24px 0 16px;
+    margin-bottom: 22px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.kp-main > .container > h4:first-child i { color: var(--kp-crest); }
+
+/* my-borrow.css และ confirm_borrow.css ตั้ง ".container h4, h4 { color: #fff !important }"
+   ไว้สำหรับแบนเนอร์เดิม พอแบนเนอร์หายไปตัวอักษรจึงเป็นสีขาวบนพื้นขาว */
+.container h4, h4 { color: var(--kp-ink) !important; }
+
+/* ยกเว้นหัวข้อที่อยู่บนแถบสีเข้ม ซึ่งยังต้องเป็นตัวอักษรสีอ่อน */
+.modal-header h4, .modal-header .modal-title,
+.swal2-title, .page-header h4, .welcome-header h4 { color: inherit !important; }
+.modal-header h4, .modal-header .modal-title { color: var(--kp-on-crest) !important; }
+.page-header h4, .welcome-header h4 { color: var(--kp-ink) !important; }

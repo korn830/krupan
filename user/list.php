@@ -200,8 +200,8 @@ $departments = $conn->query("SELECT * FROM departments")->fetchAll();
 <link rel="stylesheet" href="<?= kp_asset('assets/css/shared/assets-list.css', '../') ?>">
     <style>
         .dataTables_wrapper .pagination .page-item.active .page-link {
-            background-color: #667eea;
-            border-color: #667eea;
+            background-color: var(--kp-crest);
+            border-color: var(--kp-crest);
         }
         .dataTables_filter input {
             border-radius: 8px;

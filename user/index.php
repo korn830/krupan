@@ -152,7 +152,7 @@ require 'header.php'; // พ่น <head> และแถบเมนู
         ยืมครุภัณฑ์ <span class="icon">→</span>
     </a>
     &nbsp;
-    <a href="my_borrow.php" class="btn-view-all" style="background: linear-gradient(135deg,#764ba2,#667eea);">
+    <a href="my_borrow.php" class="btn-view-all" style="background: var(--kp-gradient);">
         การยืมของฉัน <span class="icon">→</span>
     </a>
 </div>

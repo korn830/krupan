@@ -38,6 +38,7 @@ if (!function_exists('isActive')) {
     <?php require_once __DIR__ . '/../assets/kp_assets.php'; ?>
     <link rel="stylesheet" href="<?= kp_asset('assets/css/tokens.css', $base_url . '../') ?>">
     <link rel="stylesheet" href="<?= kp_asset('assets/css/shared/header.css', $base_url . '../') ?>">
+    <link rel="stylesheet" href="<?= kp_asset('assets/css/shared/kp-components.css', $base_url . '../') ?>">
 
     
     <!-- Favicon -->

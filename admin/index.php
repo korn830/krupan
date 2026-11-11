@@ -77,9 +77,9 @@ require 'header.php'; // พ่น <head> และแถบเมนู
         <h5 class="summary-title">สรุปภาพรวมครุภัณฑ์</h5>
         <div class="status-cards">
             <?php foreach ($all_statuses as $status): ?>
-                <div class="status-card" data-status="<?= htmlspecialchars($status) ?>" style="--card-color: <?= $colorMap[$status] ?? '#667eea' ?>;">
+                <div class="status-card" data-status="<?= htmlspecialchars($status) ?>" style="--card-color: <?= $colorMap[$status] ?? 'var(--kp-crest)' ?>;">
                     <div class="card-header">
-                        <div class="card-icon" style="background: <?= $colorMap[$status] ?? '#667eea' ?>;">
+                        <div class="card-icon" style="background: <?= $colorMap[$status] ?? 'var(--kp-crest)' ?>;">
                             <?= $iconMap[$status] ?? '📋' ?>
                         </div>
                         <h6 class="card-title"><?= htmlspecialchars($status) ?></h6>

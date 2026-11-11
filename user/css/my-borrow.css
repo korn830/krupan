@@ -31,10 +31,10 @@ h4 {
     font-size: 2rem;
     margin: 0;
     color: white;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--kp-gradient);
     padding: 2rem;
     border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+    box-shadow: 0 10px 30px rgba(158, 27, 50, 0.2);
     display: flex;
     align-items: center;
     position: relative;
@@ -119,7 +119,7 @@ h4 .fas {
 
 .table-title .icon {
     margin-right: 0.75rem;
-    color: #667eea;
+    color: var(--kp-crest);
 }
 
 .table {
@@ -395,7 +395,7 @@ h4 .fas {
 }
 
 .modal-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--kp-gradient);
     color: white;
     border-radius: 16px 16px 0 0;
     border-bottom: none;

@@ -77,7 +77,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 }
 
-$themeBar = ['user' => '#667eea', 'staff' => '#0f172a'];
+$themeBar = ['user' => 'var(--kp-crest)', 'staff' => '#0f172a'];
 require_once __DIR__ . '/assets/kp_assets.php';
 ?>
 <!DOCTYPE html>
@@ -193,7 +193,7 @@ require_once __DIR__ . '/assets/kp_assets.php';
     var root  = document.documentElement;
     var field = document.getElementById('modeField');
     var theme = document.querySelector('meta[name="theme-color"]');
-    var bar   = { user: '#667eea', staff: '#0f172a' };
+    var bar   = { user: 'var(--kp-crest)', staff: '#0f172a' };
 
     document.querySelectorAll('.seg input').forEach(function (radio) {
         radio.addEventListener('change', function () {

@@ -45,7 +45,7 @@ require_once __DIR__ . '/assets/kp_assets.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#667eea">
+    <meta name="theme-color" content="var(--kp-crest)">
     <title>สมัครสมาชิก - ระบบจัดการครุภัณฑ์</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
