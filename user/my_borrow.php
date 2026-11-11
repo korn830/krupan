@@ -12,63 +12,8 @@ kp_mark_overdue_borrows($conn);
 
 $user_id = $_SESSION["user_id"];
 
-// --- ส่วนของการคืนครุภัณฑ์ ---
-if (isset($_POST['action']) && $_POST['action'] === 'return_asset' && isset($_POST['borrow_id'])) {
-    $borrow_id = (int)$_POST['borrow_id'];
-
-    try {
-        $conn->beginTransaction(); // เริ่มต้น Transaction
-
-        // 1. ดึงข้อมูลการยืมเพื่อหา asset_id
-        $stmtBorrow = $conn->prepare("SELECT asset_id FROM borrow_history WHERE borrow_id = ? AND user_id = ? AND (status = 'อนุมัติ' OR status = 'ยืมอยู่' OR status = 'เกินวันที่กำหนด')");
-        $stmtBorrow->execute([$borrow_id, $user_id]);
-        $borrowInfo = $stmtBorrow->fetch(PDO::FETCH_ASSOC);
-
-        if ($borrowInfo) {
-            $asset_id = $borrowInfo['asset_id'];
-
-            // 2. อัปเดตสถานะใน borrow_history เป็น 'คืนแล้ว'
-            $stmtUpdateBorrow = $conn->prepare("UPDATE borrow_history SET status = 'คืนแล้ว', actual_return_date = NOW() WHERE borrow_id = ?");
-            $stmtUpdateBorrow->execute([$borrow_id]);
-
-            // 3. อัปเดตสถานะของครุภัณฑ์ในตาราง assets เป็น 'ใช้งานปกติ'
-            $stmtUpdateAsset = $conn->prepare("UPDATE assets SET status = 'ใช้งานปกติ' WHERE asset_id = ?");
-            $stmtUpdateAsset->execute([$asset_id]);
-
-            // 4. บันทึก log การดำเนินการ
-            $logDetails = json_encode([
-                'action_borrow' => 'returned',
-                'borrow_id' => $borrow_id,
-                'asset_id' => $asset_id,
-                'new_borrow_status' => 'คืนแล้ว',
-                'new_asset_status' => 'ใช้งานปกติ'
-            ], JSON_UNESCAPED_UNICODE);
-
-            $logStmt = $conn->prepare("INSERT INTO asset_action_log (asset_id, action_type, user_id, details) VALUES (?, ?, ?, ?)");
-            $logStmt->execute([$asset_id, 'borrow', $_SESSION['user_id'], $logDetails]);
-
-        } else {
-            throw new Exception("ไม่พบรายการยืมที่ระบุ หรือคุณไม่มีสิทธิ์คืนครุภัณฑ์นี้ (Borrow ID: $borrow_id)");
-        }
-
-        $conn->commit();
-        $_SESSION['success_message'] = "คืนครุภัณฑ์สำเร็จ!";
-        header("Location: my_borrow.php");
-        exit;
-
-    } catch (PDOException $e) {
-        $conn->rollBack();
-        $_SESSION['error_message'] = "เกิดข้อผิดพลาดในการคืนครุภัณฑ์: " . $e->getMessage();
-        header("Location: my_borrow.php");
-        exit;
-    } catch (Exception $e) {
-        $conn->rollBack();
-        $_SESSION['error_message'] = "Application Error: " . $e->getMessage();
-        header("Location: my_borrow.php");
-        exit;
-    }
-}
-
+// ขั้นตอนบันทึกการคืนย้ายไปอยู่ที่ confirm_return.php แล้ว
+// หน้านั้นตรวจ CSRF และตรวจสิทธิ์เจ้าของรายการก่อนบันทึก ซึ่งของเดิมตรงนี้ไม่มี
 
 // --- ส่วนของการดึงข้อมูลเพื่อแสดงผล (แก้ไขตรงนี้) ---
 try {
@@ -171,9 +116,9 @@ try {
                         </td>
                         <td>
                             <?php if ($row['status'] === 'อนุมัติ' || $row['status'] === 'ยืมอยู่' || $row['status'] === 'เกินวันที่กำหนด'): ?>
-                                <button class="btn btn-primary btn-sm" onclick="showReturnModal(<?= $row['borrow_id'] ?>, '<?= htmlspecialchars($row['asset_code']) ?>', '<?= htmlspecialchars($row['asset_name']) ?>')">
+                                <a class="btn btn-primary btn-sm" href="confirm_return.php?borrow_id=<?= (int)$row['borrow_id'] ?>">
                                     <i class="fas fa-undo"></i> คืนครุภัณฑ์
-                                </button>
+                                </a>
                             <?php elseif ($row['status'] === 'รออนุมัติ'): ?>
                                 <span class="text-muted small"><i class="fas fa-clock"></i> รอการตรวจสอบ</span>
                             <?php else: ?>
@@ -197,82 +142,8 @@ try {
     <a href="index.php" class="btn btn-secondary mt-3"> <i class="fas fa-arrow-left"></i>  กลับหน้าหลัก</a>
 </div>
 
-<div class="modal fade" id="returnModal" tabindex="-1" aria-labelledby="returnModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="returnModalLabel">
-                    <i class="fas fa-undo-alt me-2"></i>ยืนยันการคืนครุภัณฑ์
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="return-icon">
-                    <i class="fas fa-handshake"></i>
-                </div>
-                <h4 class="mb-3">คุณต้องการคืนครุภัณฑ์นี้หรือไม่?</h4>
-                <div class="asset-info">
-                    <h5>รายละเอียดครุภัณฑ์</h5>
-                    <div class="row">
-                        <div class="col-5 text-end"><strong>เลขครุภัณฑ์:</strong></div>
-                        <div class="col-7 text-start asset-code" id="modalAssetCode"></div>
-                    </div>
-                    <div class="row mt-2">
-                        <div class="col-5 text-end"><strong>ชื่อครุภัณฑ์:</strong></div>
-                        <div class="col-7 text-start" id="modalAssetName"></div>
-                    </div>
-                </div>
-                <div class="alert alert-info mt-3">
-                    <i class="fas fa-info-circle me-2"></i>
-                    เมื่อคืนครุภัณฑ์แล้ว สถานะจะเปลี่ยนเป็น "คืนแล้ว" และครุภัณฑ์จะพร้อมให้ผู้อื่นยืมต่อไป
-                </div>
-            </div>
-            <div class="modal-footer justify-content-center">
-                <button type="button" class="btn btn-cancel me-3" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-2"></i>ยกเลิก
-                </button>
-                <button type="button" class="btn btn-return text-white" onclick="confirmReturn()">
-                    <i class="fas fa-check me-2"></i>ยืนยันการคืน
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<form id="returnForm" method="post" style="display: none;">
-    <input type="hidden" name="borrow_id" id="returnBorrowId">
-    <input type="hidden" name="action" value="return_asset">
-</form>
-
 <script src="../assets/vendor/bootstrap/bootstrap.bundle.min.js"></script>
-<script src="../assets/vendor/fontawesome/css/all.min.css"></script>
 <script>
-let currentBorrowId = null;
-
-function showReturnModal(borrowId, assetCode, assetName) {
-    currentBorrowId = borrowId;
-    document.getElementById('modalAssetCode').textContent = assetCode;
-    document.getElementById('modalAssetName').textContent = assetName;
-    
-    // Show modal with animation
-    const modal = new bootstrap.Modal(document.getElementById('returnModal'));
-    modal.show();
-}
-
-function confirmReturn() {
-    if (currentBorrowId) {
-        document.getElementById('returnBorrowId').value = currentBorrowId;
-        document.getElementById('returnForm').submit();
-    }
-}
-
-// Add loading state when form is submitted
-document.getElementById('returnForm').addEventListener('submit', function() {
-    const confirmButton = document.querySelector('.btn-return');
-    confirmButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>กำลังประมวลผล...';
-    confirmButton.disabled = true;
-});
-
 // Add smooth animations
 document.addEventListener('DOMContentLoaded', function() {
     const rows = document.querySelectorAll('tbody tr');
