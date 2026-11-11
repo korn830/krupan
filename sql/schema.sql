@@ -108,3 +108,16 @@ CREATE TABLE borrow_history (
     FOREIGN KEY (asset_id) REFERENCES assets(asset_id),
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
+
+-- ตารางประวัติแชทของผู้ช่วย AI
+-- เก็บแยกตามผู้ใช้ ระบบจะเก็บไว้ 40 ข้อความล่าสุดต่อคน แล้วลบของเก่าทิ้งเอง
+CREATE TABLE ai_chat_history (
+    history_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    -- 'user' = ข้อความที่ผู้ใช้พิมพ์, 'assistant' = คำตอบของ AI
+    role ENUM('user', 'assistant') NOT NULL,
+    content MEDIUMTEXT NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_ai_chat_user_time (user_id, created_at),
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
