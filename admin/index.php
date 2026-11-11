@@ -13,7 +13,9 @@ kp_mark_overdue_borrows($conn);
 $stmt = $conn->query("SELECT status, COUNT(*) AS total FROM assets GROUP BY status");
 $status_summary = $stmt->fetchAll();
 
-// จัดการสีและไอคอน
+/**
+ * สีของกราฟ — Chart.js วาดลงผืนผ้าใบ จึงรับได้แต่ค่าสีจริง ใช้ตัวแปร CSS ไม่ได้
+ */
 $colorMap = [
     'ใช้งานปกติ' => '#10b981', // สีเขียว
     'ชำรุด' => '#ef4444',     // สีแดง
@@ -34,6 +36,22 @@ $status_map = [];
 $chart_labels = [];
 $chart_data = [];
 $chart_colors = [];
+
+/**
+ * สีของตัวเลขบนการ์ดสรุป — ใช้โทเคนสถานะจาก tokens.css ซึ่งมีชุดมืดอยู่แล้ว
+ * เดิมใช้ค่าเดียวกับกราฟ ซึ่งสถานะ "เลิกใช้/จำหน่าย" เป็นเทาเข้ม (#6b7280)
+ * พอเป็นโหมดมืดตัวเลขจึงจมหายไปกับพื้น
+ */
+$cardColorMap = [
+    'ใช้งานปกติ' => 'var(--st-ok)',
+    'ชำรุด'      => 'var(--st-broken)',
+    'ซ่อมแซม'    => 'var(--st-repair)',
+    'ส่งซ่อม'     => 'var(--st-repair)',
+    'เลิกใช้'     => 'var(--st-gone)',
+    'จำหน่าย'    => 'var(--st-gone)',
+    'รออนุมัติ'   => 'var(--st-wait)',
+    'ถูกยืม'      => 'var(--st-out)',
+];
 
 foreach ($status_summary as $row) {
     $status_map[$row['status']] = $row['total'];
@@ -77,9 +95,9 @@ require 'header.php'; // พ่น <head> และแถบเมนู
         <h5 class="summary-title">สรุปภาพรวมครุภัณฑ์</h5>
         <div class="status-cards">
             <?php foreach ($all_statuses as $status): ?>
-                <div class="status-card" data-status="<?= htmlspecialchars($status) ?>" style="--card-color: <?= $colorMap[$status] ?? 'var(--kp-crest)' ?>;">
+                <div class="status-card" data-status="<?= htmlspecialchars($status) ?>" style="--card-color: <?= $cardColorMap[$status] ?? 'var(--kp-crest)' ?>;">
                     <div class="card-header">
-                        <div class="card-icon" style="background: <?= $colorMap[$status] ?? 'var(--kp-crest)' ?>;">
+                        <div class="card-icon" style="background: <?= $cardColorMap[$status] ?? 'var(--kp-crest)' ?>;">
                             <?= $iconMap[$status] ?? '📋' ?>
                         </div>
                         <h6 class="card-title"><?= htmlspecialchars($status) ?></h6>
@@ -87,9 +105,9 @@ require 'header.php'; // พ่น <head> และแถบเมนู
                     <div class="card-count"><?= number_format($status_map[$status] ?? 0) ?></div>
                 </div>
             <?php endforeach; ?>
-            <div class="status-card" style="--card-color: #475569;">
+            <div class="status-card" style="--card-color: var(--kp-ink-soft);">
                 <div class="card-header">
-                    <div class="card-icon" style="background: #475569;">👤</div>
+                    <div class="card-icon" style="background: var(--kp-ink-soft);">👤</div>
                     <h6 class="card-title">ผู้ใช้ในระบบ</h6>
                 </div>
                 <div class="card-count"><?= number_format($user_count) ?></div>
@@ -100,7 +118,7 @@ require 'header.php'; // พ่น <head> และแถบเมนู
     <div class="col-lg-4">
         <div class="card shadow-sm border-0 mb-4" style="border-radius: 16px; overflow: hidden;">
             <div class="card-header bg-white border-0 pt-4 pb-0 text-center">
-                <h6 class="fw-bold" style="color: #475569;"><i class="fas fa-chart-doughnut me-1"></i> สัดส่วนสถานะครุภัณฑ์</h6>
+                <h6 class="fw-bold" style="color: var(--kp-ink-soft);"><i class="fas fa-chart-doughnut me-1"></i> สัดส่วนสถานะครุภัณฑ์</h6>
             </div>
             <div class="card-body d-flex justify-content-center align-items-center" style="height: 300px;">
                 <?php if (empty($chart_data)): ?>

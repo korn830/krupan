@@ -358,6 +358,45 @@ h4::before, h4::after { display: none; }
     box-shadow: 0 0 0 3px var(--kp-crest-dim);
 }
 
+/* กล่องแจ้งเตือนของ bootstrap ใช้พื้นพาสเทลสว่างตายตัว และบางหน้าก็ทับด้วย
+   ไล่สีของตัวเอง พอเป็นโหมดมืดจึงกลายเป็นแผ่นสว่างกลางหน้าจอมืด
+   เขียนทับเฉพาะโหมดมืด โหมดสว่างจึงเหมือนเดิมทุกประการ
+   ใช้ .alert.alert-* เพื่อให้ชนะสไตล์ของแต่ละหน้าที่โหลดทีหลัง */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .alert.alert-success { background: var(--st-ok-bg);     color: var(--st-ok);     border-color: var(--st-ok); }
+    :root:not([data-theme="light"]) .alert.alert-danger  { background: var(--st-broken-bg); color: var(--st-broken); border-color: var(--st-broken); }
+    :root:not([data-theme="light"]) .alert.alert-warning { background: var(--st-wait-bg);   color: var(--st-wait);   border-color: var(--st-wait); }
+    :root:not([data-theme="light"]) .alert.alert-info    { background: var(--st-out-bg);    color: var(--st-out);    border-color: var(--st-out); }
+    :root:not([data-theme="light"]) .alert.alert-success .alert-link,
+    :root:not([data-theme="light"]) .alert.alert-danger  .alert-link,
+    :root:not([data-theme="light"]) .alert.alert-warning .alert-link,
+    :root:not([data-theme="light"]) .alert.alert-info    .alert-link { color: inherit; }
+}
+:root[data-theme="dark"] .alert.alert-success { background: var(--st-ok-bg);     color: var(--st-ok);     border-color: var(--st-ok); }
+:root[data-theme="dark"] .alert.alert-danger  { background: var(--st-broken-bg); color: var(--st-broken); border-color: var(--st-broken); }
+:root[data-theme="dark"] .alert.alert-warning { background: var(--st-wait-bg);   color: var(--st-wait);   border-color: var(--st-wait); }
+:root[data-theme="dark"] .alert.alert-info    { background: var(--st-out-bg);    color: var(--st-out);    border-color: var(--st-out); }
+:root[data-theme="dark"] .alert.alert-success .alert-link,
+:root[data-theme="dark"] .alert.alert-danger  .alert-link,
+:root[data-theme="dark"] .alert.alert-warning .alert-link,
+:root[data-theme="dark"] .alert.alert-info    .alert-link { color: inherit; }
+
+/* ปุ่มขอบของ bootstrap ที่ใช้สีเข้ม (dark/secondary) ฝังเป็น #212529 กับ #6c757d
+   พอเป็นโหมดมืด ทั้งขอบและตัวอักษรจึงกลืนไปกับพื้นจนมองไม่เห็นปุ่มเลย
+   เช่นปุ่ม QR ในหน้าทะเบียนครุภัณฑ์ */
+.btn-outline-dark, .btn-outline-secondary {
+    color: var(--kp-ink);
+    /* ใช้ --kp-muted ไม่ใช่ --kp-border เพราะเส้นขอบที่จางเท่าเส้นคั่นตาราง
+       จะมองแทบไม่เห็นว่าเป็นปุ่ม (วัดได้ 1.41 ต่อพื้นการ์ด) */
+    border-color: var(--kp-muted);
+}
+.btn-outline-dark:hover, .btn-outline-dark:focus,
+.btn-outline-secondary:hover, .btn-outline-secondary:focus {
+    background-color: var(--kp-ink);
+    border-color: var(--kp-ink);
+    color: var(--kp-surface);
+}
+
 /* คลาสยูทิลิตีของ bootstrap ฝังสีไว้ตายตัว พอเป็นโหมดมืดจึงยังขาวอยู่
    ให้ยูทิลิตีเหล่านี้อ้างโทเคนแทน จะได้เปลี่ยนตามธีม */
 .bg-white      { background-color: var(--kp-surface) !important; color: var(--kp-ink); }

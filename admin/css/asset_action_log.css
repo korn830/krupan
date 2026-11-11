@@ -105,7 +105,8 @@ body {
 }
 .badge.bg-warning {
     background: linear-gradient(135deg, #f6e05e 0%, #ecc94b 100%) !important;
-    color: var(--kp-ink) !important;
+    /* พื้นเหลืองเท่าเดิมทั้งสองธีม ถ้าใช้ --kp-ink โหมดมืดจะได้ตัวอักษรสว่างบนเหลือง */
+    color: #4a3209 !important;
 }
 .badge.bg-danger {
     background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;

@@ -106,9 +106,12 @@ body {
     transform: translateX(4px);
 }
 
-/* Added striped table style */
-.table-striped > tbody > tr:nth-of-type(odd) {
-    background-color: #f6f8fa;
+/* แถบลายของตาราง — เดิมฝังเป็น #f6f8fa ทำให้โหมดมืดยังเป็นแถบขาว
+   และตัวอักษรสีสว่างที่ kp-components ตั้งไว้ก็อ่านไม่ออกบนแถบนั้น */
+.table-striped > tbody > tr:nth-of-type(odd),
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+    background-color: var(--kp-bg);
+    color: var(--kp-ink);
 }
 
 /* --- Badges (Bootstrap overrides) --- */
@@ -118,7 +121,8 @@ body {
 }
 .badge.bg-warning {
     background: linear-gradient(135deg, #f6e05e 0%, #ecc94b 100%) !important;
-    color: var(--kp-ink) !important;
+    /* พื้นเหลืองเท่าเดิมทั้งสองธีม ถ้าใช้ --kp-ink โหมดมืดจะได้ตัวอักษรสว่างบนเหลือง */
+    color: #4a3209 !important;
 }
 .badge.bg-danger {
     background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
@@ -337,9 +341,41 @@ body {
    คำขอสมัครที่รออนุมัติ — แยกกล่องออกจากรายชื่อผู้ใช้ปกติให้เห็นชัด
    ========================================================================== */
 
+/* ชุดสว่าง — ค่าเดิมทุกตัว */
+:root {
+    --kp-amber-bg:   #fffbeb;
+    --kp-amber-head: #fef3c7;
+    --kp-amber-line: #fcd34d;
+    --kp-amber-ink:  #92400e;
+    --kp-amber-help: #a16207;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        /* ชุดสีเหลืองอำพันของกล่องคำขอ — โหมดมืดต้องกลับเป็นพื้นเข้มตัวอักษรสว่าง
+           ไม่งั้นกล่องจะเป็นแผ่นสว่างกลางหน้าจอมืด และตัวอักษรในตารางซึ่ง
+           kp-components ตั้งเป็นสีสว่าง จะอ่านไม่ออกบนพื้นอ่อน */
+        --kp-amber-bg:   #2c2412;
+        --kp-amber-head: #39301a;
+        --kp-amber-line: #5c4a1c;
+        --kp-amber-ink:  #f0c974;
+        --kp-amber-help: #d4ad63;
+    }
+}
+:root[data-theme="dark"] {
+    /* ชุดสีเหลืองอำพันของกล่องคำขอ — โหมดมืดต้องกลับเป็นพื้นเข้มตัวอักษรสว่าง
+       ไม่งั้นกล่องจะเป็นแผ่นสว่างกลางหน้าจอมืด และตัวอักษรในตารางซึ่ง
+       kp-components ตั้งเป็นสีสว่าง จะอ่านไม่ออกบนพื้นอ่อน */
+    --kp-amber-bg:   #2c2412;
+    --kp-amber-head: #39301a;
+    --kp-amber-line: #5c4a1c;
+    --kp-amber-ink:  #f0c974;
+    --kp-amber-help: #d4ad63;
+}
+
 .pending-panel {
-    background: #fffbeb;
-    border: 1px solid #fcd34d;
+    background: var(--kp-amber-bg);
+    border: 1px solid var(--kp-amber-line);
     border-left: 4px solid #f59e0b;
     border-radius: 14px;
     padding: 1.25rem 1.4rem;
@@ -352,7 +388,7 @@ body {
     gap: .5rem;
     margin: 0 0 .35rem;
     font-weight: 700;
-    color: #92400e;
+    color: var(--kp-amber-ink);
 }
 
 .pending-count {
@@ -372,7 +408,7 @@ body {
 .pending-help {
     margin: 0 0 1rem;
     font-size: .86rem;
-    color: #a16207;
+    color: var(--kp-amber-help);
     line-height: 1.6;
 }
 
@@ -383,11 +419,11 @@ body {
 }
 
 .pending-panel .table thead th {
-    background: #fef3c7;
-    color: #92400e;
+    background: var(--kp-amber-head);
+    color: var(--kp-amber-ink);
     font-size: .85rem;
     font-weight: 600;
-    border-bottom: 1px solid #fcd34d;
+    border-bottom: 1px solid var(--kp-amber-line);
 }
 
 .pending-panel .table td { font-size: .9rem; }
