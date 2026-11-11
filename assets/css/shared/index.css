@@ -20,12 +20,12 @@ body {
 
 /* Welcome header */
 .welcome-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--kp-gradient);
     color: white;
     padding: 2rem;
     border-radius: 20px;
     margin-bottom: 2rem;
-    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+    box-shadow: 0 10px 30px rgba(158, 27, 50, 0.2);
     position: relative;
     overflow: hidden;
 }
@@ -91,7 +91,7 @@ hr {
     transform: translateY(-50%);
     width: 4px;
     height: 30px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: var(--kp-gradient);
     border-radius: 2px;
 }
 
@@ -124,7 +124,7 @@ hr {
     left: 0;
     right: 0;
     height: 4px;
-    background: var(--card-color, linear-gradient(90deg, #667eea, #764ba2));
+    background: var(--card-color, linear-gradient(90deg, var(--kp-crest), #7d1527));
     transition: all 0.3s ease;
 }
 
@@ -176,7 +176,7 @@ hr {
     align-items: center;
     justify-content: center;
     font-size: 1.5rem;
-    background: var(--card-color, linear-gradient(135deg, #667eea, #764ba2));
+    background: var(--card-color, var(--kp-gradient));
     color: white;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
@@ -217,14 +217,14 @@ hr {
     display: inline-flex;
     align-items: center;
     padding: 1rem 2rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--kp-gradient);
     color: white;
     text-decoration: none;
     border-radius: 50px;
     font-weight: 600;
     font-size: 1.1rem;
     transition: all 0.3s ease;
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 8px 20px rgba(158, 27, 50, 0.3);
     position: relative;
     overflow: hidden;
 }
@@ -242,7 +242,7 @@ hr {
 
 .btn-view-all:hover {
     transform: translateY(-3px);
-    box-shadow: 0 12px 30px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 12px 30px rgba(158, 27, 50, 0.4);
     color: white;
     text-decoration: none;
 }
@@ -415,8 +415,110 @@ hr {
     }
     
     .welcome-header {
-        background: #667eea !important;
+        background: var(--kp-crest) !important;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
     }
 }
+/* ==========================================================================
+   ปรับรูปทรงให้เข้ากับดีไซน์ใหม่ — หน้าแรก
+   สีทั้งหมดมาจาก tokens.css
+   ========================================================================== */
+
+/* หัวหน้า: จากแถบสีทึบเต็มความกว้าง เป็นหัวเรื่องบนพื้นหน้าเว็บ */
+.welcome-header {
+    background: none !important;
+    border: 0;
+    border-bottom: 1px solid var(--kp-border);
+    border-radius: 0;
+    box-shadow: none;
+    color: var(--kp-ink);
+    padding: 24px 0 16px;
+    margin-bottom: 22px;
+}
+.welcome-header::before, .welcome-header::after { display: none; }
+.welcome-header h4 {
+    color: var(--kp-ink);
+    font-family: var(--kp-display);
+    font-size: 23px;
+    font-weight: 700;
+    text-shadow: none;
+}
+.welcome-header p, .welcome-header .text-white-50 {
+    color: var(--kp-muted) !important;
+    font-size: 13px;
+}
+
+.summary-title {
+    font-family: var(--kp-display);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--kp-ink);
+    border: 0;
+    padding: 0 0 12px;
+}
+
+/* การ์ดสถานะ: เล็กและเรียงเป็นแถว อ่านได้ในสายตาเดียว */
+.status-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
+    gap: 12px;
+}
+.status-card {
+    background: var(--kp-surface);
+    border: 1px solid var(--kp-border);
+    border-top: 3px solid var(--card-color, var(--kp-border));
+    border-radius: var(--kp-radius);
+    box-shadow: var(--kp-shadow);
+    padding: 13px 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-height: 0;
+}
+.status-card:hover { transform: none; box-shadow: var(--kp-shadow); }
+.status-card .card-header {
+    background: none;
+    border: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+/* ไอคอนกลมใหญ่กินที่โดยไม่ได้บอกอะไรเพิ่ม ตัดออกแล้วใช้สีขอบบนแทน */
+.status-card .card-icon { display: none; }
+.status-card .card-title {
+    font-family: var(--kp-font);
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--kp-muted);
+    margin: 0;
+}
+.status-card .card-count {
+    font-family: var(--kp-mono);
+    font-size: 27px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+    color: var(--card-color, var(--kp-ink));
+    text-align: left;
+}
+.status-card .card-label { font-size: 11.5px; color: var(--kp-muted); text-align: left; }
+
+/* ปุ่มลัดด้านล่าง */
+.action-section { padding-top: 22px; }
+.btn-view-all {
+    background: var(--kp-crest) !important;
+    border-radius: var(--kp-radius-sm);
+    box-shadow: none;
+    font-family: var(--kp-display);
+    font-weight: 600;
+    padding: 9px 18px;
+}
+.btn-view-all:hover { filter: brightness(1.12); transform: none; box-shadow: none; }
+
+/* index.css ตั้งพื้นหลัง body เป็นไล่สีฟ้าเทา ซึ่งทับค่าจาก header.css
+   ดีไซน์ใหม่ใช้พื้นเรียบสีเดียว และหัวข้อไม่มีแถบสีด้านหน้าแล้ว */
+body { background: var(--kp-bg) !important; font-family: var(--kp-font); color: var(--kp-ink); }
+.summary-title::before { display: none !important; }
+.summary-title { padding-left: 0 !important; }

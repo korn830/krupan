@@ -61,7 +61,7 @@ require_once __DIR__ . '/assets/kp_assets.php';
         <div class="login-card">
 
             <div class="login-header">
-                <div class="login-icon"><i class="fas fa-user-plus"></i></div>
+                <div class="login-icon"><img src="assets/img/logo.jpg" alt="ตราวิทยาลัยการอาชีพวังไกลกังวล"><i class="fas fa-user-plus"></i></div>
                 <h4>สมัครสมาชิก</h4>
                 <p class="subtitle">สำหรับครูที่ต้องการยืมครุภัณฑ์</p>
             </div>

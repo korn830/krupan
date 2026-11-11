@@ -57,10 +57,13 @@ if (!function_exists('isActive')) {
     <script src="../assets/vendor/bootstrap/bootstrap.bundle.min.js"></script>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark" id="mainNavbar">
+    <nav class="navbar" id="mainNavbar">
         <div class="container-fluid">
             <a class="navbar-brand" href="<?= $base_url ?>index.php" title="กลับสู่หน้าหลัก">
-                ระบบครุภัณฑ์
+                <img src="<?= $base_url ?>../assets/img/logo.jpg" alt="ตราวิทยาลัยการอาชีพวังไกลกังวล">
+                <span class="kp-brandtext">งานพัสดุ
+                    <span class="kp-org">วิทยาลัยการอาชีพวังไกลกังวล</span>
+                </span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="สลับเมนูนำทาง">
                 <span class="navbar-toggler-icon"></span>
@@ -140,7 +143,7 @@ if (!function_exists('isActive')) {
             </div>
         </div>
     </nav>
-    <div class="container page-transition">
+    <div class="container page-transition kp-main">
         <?php if (isset($breadcrumb) && !empty($breadcrumb)): ?>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">

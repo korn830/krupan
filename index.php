@@ -119,7 +119,7 @@ require_once __DIR__ . '/assets/kp_assets.php';
             </div>
 
             <div class="login-header">
-                <div class="login-icon">
+                <div class="login-icon"><img src="assets/img/logo.jpg" alt="ตราวิทยาลัยการอาชีพวังไกลกังวล">
                     <i class="fas fa-chalkboard-user" data-for="user"></i>
                     <i class="fas fa-user-shield" data-for="staff"></i>
                 </div>

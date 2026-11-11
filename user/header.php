@@ -55,11 +55,14 @@ if (!function_exists('isActive')) {
 </head>
 <body>
     <!-- Enhanced Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark" id="mainNavbar">
+    <nav class="navbar" id="mainNavbar">
         <div class="container-fluid">
             <!-- Brand -->
             <a class="navbar-brand" href="<?= $base_url ?>index.php" title="กลับสู่หน้าหลัก">
-                ระบบครุภัณฑ์
+                <img src="<?= $base_url ?>../assets/img/logo.jpg" alt="ตราวิทยาลัยการอาชีพวังไกลกังวล">
+                <span class="kp-brandtext">งานพัสดุ
+                    <span class="kp-org">วิทยาลัยการอาชีพวังไกลกังวล</span>
+                </span>
             </a>
             
             <!-- Mobile toggle button -->
@@ -100,7 +103,7 @@ if (!function_exists('isActive')) {
     </nav>
 
     <!-- Main content wrapper -->
-    <div class="container page-transition">
+    <div class="container page-transition kp-main">
         
         <!-- Optional: Breadcrumb navigation -->
         <?php if (isset($breadcrumb) && !empty($breadcrumb)): ?>

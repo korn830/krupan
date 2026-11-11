@@ -31,12 +31,12 @@ body {
 
 /* Page header */
 .page-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--kp-gradient);
     color: white;
     padding: 2rem;
     border-radius: 20px;
     margin-bottom: 2rem;
-    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+    box-shadow: 0 10px 30px rgba(158, 27, 50, 0.2);
     position: relative;
     overflow: hidden;
 }
@@ -140,7 +140,7 @@ body {
 
 .table-title .icon {
     margin-right: 0.75rem;
-    color: #667eea;
+    color: var(--kp-crest);
 }
 
 .table-title .badge {
@@ -223,7 +223,7 @@ body {
 
 .asset-image:hover {
     transform: scale(1.1);
-    border-color: #667eea;
+    border-color: var(--kp-crest);
     cursor: pointer;
 }
 
@@ -329,7 +329,7 @@ body {
 
 /* QR Code Button */
 .btn-qr {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: var(--kp-gradient);
     border: none;
     color: white;
     padding: 0.5rem 1rem;
@@ -337,7 +337,7 @@ body {
     font-weight: 500;
     font-size: 0.875rem;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 2px 8px rgba(158, 27, 50, 0.3);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -345,7 +345,7 @@ body {
 
 .btn-qr:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 12px rgba(158, 27, 50, 0.4);
     color: white;
 }
 
@@ -407,7 +407,7 @@ body {
 }
 
 .page-link {
-    color: #667eea;
+    color: var(--kp-crest);
     border: 1px solid #e2e8f0;
     padding: 0.75rem 1rem;
     margin: 0 0.125rem;
@@ -417,15 +417,15 @@ body {
 }
 
 .page-link:hover {
-    background: #667eea;
-    border-color: #667eea;
+    background: var(--kp-crest);
+    border-color: var(--kp-crest);
     color: white;
     transform: translateY(-1px);
 }
 
 .page-item.active .page-link {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    border-color: #667eea;
+    background: var(--kp-gradient);
+    border-color: var(--kp-crest);
     color: white;
 }
 
@@ -444,7 +444,7 @@ body {
 }
 
 .modal-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--kp-gradient);
     color: white;
     border-radius: 16px 16px 0 0;
     border-bottom: none;
@@ -485,8 +485,8 @@ body {
 }
 
 .form-control:focus, .form-select:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: var(--kp-crest);
+    box-shadow: 0 0 0 3px rgba(158, 27, 50, 0.1);
     outline: none;
 }
 
@@ -499,7 +499,7 @@ body {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: var(--kp-gradient);
     border: none;
     border-radius: 8px;
     padding: 0.625rem 1.25rem;
@@ -509,7 +509,7 @@ body {
 }
 
 .btn-primary:hover {
-    background: linear-gradient(135deg, #5a67d8, #6b5b95);
+    background: linear-gradient(135deg, var(--kp-crest), #7d1527);
     color: white;
 }
 
@@ -539,7 +539,7 @@ body {
 }
 
 .qr-modal-content .modal-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--kp-gradient);
     color: white;
     padding: 1.5rem 2rem;
     border-bottom: none;
@@ -568,7 +568,7 @@ body {
 /* Asset Info Display */
 .qr-asset-info {
     background: white;
-    border-left: 4px solid #667eea;
+    border-left: 4px solid var(--kp-crest);
     padding: 1.25rem;
     margin-bottom: 1.5rem;
     border-radius: 10px;
@@ -592,7 +592,7 @@ body {
 }
 
 .qr-asset-info strong {
-    color: #667eea;
+    color: var(--kp-crest);
     min-width: 120px;
     font-weight: 600;
     flex-shrink: 0;
@@ -1019,7 +1019,7 @@ body {
 }
 
 .bg-primary {
-    background-color: #667eea !important;
+    background-color: var(--kp-crest) !important;
 }
 
 .justify-content-center {
@@ -1032,3 +1032,106 @@ body {
     cursor: not-allowed;
     border-style: dashed;
 }
+
+/* ==========================================================================
+   ปรับรูปทรงให้เข้ากับดีไซน์ใหม่ — ทะเบียนแบบสมุดคุม
+   กฎด้านล่างนี้อยู่ท้ายไฟล์เดียวกัน จึงทับกฎรูปทรงเดิมด้านบนโดยไม่ต้องแก้ทีละจุด
+   สีทั้งหมดมาจาก tokens.css ไม่ฝังค่าสีไว้ที่นี่
+   ========================================================================== */
+
+/* หัวหน้า: จากแถบไล่สีทึบ เป็นหัวเรื่องบนพื้นหน้าเว็บ มีเส้นคั่นด้านล่าง */
+.page-header {
+    background: none !important;
+    border: 0;
+    border-bottom: 1px solid var(--kp-border);
+    border-radius: 0;
+    box-shadow: none;
+    padding: 24px 0 16px;
+    margin-bottom: 22px;
+    color: var(--kp-ink);
+}
+.page-header::before { display: none; }
+.page-header h4 {
+    color: var(--kp-ink);
+    font-family: var(--kp-display);
+    font-size: 23px;
+    font-weight: 700;
+    text-shadow: none;
+}
+.page-header .header-icon { color: var(--kp-crest); background: none; box-shadow: none; }
+
+/* ปุ่มหลัก */
+.btn-add-asset {
+    background: var(--kp-crest) !important;
+    border: 0;
+    border-radius: var(--kp-radius-sm);
+    box-shadow: none;
+    font-family: var(--kp-display);
+    font-weight: 600;
+    padding: 9px 16px;
+}
+.btn-add-asset:hover { filter: brightness(1.12); transform: none; box-shadow: none; }
+
+/* กล่องตาราง */
+.table-container {
+    background: var(--kp-surface);
+    border: 1px solid var(--kp-border);
+    border-radius: var(--kp-radius);
+    box-shadow: var(--kp-shadow);
+    overflow: hidden;
+}
+.table-header {
+    background: var(--kp-surface) !important;
+    border-bottom: 1px solid var(--kp-border);
+    padding: 14px 16px;
+}
+.table-title { font-family: var(--kp-display); font-size: 15px; font-weight: 600; color: var(--kp-ink); }
+.table-title .badge { background: var(--kp-crest) !important; font-family: var(--kp-mono); font-weight: 600; }
+
+/* ตารางแบบสมุดคุม: เส้นบาง หัวคอลัมน์ตัวเล็ก */
+.table thead th {
+    background: var(--kp-surface) !important;
+    color: var(--kp-muted) !important;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--kp-border) !important;
+    padding: 11px 16px;
+    white-space: nowrap;
+}
+.table tbody td {
+    border-bottom: 1px solid var(--kp-border);
+    padding: 11px 16px;
+    font-size: 13.5px;
+    vertical-align: middle;
+}
+.table tbody tr:hover { background: var(--kp-bg); transform: none; box-shadow: none; }
+
+/* เลขครุภัณฑ์เป็นตัวพิมพ์ดีด ให้หลักตรงกันทั้งคอลัมน์ และอ่านชุดตัวเลขได้ชัด */
+.table tbody td:first-child {
+    font-family: var(--kp-mono);
+    font-size: 13px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+/* ป้ายสถานะ: จากป้ายทึบ เป็นป้ายพื้นอ่อนตัวอักษรเข้ม อ่านสบายตากว่าเมื่อมีหลายแถว */
+.status-badge {
+    background: var(--st-gone-bg) !important;
+    color: var(--st-gone) !important;
+    border: 0 !important;
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 11.5px;
+    font-weight: 600;
+    box-shadow: none !important;
+    text-shadow: none;
+}
+.status-badge[data-status="ใช้งานปกติ"] { background: var(--st-ok-bg) !important;     color: var(--st-ok) !important; }
+.status-badge[data-status="ถูกยืม"]     { background: var(--st-out-bg) !important;    color: var(--st-out) !important; }
+.status-badge[data-status="ส่งซ่อม"]    { background: var(--st-repair-bg) !important; color: var(--st-repair) !important; }
+.status-badge[data-status="ชำรุด"]      { background: var(--st-broken-bg) !important; color: var(--st-broken) !important; }
+.status-badge[data-status="จำหน่าย"]    { background: var(--st-gone-bg) !important;   color: var(--st-gone) !important; }
+.status-badge[data-status="รออนุมัติ"]  { background: var(--st-wait-bg) !important;   color: var(--st-wait) !important; }
