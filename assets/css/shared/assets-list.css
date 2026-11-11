@@ -327,11 +327,40 @@ body {
     text-decoration: none;
 }
 
+/* ปุ่ม "ยืม" ในตารางครุภัณฑ์ฝั่งผู้ใช้งาน
+   เดิมมีแต่คลาส .btn-borrow ในหน้าเว็บ ไม่มีนิยามใน CSS ไฟล์ไหนเลย
+   จึงแสดงเป็นลิงก์สีน้ำเงินขีดเส้นใต้ ไม่เหมือนปุ่มอื่นในคอลัมน์เดียวกัน
+   ใช้สีหลักของธีม และ --kp-on-crest เพราะสีหลักพลิกเป็นสีอ่อนในโหมดมืด */
+.btn-borrow {
+    background: var(--kp-gradient);
+    border: none;
+    color: var(--kp-on-crest);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(var(--kp-crest-rgb), 0.3);
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.btn-borrow:hover,
+.btn-borrow:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(var(--kp-crest-rgb), 0.4);
+    color: var(--kp-on-crest);
+    text-decoration: none;
+}
+
 /* QR Code Button */
 .btn-qr {
     background: var(--kp-gradient);
     border: none;
-    color: white;
+    color: var(--kp-on-crest);
     padding: 0.5rem 1rem;
     border-radius: 8px;
     font-weight: 500;
