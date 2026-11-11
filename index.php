@@ -47,7 +47,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         if ($result['status'] === KP_LOGIN_OK) {
             kp_start_session($result['user']);
 
-            if (kp_is_staff($result['user']['role'])) {
+            if (kp_is_admin($result['user']['role'])) {
                 header("Location: " . kp_home_for_role($result['user']['role']));
             } else {
                 // ถ้ามาจาก QR ให้กลับไปหน้าขอยืมของครุภัณฑ์ชิ้นนั้น
@@ -66,7 +66,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             // รหัสผ่านถูกแล้ว แค่เลือกโหมดผิด จึงบอกได้ว่าต้องไปโหมดไหน
             // และสลับหน้าไปรอที่โหมดนั้นให้เลย ผู้ใช้จะได้กรอกซ้ำแค่ครั้งเดียว
             $mode  = kp_mode_for_role($result['user']['role']);
-            $error = $mode === KP_MODE_STAFF
+            $error = $mode === KP_MODE_ADMIN
                 ? 'บัญชีนี้เป็นบัญชีแอดมิน — สลับช่องให้แล้ว กรุณาเข้าสู่ระบบอีกครั้ง'
                 : 'บัญชีนี้เป็นบัญชีผู้ใช้งาน — สลับช่องให้แล้ว กรุณาเข้าสู่ระบบอีกครั้ง';
 
@@ -77,7 +77,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 }
 
-$themeBar = ['user' => 'var(--kp-crest)', 'staff' => '#0f172a'];
+$themeBar = ['user' => 'var(--kp-crest)', 'admin' => '#0f172a'];
 require_once __DIR__ . '/assets/kp_assets.php';
 ?>
 <!DOCTYPE html>
@@ -108,7 +108,7 @@ require_once __DIR__ . '/assets/kp_assets.php';
                 <span class="pill" aria-hidden="true"></span>
                 <?php foreach ([
                     'user'  => ['icon' => 'fa-chalkboard-user', 'label' => 'ผู้ใช้งาน'],
-                    'staff' => ['icon' => 'fa-user-tie',        'label' => 'แอดมิน'],
+                    'admin' => ['icon' => 'fa-user-tie',        'label' => 'แอดมิน'],
                 ] as $m => $opt): ?>
                     <input type="radio" name="mode_toggle" id="m-<?= $m ?>" value="<?= $m ?>"
                            form="loginForm" <?= $mode === $m ? 'checked' : '' ?>>
@@ -122,12 +122,12 @@ require_once __DIR__ . '/assets/kp_assets.php';
             <div class="login-header">
                 <div class="login-icon"><img src="assets/img/logo.jpg" alt="ตราวิทยาลัยการอาชีพวังไกลกังวล">
                     <i class="fas fa-chalkboard-user" data-for="user"></i>
-                    <i class="fas fa-user-shield" data-for="staff"></i>
+                    <i class="fas fa-user-shield" data-for="admin"></i>
                 </div>
                 <h4 data-for="user">ระบบยืมครุภัณฑ์</h4>
-                <h4 data-for="staff">ระบบทะเบียนครุภัณฑ์</h4>
+                <h4 data-for="admin">ระบบทะเบียนครุภัณฑ์</h4>
                 <p class="subtitle" data-for="user">สำหรับผู้ใช้งานที่ต้องการยืมครุภัณฑ์</p>
-                <p class="subtitle" data-for="staff">สำหรับแอดมินงานพัสดุ</p>
+                <p class="subtitle" data-for="admin">สำหรับแอดมินงานพัสดุ</p>
             </div>
 
             <?php if (isset($error)): ?>
@@ -168,7 +168,7 @@ require_once __DIR__ . '/assets/kp_assets.php';
 
                 <button type="submit" class="btn-login">
                     <span data-for="user">เข้าสู่ระบบ</span>
-                    <span data-for="staff">เข้าสู่ระบบแอดมิน</span>
+                    <span data-for="admin">เข้าสู่ระบบแอดมิน</span>
                 </button>
             </form>
 
@@ -179,7 +179,7 @@ require_once __DIR__ . '/assets/kp_assets.php';
                     — บัญชีใหม่ต้องรอแอดมินอนุมัติก่อน
                 </span>
             </div>
-            <div class="login-note" data-for="staff">
+            <div class="login-note" data-for="admin">
                 <i class="fas fa-circle-info"></i>
                 <span>ส่วนนี้สำหรับแอดมินเท่านั้น บัญชีแอดมินสร้างได้จากในระบบ</span>
             </div>
@@ -194,7 +194,7 @@ require_once __DIR__ . '/assets/kp_assets.php';
     var root  = document.documentElement;
     var field = document.getElementById('modeField');
     var theme = document.querySelector('meta[name="theme-color"]');
-    var bar   = { user: 'var(--kp-crest)', staff: '#0f172a' };
+    var bar   = { user: 'var(--kp-crest)', admin: '#0f172a' };
 
     document.querySelectorAll('.seg input').forEach(function (radio) {
         radio.addEventListener('change', function () {

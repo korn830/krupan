@@ -15,12 +15,63 @@
     --lg-ring: rgba(158, 27, 50, 0.14);
     --lg-note: var(--kp-crest);
 }
-:root[data-mode="staff"] {
+:root[data-mode="admin"] {
     --lg-a1:   #1e293b;
     --lg-a2:   #334155;
     --lg-page: linear-gradient(135deg, #0f172a 0%, #334155 100%);
     --lg-ring: rgba(30, 41, 59, 0.16);
     --lg-note: #c2900f;
+}
+
+/* สวิตช์เลือกช่อง — ชุดสว่าง */
+:root {
+    --lg-seg-track:  #eef1f6;
+    --lg-seg-pill:   var(--kp-surface);
+    --lg-seg-off:    #6b7280;
+    --lg-seg-on:     var(--lg-a1);
+    --lg-seg-shadow: 0 2px 8px rgba(15, 23, 42, .13);
+}
+
+/* โหมดมืด — ทำสองที่เหมือน tokens.css
+   ตามการตั้งค่าของเครื่อง และตามปุ่มสลับที่ผู้ใช้กดเอง */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        /* สวิตช์เลือกช่อง — รางกับปุ่มต้องกลับสีด้วย
+           ไม่งั้นรางจะสว่างค้างอยู่บนการ์ดมืด และตัวอักษรบนปุ่มจะอ่านไม่ออก */
+        --lg-seg-track:  rgba(255, 255, 255, .05);
+        --lg-seg-pill:   rgba(255, 255, 255, .13);
+        --lg-seg-off:    #94a3b6;
+        --lg-seg-on:     var(--kp-ink);
+        --lg-seg-shadow: 0 2px 8px rgba(0, 0, 0, .4);
+    }
+    :root:not([data-theme="light"])[data-mode="admin"] {
+        /* ค่าของโหมดแอดมินข้างบนเป็นสีเข้มทั้งชุด ถ้าไม่เปลี่ยน
+           ตัวอักษรของช่องที่เลือกอยู่จะเป็นเข้มบนพื้นเข้ม */
+        --lg-a1:   #cbd5e1;
+        --lg-a2:   #94a3b8;
+        --lg-page: linear-gradient(135deg, #0b1220 0%, #1e293b 100%);
+        --lg-ring: rgba(203, 213, 225, .18);
+        --lg-note: var(--kp-gilt);
+    }
+}
+
+:root[data-theme="dark"] {
+    /* สวิตช์เลือกช่อง — รางกับปุ่มต้องกลับสีด้วย
+       ไม่งั้นรางจะสว่างค้างอยู่บนการ์ดมืด และตัวอักษรบนปุ่มจะอ่านไม่ออก */
+    --lg-seg-track:  rgba(255, 255, 255, .05);
+    --lg-seg-pill:   rgba(255, 255, 255, .13);
+    --lg-seg-off:    #94a3b6;
+    --lg-seg-on:     var(--kp-ink);
+    --lg-seg-shadow: 0 2px 8px rgba(0, 0, 0, .4);
+}
+:root[data-theme="dark"][data-mode="admin"] {
+    /* ค่าของโหมดแอดมินข้างบนเป็นสีเข้มทั้งชุด ถ้าไม่เปลี่ยน
+       ตัวอักษรของช่องที่เลือกอยู่จะเป็นเข้มบนพื้นเข้ม */
+    --lg-a1:   #cbd5e1;
+    --lg-a2:   #94a3b8;
+    --lg-page: linear-gradient(135deg, #0b1220 0%, #1e293b 100%);
+    --lg-ring: rgba(203, 213, 225, .18);
+    --lg-note: var(--kp-gilt);
 }
 
 /* Global styles */
@@ -421,7 +472,7 @@ body::before {
     position: relative;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    background: #eef1f6;
+    background: var(--lg-seg-track);
     border-radius: 12px;
     padding: 4px;
     margin-bottom: 1.9rem;
@@ -444,7 +495,7 @@ body::before {
     margin: 0;
     font-size: .92rem;
     font-weight: 600;
-    color: #6b7280;
+    color: var(--lg-seg-off);
     border-radius: 9px;
     cursor: pointer;
     user-select: none;
@@ -460,16 +511,16 @@ body::before {
     bottom: 4px;
     left: 4px;
     width: calc(50% - 4px);
-    background: var(--kp-surface);
+    background: var(--lg-seg-pill);
     border-radius: 9px;
-    box-shadow: 0 2px 8px rgba(15, 23, 42, .13);
+    box-shadow: var(--lg-seg-shadow);
     transition: transform .32s cubic-bezier(.4, 0, .2, 1);
 }
 
-:root[data-mode="staff"] .seg .pill { transform: translateX(100%); }
+:root[data-mode="admin"] .seg .pill { transform: translateX(100%); }
 
-:root[data-mode="user"]  label[for="m-user"]  { color: var(--lg-a1); }
-:root[data-mode="staff"] label[for="m-staff"] { color: var(--lg-a1); }
+:root[data-mode="user"]  label[for="m-user"]  { color: var(--lg-seg-on); }
+:root[data-mode="admin"] label[for="m-admin"] { color: var(--lg-seg-on); }
 
 .seg input:focus-visible + label {
     outline: 2px solid var(--lg-a1);
@@ -482,16 +533,16 @@ body::before {
 :root [data-for] { display: none; }
 
 :root[data-mode="user"]  [data-for="user"],
-:root[data-mode="staff"] [data-for="staff"]            { display: block; }
+:root[data-mode="admin"] [data-for="admin"]            { display: block; }
 
 :root[data-mode="user"]  .login-note[data-for="user"],
-:root[data-mode="staff"] .login-note[data-for="staff"] { display: flex; }
+:root[data-mode="admin"] .login-note[data-for="admin"] { display: flex; }
 
 :root[data-mode="user"]  i[data-for="user"],
-:root[data-mode="staff"] i[data-for="staff"]           { display: inline-block; }
+:root[data-mode="admin"] i[data-for="admin"]           { display: inline-block; }
 
 :root[data-mode="user"]  span[data-for="user"],
-:root[data-mode="staff"] span[data-for="staff"]        { display: inline; }
+:root[data-mode="admin"] span[data-for="admin"]        { display: inline; }
 
 .login-note {
     margin-top: 1.3rem;
@@ -522,7 +573,7 @@ body::before {
 }
 
 
-/* จอแคบ: ย่อตัวอักษรให้ "เจ้าหน้าที่/หัวหน้าพัสดุ" ยังอยู่บรรทัดเดียว */
+/* จอแคบ: ย่อตัวอักษรให้ "ผู้ใช้งาน/แอดมิน" ยังอยู่บรรทัดเดียว */
 .seg label { white-space: nowrap; }
 @media (max-width: 440px) { .seg label { font-size: .82rem; gap: .3rem; padding: .62rem .2rem; } }
 @media (max-width: 380px) { .seg label i { display: none; } .seg label { font-size: .78rem; } }

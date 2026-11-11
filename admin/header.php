@@ -7,10 +7,10 @@ require_once __DIR__ . '/../assets/roles.php';
 
 // โซนนี้สำหรับบัญชีแอดมินเท่านั้น
 if (!kp_is_logged_in()) {
-    header("Location: ../index.php?mode=staff");
+    header("Location: ../index.php?mode=admin");
     exit;
 }
-if (!kp_is_staff()) {
+if (!kp_is_admin()) {
     header("Location: ../" . kp_home_for_role());
     exit;
 }

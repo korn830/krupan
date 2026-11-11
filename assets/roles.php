@@ -86,7 +86,7 @@ function kp_is_logged_in(): bool
 }
 
 /** เป็นบัญชีฝั่งแอดมินหรือไม่ (ใช้เลือกเมนู/หน้าแรก/ช่องเข้าสู่ระบบ) */
-function kp_is_staff(?string $role = null): bool
+function kp_is_admin(?string $role = null): bool
 {
     return kp_normalize_role($role ?? ($_SESSION['role'] ?? null)) === KP_ROLE_ADMIN;
 }
@@ -101,7 +101,7 @@ function kp_can(string $capability, ?string $role = null): bool
 /** หน้าแรกที่เหมาะกับสิทธิ์ของผู้ใช้ */
 function kp_home_for_role(?string $role = null): string
 {
-    return kp_is_staff($role) ? 'admin/index.php' : 'user/index.php';
+    return kp_is_admin($role) ? 'admin/index.php' : 'user/index.php';
 }
 
 /**
@@ -115,7 +115,8 @@ function kp_require_cap(string $capability, string $base = '../'): void
     if (!kp_is_logged_in()) {
         // พาไปที่ช่องเข้าสู่ระบบที่ตรงกับหน้าที่เขาพยายามเข้า
         // ถ้าเป็นสิ่งที่ผู้ใช้งานทำได้ ก็คือช่องผู้ใช้งาน นอกนั้นคือช่องแอดมิน
-        $mode = kp_can($capability, KP_ROLE_USER) ? 'user' : 'staff';
+        // ใช้ค่าตรง ๆ เพราะไฟล์นี้ถูกโหลดก่อน auth.php จึงยังไม่มี KP_MODE_*
+        $mode = kp_can($capability, KP_ROLE_USER) ? 'user' : 'admin';
         header('Location: ' . $base . 'index.php?mode=' . $mode);
         exit;
     }

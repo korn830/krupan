@@ -23,25 +23,30 @@ const KP_STATUS_REJECTED = 'rejected';
 /**
  * ช่องของหน้าเข้าสู่ระบบ มีสองช่อง
  *   user  — ผู้ใช้งาน
- *   staff — แอดมิน
+ *   admin — แอดมิน
  *
  * ช่องที่เลือกไม่ได้ให้สิทธิ์อะไร เป็นแค่ตัวตรวจว่าบัญชีนี้
  * อยู่ฝั่งเดียวกับช่องที่กรอกมาหรือไม่ สิทธิ์จริงมาจาก role ของบัญชี
  */
 const KP_MODE_USER  = 'user';
-const KP_MODE_STAFF = 'staff';
+const KP_MODE_ADMIN = 'admin';
 
 function kp_login_modes(): array
 {
-    return [KP_MODE_USER, KP_MODE_STAFF];
+    return [KP_MODE_USER, KP_MODE_ADMIN];
 }
 
 /**
  * รับค่าโหมดจากฟอร์มหรือ query string ให้เหลือเฉพาะค่าที่ยอมรับได้
  * ค่าแปลกปลอมตกมาเป็นช่องผู้ใช้งานเสมอ ไม่ใช่ช่องที่มีสิทธิ์สูงกว่า
+ *
+ * ?mode=staff เป็นชื่อช่องเดิม ยังรับไว้ให้ลิงก์หรือบุ๊กมาร์กเก่าใช้ได้
  */
 function kp_clean_mode($mode): string
 {
+    if ($mode === 'staff') {
+        return KP_MODE_ADMIN;
+    }
     return in_array($mode, kp_login_modes(), true) ? $mode : KP_MODE_USER;
 }
 
@@ -94,7 +99,7 @@ function kp_attempt_login(PDO $conn, string $username, string $password, string 
 
     // รหัสผ่านถูกต้องแล้ว จึงบอกได้ว่าเข้าผิดช่องโดยไม่รั่วข้อมูลให้ใคร
     // เทียบแค่ว่าบัญชีนี้อยู่ฝั่งแอดมินหรือฝั่งผู้ใช้งาน
-    if (kp_is_staff($user['role']) !== ($mode === KP_MODE_STAFF)) {
+    if (kp_is_admin($user['role']) !== ($mode === KP_MODE_ADMIN)) {
         return ['status' => KP_LOGIN_WRONG_DOOR, 'user' => $user];
     }
 
@@ -112,10 +117,10 @@ function kp_start_session(array $user): void
     $_SESSION['name']    = $user['name'];
 }
 
-/** ช่องเข้าสู่ระบบที่ตรงกับสิทธิ์ของบัญชีนี้ (admin/staff เดิมถูกแปลงให้แล้ว) */
+/** ช่องเข้าสู่ระบบที่ตรงกับสิทธิ์ของบัญชีนี้ (ชื่อสิทธิ์เดิมถูกแปลงให้แล้ว) */
 function kp_mode_for_role(?string $role): string
 {
-    return kp_is_staff($role) ? KP_MODE_STAFF : KP_MODE_USER;
+    return kp_is_admin($role) ? KP_MODE_ADMIN : KP_MODE_USER;
 }
 
 
