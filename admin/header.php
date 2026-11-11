@@ -62,7 +62,7 @@ if (!function_exists('isActive')) {
     <nav class="navbar" id="mainNavbar">
         <div class="container-fluid">
             <a class="navbar-brand" href="<?= $base_url ?>index.php" title="กลับสู่หน้าหลัก">
-                <img src="<?= $base_url ?>../assets/img/logo.jpg" alt="ตราวิทยาลัยการอาชีพวังไกลกังวล">
+                <img src="<?= $base_url ?>../assets/img/logo.png" alt="ตราวิทยาลัยการอาชีพวังไกลกังวล">
                 <span class="kp-brandtext">งานพัสดุ
                     <span class="kp-org">วิทยาลัยการอาชีพวังไกลกังวล</span>
                 </span>
