@@ -343,6 +343,20 @@ h4::before, h4::after { display: none; }
     color: var(--kp-on-crest) !important;
 }
 
+/* list-group ของ bootstrap วาดพื้นจาก --bs-list-group-bg ซึ่งเป็นสีขาวตายตัว
+   รายการ "ครุภัณฑ์ที่ยังไม่ได้คืน" จึงเป็นกล่องขาวกลางหน้าจอมืด */
+.list-group {
+    --bs-list-group-bg: transparent;
+    --bs-list-group-color: var(--kp-ink);
+    --bs-list-group-border-color: var(--kp-border);
+    --bs-list-group-action-hover-bg: var(--kp-bg);
+    --bs-list-group-action-hover-color: var(--kp-ink);
+    --bs-list-group-active-bg: var(--kp-crest);
+    --bs-list-group-active-border-color: var(--kp-crest);
+    --bs-list-group-active-color: var(--kp-on-crest);
+}
+.list-group-item { background-color: transparent; color: var(--kp-ink); }
+
 /* กล่องและฟอร์มที่ยังอ้างสีพื้นของ bootstrap โดยตรง */
 .modal-content, .card, .dropdown-menu { background: var(--kp-surface); color: var(--kp-ink); }
 .form-control, .form-select {

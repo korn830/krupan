@@ -101,7 +101,7 @@ require 'header.php'; // พ่น <head> และแถบเมนู
     <div class="col-lg-5">
         <div class="card shadow-sm border-0 mb-4" style="border-radius:16px; overflow:hidden;">
             <div class="card-header bg-white border-0 pt-4 pb-2">
-                <h6 class="fw-bold m-0" style="color:#475569;">
+                <h6 class="fw-bold m-0" style="color:var(--kp-ink);">
                     <i class="fas fa-hourglass-half me-1"></i> ครุภัณฑ์ที่ยังไม่ได้คืน
                 </h6>
             </div>

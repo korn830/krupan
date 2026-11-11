@@ -1028,8 +1028,8 @@ body {
 }
 /* ช่อง "ประเภท" ที่ถูกเติมจากหมวดหมู่ — ล็อกไว้ให้เห็นชัดว่ามาจากหมวดหมู่ ไม่ใช่พิมพ์เอง */
 .form-control.fsn-locked {
-    background: #f1f5f9;
-    color: #475569;
+    background: var(--kp-bg);
+    color: var(--kp-muted);
     cursor: not-allowed;
     border-style: dashed;
 }

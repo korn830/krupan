@@ -596,7 +596,7 @@ body::before {
 
 .register-done {
     margin: 0 0 1.4rem;
-    color: #475569;
+    color: var(--kp-ink-soft);
     font-size: .92rem;
     line-height: 1.75;
     text-align: center;
