@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (($_POST['password'] ?? '') !== ($_POST['password_confirm'] ?? '')) {
             $error = 'รหัสผ่านทั้งสองช่องไม่ตรงกัน';
         } else {
-            // สิทธิ์ไม่ได้มาจากฟอร์ม — kp_register_user() ตั้งเป็น "ครู" และ "รออนุมัติ" ให้เสมอ
+            // สิทธิ์ไม่ได้มาจากฟอร์ม — kp_register_user() ตั้งเป็น "ผู้ใช้งาน" และ "รออนุมัติ" ให้เสมอ
             $result = kp_register_user(
                 $conn,
                 $_POST['username'] ?? '',
@@ -55,6 +55,7 @@ require_once __DIR__ . '/assets/kp_assets.php';
     <link rel="stylesheet" href="assets/vendor/fontawesome/css/all.min.css">
     <link rel="stylesheet" href="<?= kp_asset('assets/css/tokens.css') ?>">
     <link rel="stylesheet" href="<?= kp_asset('assets/css/shared/login.css') ?>">
+    <?php require_once __DIR__ . '/assets/theme.php'; kp_theme_boot(); ?>
 </head>
 <body>
     <div class="login-wrap">
@@ -63,7 +64,7 @@ require_once __DIR__ . '/assets/kp_assets.php';
             <div class="login-header">
                 <div class="login-icon"><img src="assets/img/logo.jpg" alt="ตราวิทยาลัยการอาชีพวังไกลกังวล"><i class="fas fa-user-plus"></i></div>
                 <h4>สมัครสมาชิก</h4>
-                <p class="subtitle">สำหรับครูที่ต้องการยืมครุภัณฑ์</p>
+                <p class="subtitle">สำหรับผู้ใช้งานที่ต้องการยืมครุภัณฑ์</p>
             </div>
 
             <?php if ($done): ?>
@@ -139,7 +140,7 @@ require_once __DIR__ . '/assets/kp_assets.php';
                 <div class="login-note" style="display:flex;">
                     <i class="fas fa-circle-info"></i>
                     <span>
-                        สมัครได้เฉพาะบัญชีครู และต้องรอหัวหน้าพัสดุอนุมัติก่อนจึงเข้าใช้งานได้
+                        สมัครได้เฉพาะบัญชีผู้ใช้งาน และต้องรอหัวหน้าพัสดุอนุมัติก่อนจึงเข้าใช้งานได้
                         — มีบัญชีอยู่แล้ว? <a href="index.php">เข้าสู่ระบบ</a>
                     </span>
                 </div>

@@ -44,6 +44,7 @@ if (!function_exists('isActive')) {
     <link rel="stylesheet" href="<?= kp_asset('assets/css/tokens.css', $base_url . '../') ?>">
     <link rel="stylesheet" href="<?= kp_asset('assets/css/shared/header.css', $base_url . '../') ?>">
     <link rel="stylesheet" href="<?= kp_asset('assets/css/shared/kp-components.css', $base_url . '../') ?>">
+    <?php require_once __DIR__ . '/../assets/theme.php'; kp_theme_boot(); ?>
     <script src="<?= $base_url ?>js/script.js"></script>
     <script>
         const baseUrlForJs = '<?= $base_url ?>';
@@ -74,14 +75,14 @@ if (!function_exists('isActive')) {
                     <?php if (kp_can('overview.view')): ?>
                     <li class="nav-item">
                         <a class="nav-link <?= isActive('index.php') ?>" href="<?= $base_url ?>index.php" title="หน้าแรก">
-                            หน้าแรก
+                            <i class="fas fa-gauge-high"></i> หน้าแรก
                         </a>
                     </li>
                     <?php endif; ?>
                     <?php if (kp_can('asset.view.all')): ?>
                     <li class="nav-item">
                         <a class="nav-link <?= isActive('list.php', 'assets') ?>" href="<?= $base_url ?>list.php" title="จัดการครุภัณฑ์">
-                            ครุภัณฑ์
+                            <i class="fas fa-boxes-stacked"></i> ครุภัณฑ์
                         </a>
                     </li>
                     <?php endif; ?>
@@ -89,47 +90,48 @@ if (!function_exists('isActive')) {
                     <?php if (kp_can('borrow.approve')): ?>
                     <li class="nav-item">
                         <a class="nav-link <?= isActive('confirm_borrow.php') ?>" href="<?= $base_url ?>confirm_borrow.php" title="อนุมัติการยืมครุภัณฑ์">
-                            อนุมัติการยืม
+                            <i class="fas fa-clipboard-check"></i> อนุมัติการยืม
                         </a>
                     </li>
                     <?php endif; ?>
                     <?php if (kp_can('taxonomy.manage')): ?>
                     <li class="nav-item">
                         <a class="nav-link <?= isActive('departments.php') ?>" href="<?= $base_url ?>departments.php" title="จัดการแผนก">
-                            แผนก
+                            <i class="fas fa-sitemap"></i> แผนก
                         </a>
                     </li>
                     <?php endif; ?>
                     <?php if (kp_can('taxonomy.manage')): ?>
                     <li class="nav-item">
                         <a class="nav-link <?= isActive('categories.php') ?>" href="<?= $base_url ?>categories.php" title="หมวดหมู่ครุภัณฑ์">
-                            <i class="fas fa-layer-group me-1"></i> หมวดหมู่
+                            <i class="fas fa-layer-group"></i> หมวดหมู่
                         </a>
                     </li>
                     <?php endif; ?>
                     <?php if (kp_can('taxonomy.manage')): ?>
                     <li class="nav-item">
                         <a class="nav-link <?= isActive('locations.php') ?>" href="<?= $base_url ?>locations.php" title="จัดการสถานที่">
-                            สถานที่
+                            <i class="fas fa-location-dot"></i> สถานที่
                         </a>
                     </li>
                     <?php endif; ?>
                     <?php if (kp_can('log.view')): ?>
                     <li class="nav-item">
                         <a class="nav-link <?= isActive('asset_action_log.php') ?>" href="<?= $base_url ?>asset_action_log.php" title="ประวัติการเพิ่ม/แก้ไข">
-                            <i class="fas fa-history me-1"></i> ประวัติการเพิ่ม/แก้ไข
+                            <i class="fas fa-clock-rotate-left"></i> ประวัติการเพิ่ม/แก้ไข
                         </a>
                     </li>
                     <?php endif; ?>
                     <?php if (kp_can('user.manage')): ?>
                     <li class="nav-item">
                         <a class="nav-link <?= isActive('add_user.php') ?>" href="<?= $base_url ?>add_user.php" title="เพิ่มผู้ใช้ใหม่">
-                            <i class="fas fa-user-plus me-1"></i> เพิ่มผู้ใช้
+                            <i class="fas fa-user-plus"></i> เพิ่มผู้ใช้
                         </a>
                     </li>
                     <?php endif; ?>
                 </ul>
                 <ul class="navbar-nav">
+                    <li class="nav-item"><?php kp_theme_toggle(); ?></li>
                     <li class="nav-item dropdown" style="display: none;" id="userDropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <span class="user-avatar"><?= substr($_SESSION["name"], 0, 1) ?></span> <?= htmlspecialchars($_SESSION["name"]) ?>
@@ -137,7 +139,7 @@ if (!function_exists('isActive')) {
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="<?= $base_url ?>logout.php" title="ออกจากระบบ" id="logoutBtn">
-                            ออกจากระบบ
+                            <i class="fas fa-right-from-bracket"></i> ออกจากระบบ
                         </a>
                     </li>
                 </ul>

@@ -5,7 +5,7 @@ body {
     font-family: 'Sarabun', sans-serif;
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     min-height: 100vh;
-    color: #2d3748;
+    color: var(--kp-ink);
     line-height: 1.6;
 }
 
@@ -45,7 +45,7 @@ body {
 
 /* --- Table Container --- */
 .table-container {
-    background: white;
+    background: var(--kp-surface);
     border-radius: 16px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
     overflow: hidden;
@@ -57,14 +57,14 @@ body {
 .table-header {
     background: linear-gradient(135deg, #f8f9ff 0%, #e6efff 100%);
     padding: 1.5rem;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--kp-border);
 }
 
 .table-title {
     font-family: 'Prompt', sans-serif;
     font-size: 1.25rem;
     font-weight: 600;
-    color: #2d3748;
+    color: var(--kp-ink);
     margin: 0;
     display: flex;
     align-items: center;
@@ -81,10 +81,10 @@ body {
 }
 
 .table thead th {
-    background: #f8fafc;
+    background: var(--kp-bg);
     border: none;
-    border-bottom: 2px solid #e2e8f0;
-    color: #4a5568; /* Retained original color for better contrast with light header */
+    border-bottom: 2px solid var(--kp-border);
+    color: var(--kp-ink-soft); /* Retained original color for better contrast with light header */
     font-weight: 600;
     padding: 1rem;
     font-family: 'Prompt', sans-serif;
@@ -102,7 +102,7 @@ body {
 }
 
 .table tbody tr:hover {
-    background: #f8fafc;
+    background: var(--kp-bg);
     transform: translateX(4px);
 }
 
@@ -118,7 +118,7 @@ body {
 }
 .badge.bg-warning {
     background: linear-gradient(135deg, #f6e05e 0%, #ecc94b 100%) !important;
-    color: #2d3748 !important;
+    color: var(--kp-ink) !important;
 }
 .badge.bg-danger {
     background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
@@ -135,9 +135,9 @@ body {
 
 /* --- Buttons --- */
 .btn-secondary {
-    background: #e2e8f0;
+    background: var(--kp-border);
     border: none;
-    color: #4a5568;
+    color: var(--kp-ink-soft);
     border-radius: 8px; /* Slightly adjusted to 8px from 6px for consistency */
     padding: 0.625rem 1.25rem;
     font-weight: 600;
@@ -145,7 +145,7 @@ body {
 }
 .btn-secondary:hover {
     background: #cbd5e0;
-    color: #2d3748;
+    color: var(--kp-ink);
 }
 
 /* Common button border-radius */
@@ -160,7 +160,7 @@ body {
 
 /* Custom styles for the "ดูรายละเอียดการแก้ไข" button (matching Bootstrap btn-info) */
 .view-diff-btn {
-    background-color: #ffffff;
+    background-color: var(--kp-surface);
     color: #0dcaf0;
     border: 1px solid #0dcaf0;
     border-radius: 0.375rem;
@@ -179,7 +179,7 @@ body {
 
 /* Custom styles for the "ดูรายละเอียดการลบ" button */
 .view-delete-details-btn {
-    background-color: #ffffff;
+    background-color: var(--kp-surface);
     color: #dc3545;
     border: 1px solid #dc3545;
     border-radius: 0.375rem;
@@ -214,7 +214,7 @@ body {
 
 .modal-header {
     /* Changed to match the lighter header style from your second example */
-    background: #f8fafc;
+    background: var(--kp-bg);
     border-radius: 16px 16px 0 0;
     border-bottom: 1px solid #e3e6f0; /* Kept original border-bottom style */
     padding: 1.5rem;
@@ -248,7 +248,7 @@ body {
 }
 
 .modal-footer {
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid var(--kp-border);
     padding: 1.5rem 2rem;
 }
 
@@ -267,7 +267,7 @@ body {
 /* --- Other General Styles --- */
 .form-label {
     font-weight: 500;
-    color: #2d3748; /* Ensuring good readability */
+    color: var(--kp-ink); /* Ensuring good readability */
 }
 
 .alert {
@@ -295,7 +295,7 @@ body {
     margin: 0;
 }
 .btn-back {
-    background: linear-gradient(135deg, #a0aec0, #718096);
+    background: linear-gradient(135deg, #a0aec0, var(--kp-muted));
     border: none;
     color: white;
     padding: 0.875rem 1.5rem;
@@ -377,7 +377,7 @@ body {
 }
 
 .pending-panel .table {
-    background: #fff;
+    background: var(--kp-surface);
     border-radius: 10px;
     overflow: hidden;
 }

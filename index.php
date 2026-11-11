@@ -67,8 +67,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             // และสลับหน้าไปรอที่โหมดนั้นให้เลย ผู้ใช้จะได้กรอกซ้ำแค่ครั้งเดียว
             $mode  = kp_mode_for_role($result['user']['role']);
             $error = $mode === KP_MODE_STAFF
-                ? 'บัญชีนี้เป็นบัญชีงานพัสดุ — สลับช่องให้แล้ว กรุณาเข้าสู่ระบบอีกครั้ง'
-                : 'บัญชีนี้เป็นบัญชีครู — สลับช่องให้แล้ว กรุณาเข้าสู่ระบบอีกครั้ง';
+                ? 'บัญชีนี้เป็นบัญชีแอดมิน — สลับช่องให้แล้ว กรุณาเข้าสู่ระบบอีกครั้ง'
+                : 'บัญชีนี้เป็นบัญชีผู้ใช้งาน — สลับช่องให้แล้ว กรุณาเข้าสู่ระบบอีกครั้ง';
 
         } else {
             // ข้อความเดียวกันทั้งสองโหมด ไม่บอกว่าชื่อผู้ใช้มีอยู่จริงหรือไม่
@@ -97,6 +97,7 @@ require_once __DIR__ . '/assets/kp_assets.php';
     <link rel="stylesheet" href="assets/vendor/fontawesome/css/all.min.css">
     <link rel="stylesheet" href="<?= kp_asset('assets/css/tokens.css') ?>">
     <link rel="stylesheet" href="<?= kp_asset('assets/css/shared/login.css') ?>">
+    <?php require_once __DIR__ . '/assets/theme.php'; kp_theme_boot(); ?>
 </head>
 <body>
     <div class="login-wrap">
@@ -106,8 +107,8 @@ require_once __DIR__ . '/assets/kp_assets.php';
             <div class="seg" role="radiogroup" aria-label="เลือกประเภทผู้ใช้งาน">
                 <span class="pill" aria-hidden="true"></span>
                 <?php foreach ([
-                    'user'  => ['icon' => 'fa-chalkboard-user', 'label' => 'ครู'],
-                    'staff' => ['icon' => 'fa-user-tie',        'label' => 'เจ้าหน้าที่/หัวหน้าพัสดุ'],
+                    'user'  => ['icon' => 'fa-chalkboard-user', 'label' => 'ผู้ใช้งาน'],
+                    'staff' => ['icon' => 'fa-user-tie',        'label' => 'แอดมิน'],
                 ] as $m => $opt): ?>
                     <input type="radio" name="mode_toggle" id="m-<?= $m ?>" value="<?= $m ?>"
                            form="loginForm" <?= $mode === $m ? 'checked' : '' ?>>
@@ -125,7 +126,7 @@ require_once __DIR__ . '/assets/kp_assets.php';
                 </div>
                 <h4 data-for="user">ระบบยืมครุภัณฑ์</h4>
                 <h4 data-for="staff">ระบบทะเบียนครุภัณฑ์</h4>
-                <p class="subtitle" data-for="user">สำหรับครูผู้ขอยืมครุภัณฑ์</p>
+                <p class="subtitle" data-for="user">สำหรับผู้ใช้งานที่ต้องการยืมครุภัณฑ์</p>
                 <p class="subtitle" data-for="staff">สำหรับเจ้าหน้าที่พัสดุและหัวหน้าพัสดุ</p>
             </div>
 
@@ -167,7 +168,7 @@ require_once __DIR__ . '/assets/kp_assets.php';
 
                 <button type="submit" class="btn-login">
                     <span data-for="user">เข้าสู่ระบบ</span>
-                    <span data-for="staff">เข้าสู่ระบบงานพัสดุ</span>
+                    <span data-for="staff">เข้าสู่ระบบแอดมิน</span>
                 </button>
             </form>
 
@@ -180,7 +181,7 @@ require_once __DIR__ . '/assets/kp_assets.php';
             </div>
             <div class="login-note" data-for="staff">
                 <i class="fas fa-circle-info"></i>
-                <span>ส่วนนี้สำหรับงานพัสดุเท่านั้น สิทธิ์ที่ได้ขึ้นกับบัญชีของคุณ</span>
+                <span>ส่วนนี้สำหรับแอดมินเท่านั้น สิทธิ์ที่ได้ขึ้นกับบัญชีของคุณ</span>
             </div>
         </div>
 

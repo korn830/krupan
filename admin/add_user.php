@@ -273,7 +273,7 @@ try {
                             <form method="POST" class="d-flex gap-2 align-items-center m-0">
                                 <input type="hidden" name="pending_user_id" value="<?= (int)$req['user_id'] ?>">
                                 <select name="grant_role" class="form-select form-select-sm" style="min-width:150px;">
-                                    <option value="<?= KP_ROLE_USER ?>">ครู</option>
+                                    <option value="<?= KP_ROLE_USER ?>">ผู้ใช้งาน</option>
                                     <option value="<?= KP_ROLE_OFFICER ?>">เจ้าหน้าที่พัสดุ</option>
                                     <option value="<?= KP_ROLE_HEAD ?>">หัวหน้าพัสดุ</option>
                                 </select>
@@ -375,7 +375,7 @@ try {
                     <div class="mb-3">
                         <label class="form-label">สิทธิ์การใช้งาน</label>
                         <select name="role" class="form-select" required>
-                            <option value="<?= KP_ROLE_USER ?>">ครู — ยืมครุภัณฑ์ได้อย่างเดียว</option>
+                            <option value="<?= KP_ROLE_USER ?>">ผู้ใช้งาน — ยืมครุภัณฑ์ได้อย่างเดียว</option>
                             <option value="<?= KP_ROLE_OFFICER ?>">เจ้าหน้าที่พัสดุ — จัดการทะเบียนและอนุมัติการยืม</option>
                             <option value="<?= KP_ROLE_HEAD ?>">หัวหน้าพัสดุ — เพิ่มสิทธิ์ลบ นำเข้าข้อมูล และจัดการผู้ใช้</option>
                         </select>
@@ -413,7 +413,7 @@ try {
                     <div class="mb-3">
                         <label class="form-label">สิทธิ์การใช้งาน</label>
                         <select name="edit_role" id="edit_role" class="form-select" required>
-                            <option value="<?= KP_ROLE_USER ?>">ครู — ยืมครุภัณฑ์ได้อย่างเดียว</option>
+                            <option value="<?= KP_ROLE_USER ?>">ผู้ใช้งาน — ยืมครุภัณฑ์ได้อย่างเดียว</option>
                             <option value="<?= KP_ROLE_OFFICER ?>">เจ้าหน้าที่พัสดุ — จัดการทะเบียนและอนุมัติการยืม</option>
                             <option value="<?= KP_ROLE_HEAD ?>">หัวหน้าพัสดุ — เพิ่มสิทธิ์ลบ นำเข้าข้อมูล และจัดการผู้ใช้</option>
                         </select>

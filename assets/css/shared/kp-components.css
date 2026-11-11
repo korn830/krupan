@@ -309,3 +309,61 @@ h4::before, h4::after { display: none; }
 .swal2-title, .page-header h4, .welcome-header h4 { color: inherit !important; }
 .modal-header h4, .modal-header .modal-title { color: var(--kp-on-crest) !important; }
 .page-header h4, .welcome-header h4 { color: var(--kp-ink) !important; }
+
+/* ในโหมดมืด สีของตราจะสว่างขึ้น ตัวอักษรบนพื้นสีนั้นจึงต้องเป็นสีเข้ม
+   ไม่ใช่สีขาวตายตัวแบบเดิม ไม่งั้นอ่านแทบไม่ออก */
+.btn-add-asset, .btn-view-all, .btn-add, .btn-primary-custom, .btn-submit, .btn-login,
+.table-title .badge, .status-card .card-icon {
+    color: var(--kp-on-crest) !important;
+}
+.btn-add-asset i, .btn-view-all i, .btn-add i, .btn-login i,
+.btn-primary-custom i, .btn-submit i { color: inherit !important; }
+
+/* bootstrap วาดพื้นช่องตารางด้วยตัวแปรของตัวเอง ซึ่งเป็นสีขาวตายตัว
+   พอเป็นโหมดมืดแถวจึงยังขาวอยู่กลางหน้าจอมืด ให้ใช้พื้นของการ์ดแทน */
+.table {
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--kp-ink);
+    --bs-table-striped-bg: var(--kp-bg);
+    --bs-table-striped-color: var(--kp-ink);
+    --bs-table-hover-bg: var(--kp-bg);
+    --bs-table-hover-color: var(--kp-ink);
+    color: var(--kp-ink);
+}
+.table > :not(caption) > * > * {
+    background-color: transparent;
+    color: var(--kp-ink);
+    box-shadow: none;
+}
+.table-container, .table-responsive { background: var(--kp-surface); }
+
+/* ป้ายรหัสในตารางหมวดหมู่/สถานที่/แผนก ใช้พื้นสีของตราและตัวอักษรสีขาวตายตัว
+   โหมดมืดทำให้พื้นสว่างขึ้น ตัวอักษรจึงต้องเป็นสีเข้มตามคู่ของมัน */
+.location-id, .category-id, .department-id, .user-id {
+    color: var(--kp-on-crest) !important;
+}
+
+/* กล่องและฟอร์มที่ยังอ้างสีพื้นของ bootstrap โดยตรง */
+.modal-content, .card, .dropdown-menu { background: var(--kp-surface); color: var(--kp-ink); }
+.form-control, .form-select {
+    background: var(--kp-surface);
+    color: var(--kp-ink);
+    border-color: var(--kp-border);
+}
+.form-control::placeholder { color: var(--kp-muted); }
+.form-control:focus, .form-select:focus {
+    background: var(--kp-surface);
+    color: var(--kp-ink);
+    border-color: var(--kp-crest);
+    box-shadow: 0 0 0 3px var(--kp-crest-dim);
+}
+
+/* คลาสยูทิลิตีของ bootstrap ฝังสีไว้ตายตัว พอเป็นโหมดมืดจึงยังขาวอยู่
+   ให้ยูทิลิตีเหล่านี้อ้างโทเคนแทน จะได้เปลี่ยนตามธีม */
+.bg-white      { background-color: var(--kp-surface) !important; color: var(--kp-ink); }
+.bg-light      { background-color: var(--kp-bg) !important; color: var(--kp-ink); }
+.text-dark     { color: var(--kp-ink) !important; }
+.text-muted    { color: var(--kp-muted) !important; }
+.text-secondary{ color: var(--kp-muted) !important; }
+.border        { border-color: var(--kp-border) !important; }
+.modal-header, .modal-footer { border-color: var(--kp-border); }

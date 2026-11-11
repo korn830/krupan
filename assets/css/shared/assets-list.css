@@ -13,7 +13,7 @@ body {
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     background-attachment: fixed;
     min-height: 100vh;
-    color: #2d3748;
+    color: var(--kp-ink);
     line-height: 1.6;
     margin: 0;
     padding: 0;
@@ -115,7 +115,7 @@ body {
 
 /* Table container */
 .table-container {
-    background: white;
+    background: var(--kp-surface);
     border-radius: 16px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
     overflow: hidden;
@@ -125,14 +125,14 @@ body {
 .table-header {
     background: linear-gradient(135deg, #f8f9ff 0%, #e6efff 100%);
     padding: 1.5rem;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--kp-border);
 }
 
 .table-title {
     font-family: 'Prompt', sans-serif;
     font-size: 1.25rem;
     font-weight: 600;
-    color: #2d3748;
+    color: var(--kp-ink);
     margin: 0;
     display: flex;
     align-items: center;
@@ -176,10 +176,10 @@ body {
 }
 
 .table thead th {
-    background: #f8fafc;
+    background: var(--kp-bg);
     border: none;
-    border-bottom: 2px solid #e2e8f0;
-    color: #4a5568;
+    border-bottom: 2px solid var(--kp-border);
+    color: var(--kp-ink-soft);
     font-weight: 600;
     padding: 1rem 0.75rem;
     font-family: 'Prompt', sans-serif;
@@ -199,7 +199,7 @@ body {
 }
 
 .table tbody tr:hover {
-    background: #f8fafc;
+    background: var(--kp-bg);
     transform: translateX(4px);
 }
 
@@ -217,7 +217,7 @@ body {
     height: 50px;
     object-fit: cover;
     border-radius: 8px;
-    border: 2px solid #e2e8f0;
+    border: 2px solid var(--kp-border);
     transition: all 0.3s ease;
 }
 
@@ -259,7 +259,7 @@ body {
 }
 
 .status-badge[data-status="เลิกใช้"] {
-    background: linear-gradient(135deg, #a0aec0, #718096);
+    background: linear-gradient(135deg, #a0aec0, var(--kp-muted));
     color: #fff;
 }
 
@@ -353,7 +353,7 @@ body {
 .empty-state {
     text-align: center;
     padding: 3rem 1rem;
-    color: #718096;
+    color: var(--kp-muted);
 }
 
 .empty-state .icon {
@@ -364,20 +364,20 @@ body {
 }
 
 .empty-state h5 {
-    color: #4a5568;
+    color: var(--kp-ink-soft);
     font-weight: 600;
     margin-bottom: 0.5rem;
     font-family: 'Prompt', sans-serif;
 }
 
 .empty-state p {
-    color: #718096;
+    color: var(--kp-muted);
     margin-bottom: 0;
 }
 
 /* Back button */
 .btn-back {
-    background: linear-gradient(135deg, #a0aec0, #718096);
+    background: linear-gradient(135deg, #a0aec0, var(--kp-muted));
     border: none;
     color: white;
     padding: 0.875rem 1.5rem;
@@ -408,7 +408,7 @@ body {
 
 .page-link {
     color: var(--kp-crest);
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--kp-border);
     padding: 0.75rem 1rem;
     margin: 0 0.125rem;
     border-radius: 8px;
@@ -431,8 +431,8 @@ body {
 
 .page-item.disabled .page-link {
     color: #a0aec0;
-    background: #f8fafc;
-    border-color: #e2e8f0;
+    background: var(--kp-bg);
+    border-color: var(--kp-border);
     cursor: not-allowed;
 }
 
@@ -468,14 +468,14 @@ body {
 
 .form-label {
     font-weight: 600;
-    color: #4a5568;
+    color: var(--kp-ink-soft);
     margin-bottom: 0.5rem;
     font-family: 'Prompt', sans-serif;
     display: block;
 }
 
 .form-control, .form-select {
-    border: 2px solid #e2e8f0;
+    border: 2px solid var(--kp-border);
     border-radius: 8px;
     padding: 0.75rem 1rem;
     font-size: 1rem;
@@ -491,7 +491,7 @@ body {
 }
 
 .modal-footer {
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid var(--kp-border);
     padding: 1.5rem 2rem;
     display: flex;
     gap: 0.5rem;
@@ -514,9 +514,9 @@ body {
 }
 
 .btn-secondary {
-    background: #e2e8f0;
+    background: var(--kp-border);
     border: none;
-    color: #4a5568;
+    color: var(--kp-ink-soft);
     border-radius: 8px;
     padding: 0.625rem 1.25rem;
     font-weight: 600;
@@ -525,7 +525,7 @@ body {
 
 .btn-secondary:hover {
     background: #cbd5e0;
-    color: #2d3748;
+    color: var(--kp-ink);
 }
 
 /* ========== QR CODE MODAL STYLES ========== */
@@ -567,7 +567,7 @@ body {
 
 /* Asset Info Display */
 .qr-asset-info {
-    background: white;
+    background: var(--kp-surface);
     border-left: 4px solid var(--kp-crest);
     padding: 1.25rem;
     margin-bottom: 1.5rem;
@@ -578,7 +578,7 @@ body {
 .qr-asset-info p {
     margin: 0.75rem 0;
     font-size: 1rem;
-    color: #2d3748;
+    color: var(--kp-ink);
     display: flex;
     align-items: flex-start;
 }
@@ -599,17 +599,17 @@ body {
 }
 
 .qr-asset-info span {
-    color: #4a5568;
+    color: var(--kp-ink-soft);
     flex: 1;
 }
 
 /* QR Code Display */
 .qr-code-display {
-    background: white;
+    background: var(--kp-surface);
     padding: 2rem;
     border-radius: 15px;
     text-align: center;
-    border: 3px dashed #e2e8f0;
+    border: 3px dashed var(--kp-border);
     margin-bottom: 1.5rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
@@ -643,8 +643,8 @@ body {
 
 /* Modal Footer Buttons */
 .qr-modal-content .modal-footer {
-    background: white;
-    border-top: 1px solid #e2e8f0;
+    background: var(--kp-surface);
+    border-top: 1px solid var(--kp-border);
     padding: 1.5rem 2rem;
     display: flex;
     gap: 0.75rem;

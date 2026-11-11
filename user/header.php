@@ -39,6 +39,7 @@ if (!function_exists('isActive')) {
     <link rel="stylesheet" href="<?= kp_asset('assets/css/tokens.css', $base_url . '../') ?>">
     <link rel="stylesheet" href="<?= kp_asset('assets/css/shared/header.css', $base_url . '../') ?>">
     <link rel="stylesheet" href="<?= kp_asset('assets/css/shared/kp-components.css', $base_url . '../') ?>">
+    <?php require_once __DIR__ . '/../assets/theme.php'; kp_theme_boot(); ?>
 
     
     <!-- Favicon -->
@@ -77,25 +78,26 @@ if (!function_exists('isActive')) {
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
                         <a class="nav-link <?= isActive('index.php') ?>" href="index.php" title="หน้าแรก">
-                            หน้าแรก
+                            <i class="fas fa-gauge-high"></i> หน้าแรก
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link <?= isActive('list.php', 'assets') ?>" href="list.php" title="ดูครุภัณฑ์">
-                            <i class="fas fa-boxes-stacked me-1"></i> ครุภัณฑ์
+                            <i class="fas fa-boxes-stacked"></i> ครุภัณฑ์
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link <?= isActive('my_borrow.php') ?>" href="my_borrow.php" title="การยืมของฉัน">
-                            <i class="fas fa-hand-holding me-1"></i> การยืมของฉัน
+                            <i class="fas fa-hand-holding"></i> การยืมของฉัน
                         </a>
                     </li>
                 </ul>   
                 <!-- User menu -->
                 <ul class="navbar-nav">
+                    <li class="nav-item"><?php kp_theme_toggle(); ?></li>
                     <li class="nav-item">
                         <a class="nav-link" href="../logout.php" title="ออกจากระบบ" id="logoutBtn">
-                            ออกจากระบบ
+                            <i class="fas fa-right-from-bracket"></i> ออกจากระบบ
                         </a>
                     </li>
                 </ul>

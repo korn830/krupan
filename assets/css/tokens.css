@@ -50,3 +50,74 @@
     --kp-display:  'Anuphan', 'Prompt', 'Segoe UI', system-ui, sans-serif;
     --kp-mono:     'IBM Plex Mono', ui-monospace, 'Courier New', monospace;
 }
+
+/* ==========================================================================
+   โหมดมืด
+
+   ค่าทุกตัวข้างบนคือชุดสว่าง ด้านล่างนี้เปลี่ยนค่าเดิมให้เป็นชุดมืด
+   ทำสองที่: ตามการตั้งค่าของเครื่อง และตามปุ่มสลับที่ผู้ใช้กดเอง
+   โดยปุ่มต้องชนะการตั้งค่าของเครื่องได้ทั้งสองทาง
+   ========================================================================== */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --kp-ink:      #e8eef6;
+        --kp-text:     #e8eef6;
+        --kp-ink-soft: #b3c2d4;
+        --kp-muted:    #94a3b6;
+        --kp-bg:       #141c27;
+        --kp-surface:  #1e2835;
+        --kp-border:   #33404f;
+
+        --kp-crest:     #e8798c;
+        --kp-primary:   #e8798c;
+        --kp-crest-dim: #3a2630;
+        --kp-on-crest:  #2a1016;
+        --kp-gilt:      #d9b367;
+        --kp-gradient:  linear-gradient(135deg, #e8798c 0%, #c45a6d 100%);
+
+        --kp-rail:     #1a2430;
+        --kp-rail-fg:  #d5e0ec;
+        --kp-rail-dim: #8fa0b4;
+
+        --st-ok:     #74dfa8;  --st-ok-bg:     #1a3a2e;
+        --st-out:    #96c4ee;  --st-out-bg:    #1b2f45;
+        --st-repair: #edc677;  --st-repair-bg: #3a3119;
+        --st-broken: #f59b93;  --st-broken-bg: #3b2724;
+        --st-gone:   #a3b0bf;  --st-gone-bg:   #28313d;
+        --st-wait:   #edc677;  --st-wait-bg:   #3a3119;
+
+        --kp-shadow: 0 1px 2px rgba(0, 0, 0, .35);
+        color-scheme: dark;
+    }
+}
+
+:root[data-theme="dark"] {
+    --kp-ink:      #e8eef6;
+    --kp-text:     #e8eef6;
+    --kp-ink-soft: #b3c2d4;
+    --kp-muted:    #94a3b6;
+    --kp-bg:       #141c27;
+    --kp-surface:  #1e2835;
+    --kp-border:   #33404f;
+
+    --kp-crest:     #e8798c;
+    --kp-primary:   #e8798c;
+    --kp-crest-dim: #3a2630;
+    --kp-on-crest:  #2a1016;
+    --kp-gilt:      #d9b367;
+    --kp-gradient:  linear-gradient(135deg, #e8798c 0%, #c45a6d 100%);
+
+    --kp-rail:     #1a2430;
+    --kp-rail-fg:  #d5e0ec;
+    --kp-rail-dim: #8fa0b4;
+
+    --st-ok:     #74dfa8;  --st-ok-bg:     #1a3a2e;
+    --st-out:    #96c4ee;  --st-out-bg:    #1b2f45;
+    --st-repair: #edc677;  --st-repair-bg: #3a3119;
+    --st-broken: #f59b93;  --st-broken-bg: #3b2724;
+    --st-gone:   #a3b0bf;  --st-gone-bg:   #28313d;
+    --st-wait:   #edc677;  --st-wait-bg:   #3a3119;
+
+    --kp-shadow: 0 1px 2px rgba(0, 0, 0, .35);
+    color-scheme: dark;
+}
