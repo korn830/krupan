@@ -360,6 +360,19 @@ EOT;
 
 $maxTurns = 4;
 
+/*
+ * งบเวลารวมของคำขอนี้
+ *
+ * เดิมกำหนด timeout ไว้ต่อการเรียกโมเดลหนึ่งครั้งเท่านั้น (90 วินาที)
+ * แต่โค้ดวนเรียกโมเดลได้ถึง $maxTurns รอบ รวมแล้วค้างได้ถึง 6 นาที
+ * ฝั่งหน้าเว็บก็ไม่มี timeout จึงหมุน "กำลังคิด" ค้างยาวจนดูเหมือนระบบแฮงก์
+ *
+ * จึงคุมด้วยเส้นตายรวมแทน ทุกครั้งที่จะเรียกโมเดลจะเหลือเวลาเท่าไหร่
+ * ก็ตั้ง timeout เท่านั้น พอหมดงบก็หยุดแล้วตอบข้อความที่เข้าใจได้
+ */
+$totalBudget = max(15, (int)($aiConfig['timeout_seconds'] ?? 100));
+$deadline    = time() + $totalBudget;
+
 // --- โหลดประวัติการสนทนาล่าสุด (10 exchanges = 20 messages) ---
 $historyStmt = $conn->prepare(
     "SELECT role, content FROM ai_chat_history
@@ -371,8 +384,8 @@ $historyRows = array_reverse($historyStmt->fetchAll(PDO::FETCH_ASSOC));
 
 try {
     $finalReply = ($provider === 'anthropic')
-        ? run_chat_anthropic($aiConfig, $systemPrompt, $toolsOpenAI, $userMessage, $historyRows, $conn, $currentUserId, $currentRole, $maxTurns)
-        : run_chat_ollama($aiConfig, $systemPrompt, $toolsOpenAI, $userMessage, $historyRows, $conn, $currentUserId, $currentRole, $maxTurns);
+        ? run_chat_anthropic($aiConfig, $systemPrompt, $toolsOpenAI, $userMessage, $historyRows, $conn, $currentUserId, $currentRole, $maxTurns, $deadline)
+        : run_chat_ollama($aiConfig, $systemPrompt, $toolsOpenAI, $userMessage, $historyRows, $conn, $currentUserId, $currentRole, $maxTurns, $deadline);
 
     if ($finalReply === '') {
         $finalReply = 'ขออภัยครับ ผมไม่สามารถดำเนินการให้เสร็จสิ้นได้ในขณะนี้ ลองพิมพ์คำสั่งใหม่อีกครั้งนะครับ';
@@ -402,7 +415,21 @@ try {
 //  Ollama (local) - ใช้ /api/chat แบบ native tool-calling
 // =====================================================================
 
-function call_ollama_api(string $host, string $model, array $messages, array $tools): array
+/**
+ * เวลาที่เหลือก่อนถึงเส้นตาย ถ้าหมดแล้วโยน exception ออกไปเลย
+ * ไม่ปล่อยให้เริ่มเรียกโมเดลรอบใหม่ทั้งที่ไม่มีเวลาเหลือ
+ */
+function kp_ai_remaining(int $deadline): int
+{
+    $left = $deadline - time();
+    if ($left <= 0) {
+        throw new Exception('ใช้เวลานานเกินไป ระบบจึงหยุดรอ กรุณาลองถามใหม่อีกครั้ง '
+            . 'ถ้าเกิดบ่อยให้ลองเปลี่ยนไปใช้โมเดลที่เล็กลง');
+    }
+    return $left;
+}
+
+function call_ollama_api(string $host, string $model, array $messages, array $tools, int $deadline): array
 {
     $payload = [
         'model' => $model,
@@ -418,7 +445,10 @@ function call_ollama_api(string $host, string $model, array $messages, array $to
         CURLOPT_POST => true,
         CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
         CURLOPT_POSTFIELDS => json_encode($payload),
-        CURLOPT_TIMEOUT => 90, // โมเดล local อาจช้ากว่า cloud โดยเฉพาะรอบแรกที่ต้องโหลดโมเดลเข้า VRAM
+        // ต่อไม่ติดต้องรู้เร็ว ไม่ต้องรอจนหมดงบเวลาทั้งก้อน
+        CURLOPT_CONNECTTIMEOUT => 5,
+        // ใช้เวลาที่เหลือจริง ไม่ใช่ 90 วินาทีตายตัวทุกรอบ
+        CURLOPT_TIMEOUT => kp_ai_remaining($deadline),
     ]);
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -426,6 +456,13 @@ function call_ollama_api(string $host, string $model, array $messages, array $to
     curl_close($ch);
 
     if ($response === false) {
+        // แยกสองกรณีให้ชัด ไม่งั้นพอหมดงบเวลาจะขึ้นว่า "เปิด Ollama อยู่หรือไม่"
+        // ทั้งที่เปิดอยู่ แค่โมเดลตอบช้าเกินไป ทำให้ไล่หาสาเหตุผิดทาง
+        if (time() >= $deadline) {
+            throw new Exception('โมเดลใช้เวลานานเกินกว่าที่กำหนด ระบบจึงหยุดรอ '
+                . 'กรุณาลองถามใหม่ ถ้าเกิดบ่อยให้ลองใช้โมเดลที่เล็กลง '
+                . 'หรือเพิ่มค่า timeout_seconds ใน config/ai_config.php');
+        }
         throw new Exception('เรียก Ollama ไม่สำเร็จ (เปิดโปรแกรม Ollama อยู่หรือไม่?): ' . $curlErr);
     }
 
@@ -439,7 +476,7 @@ function call_ollama_api(string $host, string $model, array $messages, array $to
     return $decoded;
 }
 
-function run_chat_ollama(array $aiConfig, string $systemPrompt, array $toolsOpenAI, string $userMessage, array $history, PDO $conn, int $userId, string $role, int $maxTurns): string
+function run_chat_ollama(array $aiConfig, string $systemPrompt, array $toolsOpenAI, string $userMessage, array $history, PDO $conn, int $userId, string $role, int $maxTurns, int $deadline): string
 {
     $host  = $aiConfig['ollama_host'] ?? 'http://localhost:11434';
     $model = $aiConfig['ollama_model'] ?? 'qwen3.5:9b';
@@ -452,7 +489,7 @@ function run_chat_ollama(array $aiConfig, string $systemPrompt, array $toolsOpen
     $messages[] = ['role' => 'user', 'content' => $userMessage];
 
     for ($turn = 0; $turn < $maxTurns; $turn++) {
-        $result = call_ollama_api($host, $model, $messages, $toolsOpenAI);
+        $result = call_ollama_api($host, $model, $messages, $toolsOpenAI, $deadline);
         $message = $result['message'] ?? [];
         $toolCalls = $message['tool_calls'] ?? [];
 
@@ -484,7 +521,7 @@ function run_chat_ollama(array $aiConfig, string $systemPrompt, array $toolsOpen
 //  Anthropic (cloud) - ใช้ /v1/messages แบบ tool-use ของ Claude
 // =====================================================================
 
-function call_claude_api(string $apiKey, string $model, string $system, array $tools, array $messages): array
+function call_claude_api(string $apiKey, string $model, string $system, array $tools, array $messages, int $deadline): array
 {
     $payload = [
         'model' => $model,
@@ -504,7 +541,9 @@ function call_claude_api(string $apiKey, string $model, string $system, array $t
             'anthropic-version: 2023-06-01',
         ],
         CURLOPT_POSTFIELDS => json_encode($payload),
-        CURLOPT_TIMEOUT => 30,
+        CURLOPT_CONNECTTIMEOUT => 5,
+        // เช่นเดียวกับฝั่ง Ollama ใช้เวลาที่เหลือจริง ไม่ใช่ค่าตายตัวต่อรอบ
+        CURLOPT_TIMEOUT => min(30, kp_ai_remaining($deadline)),
     ]);
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -512,6 +551,9 @@ function call_claude_api(string $apiKey, string $model, string $system, array $t
     curl_close($ch);
 
     if ($response === false) {
+        if (time() >= $deadline) {
+            throw new Exception('ใช้เวลานานเกินกว่าที่กำหนด ระบบจึงหยุดรอ กรุณาลองถามใหม่อีกครั้ง');
+        }
         throw new Exception('เรียก Claude API ไม่สำเร็จ: ' . $curlErr);
     }
 
@@ -525,7 +567,7 @@ function call_claude_api(string $apiKey, string $model, string $system, array $t
     return $decoded;
 }
 
-function run_chat_anthropic(array $aiConfig, string $systemPrompt, array $toolsOpenAI, string $userMessage, array $history, PDO $conn, int $userId, string $role, int $maxTurns): string
+function run_chat_anthropic(array $aiConfig, string $systemPrompt, array $toolsOpenAI, string $userMessage, array $history, PDO $conn, int $userId, string $role, int $maxTurns, int $deadline): string
 {
     $apiKey = $aiConfig['anthropic_api_key'] ?? '';
     $model  = $aiConfig['anthropic_model'] ?? 'claude-haiku-4-5-20251001';
@@ -552,7 +594,7 @@ function run_chat_anthropic(array $aiConfig, string $systemPrompt, array $toolsO
     $finalReply = '';
 
     for ($turn = 0; $turn < $maxTurns; $turn++) {
-        $result = call_claude_api($apiKey, $model, $systemPrompt, $toolsAnthropic, $messages);
+        $result = call_claude_api($apiKey, $model, $systemPrompt, $toolsAnthropic, $messages, $deadline);
 
         $stopReason = $result['stop_reason'] ?? '';
         $content = $result['content'] ?? [];

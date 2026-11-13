@@ -215,25 +215,44 @@ document.addEventListener('DOMContentLoaded', function () {
         chatMessages.appendChild(loadingEl);
         chatMessages.scrollTop = chatMessages.scrollHeight;
 
+        // เดิมไม่มี timeout เลย ถ้าฝั่งเซิร์ฟเวอร์ไม่ตอบ (เช่นโมเดลค้าง)
+        // ช่องพิมพ์จะถูกปิดและขึ้น "กำลังคิด" ค้างไปเรื่อย ๆ จนดูเหมือนระบบแฮงก์
+        // จึงตั้งเส้นตายฝั่งหน้าเว็บไว้ ให้ยาวกว่างบเวลาฝั่งเซิร์ฟเวอร์เล็กน้อย
+        var controller = new AbortController();
+        var timedOut = false;
+        var timer = setTimeout(function () {
+            timedOut = true;
+            controller.abort();
+        }, 110000);
+
+        // คืนช่องพิมพ์ให้ผู้ใช้เสมอ ไม่ว่าจะจบแบบไหน
+        function finish(text) {
+            clearTimeout(timer);
+            loadingEl.remove();
+            appendAI(text);
+            chatInput.disabled = false;
+            chatInput.focus();
+        }
+
         fetch(aiEndpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'message=' + encodeURIComponent(message)
+            body: 'message=' + encodeURIComponent(message),
+            signal: controller.signal
         })
         .then(r => r.json())
         .then(data => {
-            loadingEl.remove();
-            appendAI(data.reply || '❌ ไม่ได้รับคำตอบจาก AI');
-            chatInput.disabled = false;
-            chatInput.focus();
+            var reply = data.reply || '❌ ไม่ได้รับคำตอบจาก AI';
+            finish(reply);
             if (data.reply && data.reply.includes('✅')) {
                 setTimeout(() => location.reload(), 2000);
             }
         })
         .catch(() => {
-            loadingEl.remove();
-            appendAI('❌ เกิดข้อผิดพลาดในการเชื่อมต่อ');
-            chatInput.disabled = false;
+            finish(timedOut
+                ? '⏳ รอนานเกินไป ผู้ช่วย AI ยังไม่ตอบกลับ — ลองถามใหม่อีกครั้ง '
+                  + 'ถ้าเกิดบ่อยให้ตรวจว่าเปิดโปรแกรม Ollama อยู่หรือไม่ หรือเปลี่ยนไปใช้โมเดลที่เล็กลง'
+                : '❌ เกิดข้อผิดพลาดในการเชื่อมต่อ');
         });
     });
 
