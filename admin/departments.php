@@ -86,7 +86,6 @@ $departments = $conn->query("SELECT * FROM departments ORDER BY department_id DE
             <table class="table table-bordered align-middle">
                 <thead class="table-light">
                     <tr>
-                        <th class="text-center">รหัสแผนก</th>
                         <th>ชื่อแผนก</th>
                         <th class="text-center">จัดการ</th>
                     </tr>
@@ -94,7 +93,6 @@ $departments = $conn->query("SELECT * FROM departments ORDER BY department_id DE
                 <tbody>
                     <?php foreach ($departments as $d): ?>
                         <tr>
-                            <td class="text-center"><span class="department-id"><?= $d['department_id'] ?></span></td>
                             <td><?= htmlspecialchars($d['name']) ?></td>
                             <td class="text-center">
                                 <span class="action-buttons">
@@ -110,7 +108,7 @@ $departments = $conn->query("SELECT * FROM departments ORDER BY department_id DE
                     <?php endforeach; ?>
                     <?php if (count($departments) === 0): ?>
                         <tr>
-                            <td colspan="3" class="text-center text-muted">ไม่มีข้อมูลแผนก</td>
+                            <td colspan="2" class="text-center text-muted">ไม่มีข้อมูลแผนก</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>

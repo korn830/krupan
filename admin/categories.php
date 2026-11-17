@@ -80,7 +80,6 @@ $categories = $conn->query("SELECT * FROM categories ORDER BY category_id DESC")
             <table class="table">
                 <thead>
                     <tr>
-                        <th class="text-center">รหัสหมวดหมู่</th>
                         <th>ชื่อหมวดหมู่</th>
                         <th class="text-center">จัดการ</th>
                     </tr>
@@ -88,7 +87,6 @@ $categories = $conn->query("SELECT * FROM categories ORDER BY category_id DESC")
                 <tbody>
                     <?php foreach ($categories as $c): ?>
                         <tr>
-                            <td class="text-center"><span class="location-id"><?= $c['category_id'] ?></span></td>
                             <td><?= htmlspecialchars($c['name']) ?></td>
                             <td class="text-center">
                                 <span class="action-buttons">
@@ -104,7 +102,7 @@ $categories = $conn->query("SELECT * FROM categories ORDER BY category_id DESC")
                     <?php endforeach; ?>
                     <?php if (count($categories) === 0): ?>
                         <tr>
-                            <td colspan="3">
+                            <td colspan="2">
                                 <div class="empty-state">
                                     <div class="icon">😕</div>
                                     <h5>ไม่มีข้อมูลหมวดหมู่</h5>

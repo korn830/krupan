@@ -92,7 +92,6 @@ $locations = $conn->query("SELECT l.*, d.name AS department_name FROM locations 
                     <table class="table table-bordered align-middle">
                         <thead class="table-light">
                             <tr>
-                                <th class="text-center">รหัสสถานที่</th>
                                 <th>ชื่อสถานที่</th>
                                 <th>แผนก</th>
                                 <th class="text-center">จัดการ</th>
@@ -101,9 +100,6 @@ $locations = $conn->query("SELECT l.*, d.name AS department_name FROM locations 
                         <tbody>
                             <?php foreach ($locations as $l): ?>
                                 <tr>
-                                    <td class="text-center">
-                                        <span class="location-id"><?= str_pad($l['location_id'], 2, '0', STR_PAD_LEFT) ?></span>
-                                    </td>
                                     <td>
                                         <div class="d-flex align-items-center">
                                             <i class="fas fa-building text-muted me-2"></i>
